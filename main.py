@@ -1,5 +1,5 @@
-import pygame, multi, uno
-from typing import Any, Callable
+import pygame, multi, uno, utils
+from typing import Callable
 # 所有游戏内核在主机完成，所以大多数实例对象仅存在于主机
 # 对于客户端的玩家的数据，主机仍留有备份，客户端拥有手牌的卡牌类（主机发送json标明卡牌属性），仅此而已
 # 当然，客户端需要知道弃牌堆顶的牌，并通过rule判断自己可以打出什么，主机也应该脱离内核实现同样的架构
@@ -15,46 +15,51 @@ class UnoGame:
     TEXT_COLOR = pygame.Color('#000000')
     HIGHLIGHT_COLOR = pygame.Color('#FFFFFF80')
 
-    class Button:
-        def __init__(self, image: pygame.Surface, action: Callable[[], None], text: str = '', font: Any = None):
-            self.surface = image
+    # images
+    images: dict[str, dict[str, pygame.Surface]] = {'info': {}, 'cards': {}, 'buttons': {}, 'columns': {}}
+        # info
+    images['info']['cards_text'] = pygame.image.load('assets/images/info/cards_text.svg')
+    images['info']['players_2_10'] = pygame.image.load('assets/images/info/players_2_10.svg')
+        # cards
+    images['cards']['back'] = pygame.image.load('assets/images/cards/back.png')
+    for color in uno.deck.COLORS:
+        images['cards'][f'{color}_empty'] = pygame.image.load(f'assets/images/cards/{color}_empty.png')
+        for value in range(10):
+            images['cards'][f'{color}_{value}'] = pygame.image.load(f'assets/images/cards/numbers/{color}_{value}.png')
+        for action in uno.deck.ACTIONS:
+            images['cards'][f'{color}_{action}'] = pygame.image.load(f'assets/images/cards/actions/{color}_{action}.png')
+    for wild in uno.deck.WILDS:
+        images['cards'][wild] = pygame.image.load(f'assets/images/cards/wilds/{wild}.png')
+        # buttons
+    SHAPES = ['rectangle', 'round', 'square']
+    STYLES = ['flat', 'depth']
+    for shape, style in zip(SHAPES, STYLES):
+        images['buttons'][f'{shape}_{style}'] = pygame.image.load(f'assets/images/buttons/{shape}_{style}.png')
+        # columns
+    images['columns']['tag'] = pygame.image.load(f'assets/images/columns/tag.png')
+    images['columns']['content'] = pygame.image.load(f'assets/images/columns/content.png')
+
+    # fonts
+    fonts: dict[str, pygame.font.Font] = {}
+    fonts['tag'] = pygame.font.Font('assets/fonts/Kenney Future.ttf', 24)
+    fonts['content'] = pygame.font.Font('assets/fonts/Kenney Future.ttf', 16)
+    fonts['button'] = pygame.font.Font('assets/fonts/Kenney Future.ttf', 16)
+
+    class Button(pygame.Surface):
+        def __init__(self, image: pygame.Surface, rect: pygame.Rect, action: Callable[[], None], text: str = ''):
+            super().__init__(rect.size, pygame.SRCALPHA)
+
+            self.rect = rect
+            self.surface = utils.scale(image, rect.width, rect.height)
             if text:
-                _font: pygame.font.Font = font
-                text_surface = _font.render(text, True, UnoGame.TEXT_COLOR)
-                text_rect = text_surface.get_rect(center=self.surface.get_rect().center)
+                font = UnoGame.fonts['button']
+                text_surface = font.render(text, True, UnoGame.TEXT_COLOR)
+                text_rect = text_surface.get_rect(center=self.get_rect().center)
                 self.surface.blit(text_surface, text_rect)
 
             self.action = action
-
-        @property
-        def surface(self):
-            return self._surface
-
-        @surface.setter
-        def surface(self, value: pygame.Surface):
-            self._surface = value
-            self._rect = None
-            self._mask = None
-            self._highlight = None
-
-        @property
-        def rect(self):
-            if not self._rect:
-                self._rect = self.surface.get_rect()
-            return self._rect
-
-        @property
-        def mask(self):
-            if not self._mask:
-                self._mask = pygame.mask.from_surface(self.surface)
-            return self._mask
-
-        @property
-        def highlight(self):
-            if not self._highlight:
-                self._highlight = pygame.Surface(self.rect.size, pygame.SRCALPHA)
-                self._highlight.fill(UnoGame.HIGHLIGHT_COLOR)
-            return self._highlight
+            self.mask = pygame.mask.from_surface(self.surface)
+            self.highlight = self.mask.to_surface(setcolor=UnoGame.HIGHLIGHT_COLOR, unsetcolor=(0, 0, 0, 0))
 
         @property
         def hover(self):
@@ -66,56 +71,69 @@ class UnoGame:
             except IndexError:
                 return False
 
-        def update(self, event: pygame.event.Event):    # handle_event
-            self.display = self.surface.copy()
+        def update(self, event: pygame.event.Event):
+            self.blit(self.surface, (0, 0))
             if self.hover:
-                self.display.blit(self.highlight, (0, 0), special_flags=pygame.BLEND_ADD)
+                self.blit(self.highlight, (0, 0))
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     self.action()
 
-    def __init__(self):
-        self.images = self._images
-        self.fonts = self._fonts
+    class Column(pygame.Surface):
+        def __init__(self, width: int, height: int, head: int, tag: str = '', content: str = ''):
+            super().__init__((width, height), pygame.SRCALPHA)
 
+            self.tag = utils.scale(UnoGame.images['columns']['tag'], width, height)
+            if tag:
+                font = UnoGame.fonts['tag']
+                tag_surface = font.render(tag, True, UnoGame.TEXT_COLOR)
+                tag_rect = tag_surface.get_rect(center=(width / 2, head / 2))
+                self.tag.blit(tag_surface, tag_rect)
+
+            self.content = utils.scale(UnoGame.images['columns']['content'], width, height - head)
+            if content:
+                font = UnoGame.fonts['content']
+                content_surface = font.render(content, True, UnoGame.TEXT_COLOR)
+                content_rect = content_surface.get_rect(topleft=(16, 16))
+                self.content.blit(content_surface, content_rect)
+
+            self.tag.blit(self.content, (0, head))
+            self.blit(self.tag, (0, 0))
+
+    def __init__(self):
         pygame.display.set_icon(pygame.image.load('icon.png'))
         pygame.display.set_caption('Uno Game')
         self.screen = pygame.display.set_mode((800, 600), flags=0)
 
+        for type in UnoGame.images:
+            for image in UnoGame.images[type]:
+                UnoGame.images[type][image] = UnoGame.images[type][image].convert_alpha()   # 可以修改（稍微有点低级了看着哈哈
+
         self.buttons: list[UnoGame.Button] = []
-
-    @property
-    def _images(self):
-        images: dict[str, dict[str, pygame.Surface]] = {'info': {}, 'cards': {}, 'buttons':{}}
-        # info
-        images['info']['cards_text'] = pygame.image.load('assets/images/info/cards_text.svg')
-        images['info']['players_2_10'] = pygame.image.load('assets/images/info/players_2_10.svg')
-        # cards
-        images['cards']['back'] = pygame.image.load('assets/images/cards/back.png')
-        for color in uno.deck.COLORS:
-            images['cards'][f'{color}_empty'] = pygame.image.load(f'assets/images/cards/{color}_empty.png')
-            for value in range(10):
-                images['cards'][f'{color}_{value}'] = pygame.image.load(f'assets/images/cards/numbers/{color}_{value}.png')
-            for action in uno.deck.ACTIONS:
-                images['cards'][f'{color}_{action}'] = pygame.image.load(f'assets/images/cards/actions/{color}_{action}.png')
-        for wild in uno.deck.WILDS:
-            images['cards'][wild] = pygame.image.load(f'assets/images/cards/wilds/{wild}.png')
-        # buttons
-        images['buttons']['']
-        return images
-
-    @property
-    def _fonts(self):
-        fonts: dict[str, pygame.font.Font] = {}
-        fonts['title'] = pygame.font.Font('assets/fonts/Kenney Future.ttf', 24)
-        return fonts
 
     def menu(self):
         self.screen.fill(self.BACKGROUND)
-        column1 = uno.utils.scale('x', 100, 100, self.images['buttons'][''])
-        button1 = self.Button()
+        column = UnoGame.Column(300, 400, 50, 'menu')
+        rect = column.get_rect(center=self.screen.get_rect().center)
+        button = UnoGame.Button(UnoGame.images['buttons']['rectangle_flat'], pygame.Rect(100, 100, 150, 50), print, 'BUTTON')
+
+        self.buttons.clear()
+        self.buttons.append(button)
+        self.screen.blit(column, rect)
 
     def run(self):
-        pass
+        self.menu()
+
+        running = True
+        while running:
+            for event in pygame.event.get():
+                for button in self.buttons:
+                    self.screen.blit(button, button.rect)
+                    button.update(event)
+                if event.type == pygame.QUIT:
+                    running = False
+            pygame.display.update()
+
+        pygame.quit()
 
 
 # def main():
@@ -125,7 +143,7 @@ class UnoGame:
 #     while True:
 #         game = uno.Game(players)
 #         game.turn += game.reverse
-#         player = game.players[game.turn]   # the fi rst player
+#         player = game.players[game.turn]   # the first player
 #         while True:
 #             try:
 #                 if game.deck.discard_pile[-1].type == 'Wild Draw Four' and game.draw:

@@ -1,7 +1,7 @@
 import pygame
 
 
-def scale(width: int, height: int, image: pygame.Surface, corner: int = 16) -> pygame.Surface:
+def scale(image: pygame.Surface, width: int, height: int, corner: int = 16) -> pygame.Surface:
     if width < 2 * corner or height < 2 * corner:
         raise ValueError('size out of range')
     if image.get_width() < 2 * corner or image.get_height() < 2 * corner:
@@ -20,7 +20,7 @@ def scale(width: int, height: int, image: pygame.Surface, corner: int = 16) -> p
         'bottomright': image.subsurface((w - corner, h - corner, corner, corner))
     }
 
-    target = pygame.Surface((width, height))    # flags=pygame.SCHALPHA?
+    target = pygame.Surface((width, height), flags=pygame.SRCALPHA)    # flags=pygame.SCHALPHA?
     target.blit(slices['topleft'], (0, 0))
     target.blit(pygame.transform.scale(slices['top'], (width - 2 * corner, corner)), (corner, 0))
     target.blit(slices['topright'], (width - corner, 0))
