@@ -9,7 +9,7 @@ from typing import Callable
 
 pygame.init()
 
-class UnoGame:  # 尝试一下改用@classmethod？self.screen什么的全放到类里面（或者数据类也可以）。这样的话也许可以在创建Button时调用cls.buttons
+class UnoGame:
     # colors
     BACKGROUND = pygame.Color('#3399D9')
     TEXT_COLOR = pygame.Color('#000000')
@@ -45,6 +45,14 @@ class UnoGame:  # 尝试一下改用@classmethod？self.screen什么的全放到
     fonts['content'] = pygame.font.Font('assets/fonts/Kenney Future Narrow.ttf', 8)
     fonts['button'] = pygame.font.Font('assets/fonts/Kenney Future.ttf', 16)
 
+    pygame.display.set_icon(pygame.image.load('icon.png'))
+    pygame.display.set_caption('Uno Game')
+    screen = pygame.display.set_mode((800, 600), flags=0)
+
+    for type in images:
+        for image in images[type]:
+            images[type][image] = images[type][image].convert_alpha()   # 可以修改（稍微有点低级了看着哈哈
+
     class Button(pygame.Surface):
         def __init__(self, image: pygame.Surface, rect: pygame.Rect, action: Callable[[], None], text: str = ''):
             super().__init__(rect.size, pygame.SRCALPHA)
@@ -60,6 +68,8 @@ class UnoGame:  # 尝试一下改用@classmethod？self.screen什么的全放到
             self.action = action
             self.mask = pygame.mask.from_surface(self.surface)
             self.highlight = self.mask.to_surface(setcolor=UnoGame.HIGHLIGHT_COLOR, unsetcolor=(0, 0, 0, 0))
+
+            UnoGame.buttons.append(self)
 
         @property
         def hover(self):
@@ -77,6 +87,8 @@ class UnoGame:  # 尝试一下改用@classmethod？self.screen什么的全放到
                 self.blit(self.highlight, (0, 0))
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     self.action()
+
+    buttons: list[Button] = []
 
     class Column(pygame.Surface):
         def __init__(self, rect: pygame.Rect, head: int, tag: str = '', content: str = ''): # 也可以还是用宽高（size）毕竟Column不需要定位
@@ -101,41 +113,40 @@ class UnoGame:  # 尝试一下改用@classmethod？self.screen什么的全放到
 
             self.rect = rect
 
-    def __init__(self):
-        pygame.display.set_icon(pygame.image.load('icon.png'))
-        pygame.display.set_caption('Uno Game')
-        self.screen = pygame.display.set_mode((800, 600), flags=0)
-
-        for type in UnoGame.images:
-            for image in UnoGame.images[type]:
-                UnoGame.images[type][image] = UnoGame.images[type][image].convert_alpha()   # 可以修改（稍微有点低级了看着哈哈
-
-        self.buttons: list[UnoGame.Button] = []
-
-    def menu(self):
-        self.screen.fill(self.BACKGROUND)
+    @classmethod
+    def menu(cls):
+        cls.screen.fill(cls.BACKGROUND)
         column = UnoGame.Column(pygame.Rect(300, 150, 200, 300), 50, 'MENU')
-        self.screen.blit(column, column.rect)
+        cls.screen.blit(column, column.rect)
 
         info_1 = pygame.transform.scale(UnoGame.images['info']['cards_text'], (64, 64))
-        self.screen.blit(info_1, (10, 10))
+        cls.screen.blit(info_1, (10, 10))
         info_2 = pygame.transform.scale(UnoGame.images['info']['players_2_10'], (64, 64))
-        self.screen.blit(info_2, (84, 10))
+        cls.screen.blit(info_2, (84, 10))
 
-        self.buttons.clear()
-        self.buttons.append(UnoGame.Button(UnoGame.images['buttons']['rectangle_flat'], pygame.Rect(325, 225, 150, 50), print, 'CREATE'))
-        self.buttons.append(UnoGame.Button(UnoGame.images['buttons']['rectangle_flat'], pygame.Rect(325, 300, 150, 50), print, 'JOIN'))
-        self.buttons.append(UnoGame.Button(UnoGame.images['buttons']['rectangle_flat'], pygame.Rect(325, 375, 150, 50), quit, 'QUIT'))
+        cls.buttons.clear()
+        UnoGame.Button(UnoGame.images['buttons']['rectangle_flat'], pygame.Rect(325, 225, 150, 50), print, 'CREATE')
+        UnoGame.Button(UnoGame.images['buttons']['rectangle_flat'], pygame.Rect(325, 300, 150, 50), print, 'JOIN')
+        UnoGame.Button(UnoGame.images['buttons']['rectangle_flat'], pygame.Rect(325, 375, 150, 50), quit, 'QUIT')
 
-    def run(self):
-        self.menu()
+    @classmethod
+    def room(cls):
+        pass
+
+    @classmethod
+    def game(cls):
+        pass
+
+    @classmethod
+    def run(cls):
+        cls.menu()
 
         running = True
         while running:
             for event in pygame.event.get():
-                for button in self.buttons:
-                    self.screen.blit(button, button.rect)
+                for button in cls.buttons:
                     button.update(event)
+                    cls.screen.blit(button, button.rect)
                 pass
                 if event.type == pygame.QUIT:
                     running = False
@@ -201,4 +212,4 @@ class UnoGame:  # 尝试一下改用@classmethod？self.screen什么的全放到
 
 
 if __name__ == '__main__':
-    UnoGame().run()
+    UnoGame.run()
