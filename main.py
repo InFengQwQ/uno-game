@@ -9,7 +9,7 @@ from typing import Callable
 
 pygame.init()
 
-class UnoGame:
+class UnoGame:  # 尝试一下改用@classmethod？self.screen什么的全放到类里面（或者数据类也可以）。这样的话也许可以在创建Button时调用cls.buttons
     # colors
     BACKGROUND = pygame.Color('#3399D9')
     TEXT_COLOR = pygame.Color('#000000')
@@ -42,14 +42,13 @@ class UnoGame:
     # fonts
     fonts: dict[str, pygame.font.Font] = {}
     fonts['tag'] = pygame.font.Font('assets/fonts/Kenney Future.ttf', 24)
-    fonts['content'] = pygame.font.Font('assets/fonts/Kenney Future.ttf', 16)
+    fonts['content'] = pygame.font.Font('assets/fonts/Kenney Future Narrow.ttf', 8)
     fonts['button'] = pygame.font.Font('assets/fonts/Kenney Future.ttf', 16)
 
     class Button(pygame.Surface):
         def __init__(self, image: pygame.Surface, rect: pygame.Rect, action: Callable[[], None], text: str = ''):
             super().__init__(rect.size, pygame.SRCALPHA)
 
-            self.rect = rect
             self.surface = utils.scale(image, rect.width, rect.height)
             if text:
                 font = UnoGame.fonts['button']
@@ -57,6 +56,7 @@ class UnoGame:
                 text_rect = text_surface.get_rect(center=self.get_rect().center)
                 self.surface.blit(text_surface, text_rect)
 
+            self.rect = rect
             self.action = action
             self.mask = pygame.mask.from_surface(self.surface)
             self.highlight = self.mask.to_surface(setcolor=UnoGame.HIGHLIGHT_COLOR, unsetcolor=(0, 0, 0, 0))
@@ -79,17 +79,17 @@ class UnoGame:
                     self.action()
 
     class Column(pygame.Surface):
-        def __init__(self, width: int, height: int, head: int, tag: str = '', content: str = ''):
-            super().__init__((width, height), pygame.SRCALPHA)
+        def __init__(self, rect: pygame.Rect, head: int, tag: str = '', content: str = ''): # 也可以还是用宽高（size）毕竟Column不需要定位
+            super().__init__(rect.size, pygame.SRCALPHA)
 
-            self.tag = utils.scale(UnoGame.images['columns']['tag'], width, height)
+            self.tag = utils.scale(UnoGame.images['columns']['tag'], rect.width, rect.height)
             if tag:
                 font = UnoGame.fonts['tag']
                 tag_surface = font.render(tag, True, UnoGame.TEXT_COLOR)
-                tag_rect = tag_surface.get_rect(center=(width / 2, head / 2))
+                tag_rect = tag_surface.get_rect(center=(rect.width / 2, head / 2))
                 self.tag.blit(tag_surface, tag_rect)
 
-            self.content = utils.scale(UnoGame.images['columns']['content'], width, height - head)
+            self.content = utils.scale(UnoGame.images['columns']['content'], rect.width, rect.height - head)
             if content:
                 font = UnoGame.fonts['content']
                 content_surface = font.render(content, True, UnoGame.TEXT_COLOR)
@@ -98,6 +98,8 @@ class UnoGame:
 
             self.tag.blit(self.content, (0, head))
             self.blit(self.tag, (0, 0))
+
+            self.rect = rect
 
     def __init__(self):
         pygame.display.set_icon(pygame.image.load('icon.png'))
@@ -112,13 +114,18 @@ class UnoGame:
 
     def menu(self):
         self.screen.fill(self.BACKGROUND)
-        column = UnoGame.Column(300, 400, 50, 'menu')
-        rect = column.get_rect(center=self.screen.get_rect().center)
-        button = UnoGame.Button(UnoGame.images['buttons']['rectangle_flat'], pygame.Rect(100, 100, 150, 50), print, 'BUTTON')
+        column = UnoGame.Column(pygame.Rect(300, 150, 200, 300), 50, 'MENU')
+        self.screen.blit(column, column.rect)
+
+        info_1 = pygame.transform.scale(UnoGame.images['info']['cards_text'], (64, 64))
+        self.screen.blit(info_1, (10, 10))
+        info_2 = pygame.transform.scale(UnoGame.images['info']['players_2_10'], (64, 64))
+        self.screen.blit(info_2, (84, 10))
 
         self.buttons.clear()
-        self.buttons.append(button)
-        self.screen.blit(column, rect)
+        self.buttons.append(UnoGame.Button(UnoGame.images['buttons']['rectangle_flat'], pygame.Rect(325, 225, 150, 50), print, 'CREATE'))
+        self.buttons.append(UnoGame.Button(UnoGame.images['buttons']['rectangle_flat'], pygame.Rect(325, 300, 150, 50), print, 'JOIN'))
+        self.buttons.append(UnoGame.Button(UnoGame.images['buttons']['rectangle_flat'], pygame.Rect(325, 375, 150, 50), quit, 'QUIT'))
 
     def run(self):
         self.menu()
@@ -129,6 +136,7 @@ class UnoGame:
                 for button in self.buttons:
                     self.screen.blit(button, button.rect)
                     button.update(event)
+                pass
                 if event.type == pygame.QUIT:
                     running = False
             pygame.display.update()
