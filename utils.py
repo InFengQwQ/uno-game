@@ -1,7 +1,8 @@
 import pygame
 
 
-def scale(image: pygame.Surface, width: int, height: int, corner: int = 16) -> pygame.Surface:
+def scale(image: pygame.Surface, size: tuple[int, int], corner: int = 8) -> pygame.Surface:
+    width, height = size
     if width < 2 * corner or height < 2 * corner:
         raise ValueError('size out of range')
     if image.get_width() < 2 * corner or image.get_height() < 2 * corner:
@@ -20,14 +21,14 @@ def scale(image: pygame.Surface, width: int, height: int, corner: int = 16) -> p
         'bottomright': image.subsurface((w - corner, h - corner, corner, corner))
     }
 
-    target = pygame.Surface((width, height), flags=pygame.SRCALPHA)    # flags=pygame.SCHALPHA?
+    target = pygame.Surface((width, height), flags=pygame.SRCALPHA)
     target.blit(slices['topleft'], (0, 0))
-    target.blit(pygame.transform.scale(slices['top'], (width - 2 * corner, corner)), (corner, 0))
+    target.blit(pygame.transform.smoothscale(slices['top'], (width - 2 * corner, corner)), (corner, 0))
     target.blit(slices['topright'], (width - corner, 0))
-    target.blit(pygame.transform.scale(slices['left'], (corner, height - 2 * corner)), (0, corner))
-    target.blit(pygame.transform.scale(slices['center'], (width - 2 * corner, height - 2 * corner)), (corner, corner))
-    target.blit(pygame.transform.scale(slices['right'], (corner, height - 2 * corner)), (width - corner, corner))
+    target.blit(pygame.transform.smoothscale(slices['left'], (corner, height - 2 * corner)), (0, corner))
+    target.blit(pygame.transform.smoothscale(slices['center'], (width - 2 * corner, height - 2 * corner)), (corner, corner))
+    target.blit(pygame.transform.smoothscale(slices['right'], (corner, height - 2 * corner)), (width - corner, corner))
     target.blit(slices['bottomleft'], (0, height - corner))
-    target.blit(pygame.transform.scale(slices['bottom'], (width - 2 * corner, corner)), (corner, height - corner))
+    target.blit(pygame.transform.smoothscale(slices['bottom'], (width - 2 * corner, corner)), (corner, height - corner))
     target.blit(slices['bottomright'], (width - corner, height - corner))
     return target

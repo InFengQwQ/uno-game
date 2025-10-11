@@ -1,23 +1,24 @@
+from . import Room
 import json, socket, time
 from typing import Any
-
+# socket udp组播地址：239.255.0.0:50000+ 局域网使用
 
 class Client:
-    def __init__(self):
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.connections = []
-        
-        self.actions = []
+    def __init__(self, name: str):
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-    def update(self, rooms: dict[tuple[str, int], dict[str, Any]]):   # 房间列表更新  可以不作为函数
-        for addr, info in rooms.items():
-            ip, port = addr
-            print(f'{info['name']}: {ip} on {port}, {info['number']}/10')
+        self.name = name
+        self.room: Room # TODO
+
+        # self.actions = []
 
     def receive(self):  # 接收一秒内所有房间信息
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
             sock.bind(('0.0.0.0', 50000))
+            sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, socket.inet_aton('239.255.0.0') + socket.inet_aton('0.0.0.0'))
             sock.setblocking(False)
+
             rooms: dict[tuple[str, int], dict[str, Any]] = {}
             start_time = time.time()
             while time.time() - start_time < 1:

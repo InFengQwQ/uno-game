@@ -1,7 +1,7 @@
 from . import Room
 import json, socket, time    # threading 仅用于测试，类定义中不用
 from typing import Any
-# TODO: 各种socket报错处理
+# TODO: 各种socket报错处理S
 
 class Host:
     def __init__(self, name: str, room_name: str, password: int):
@@ -17,7 +17,7 @@ class Host:
         self.sock.setblocking(False)
         self.connections: dict[str, socket.socket] = {}
 
-        self.name = name
+        self.name = name    # TODO: 删除
         self.room = Room(room_name, password)
 
         self.actions: list[dict[str, Any]] = []   # [{player, type, ...}]
@@ -30,7 +30,7 @@ class Host:
                     'name': self.room.name,
                     'number': len(self.connections)
                 }
-                sock.sendto(json.dumps(info).encode(), ('255.255.255.255', 50000))
+                sock.sendto(json.dumps(info).encode(), ('239.255.0.0', 50000))
                 time.sleep(1)
 
     def admit(self):    # 持续接收玩家
