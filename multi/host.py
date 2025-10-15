@@ -1,60 +1,61 @@
-from . import Room
-import json, socket, time    # threading 仅用于测试，类定义中不用
+from . import Client, Room
+import json, socket    # threading 仅用于测试，类定义中不用
 from typing import Any
-# TODO: 各种socket报错处理S
+# TODO: 各种socket报错处理
 
 class Host:
     def __init__(self, name: str, room_name: str, password: int):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        for port in range(50001, 51000):
+        for port in range(50001, 51000):    # 同一设备可尝试占用999个端口用作游戏（TCP）
             try:
                 self.sock.bind(('0.0.0.0', port))
-                self.port = port
-                break
             except OSError:
                 continue
-        self.sock.listen(10)
-        self.sock.setblocking(False)
-        self.connections: dict[str, socket.socket] = {}
+            else:
+                self.sock.listen(10)
+                self.sock.settimeout(1)
+                sock, client_sock = socket.socketpair(socket.AF_INET, socket.SOCK_STREAM)
+                self.connections: dict[str, socket.socket] = {name: sock}
+                self.client = Client(name, client_sock)
+                self.client.room = Room(room_name, password, ('127.0.0.1', port))
+                break
+        else:
+            raise OSError
 
-        self.name = name    # TODO: 删除
-        self.room = Room(room_name, password)
+        self.actions: list[dict[str, Any]] = []   # TODO: [{player, type, ...}]
 
-        self.actions: list[dict[str, Any]] = []   # [{player, type, ...}]
+    def wait(self):
+        def broadcast():    # 向239.255.0.0:50000的组广播房间信息一次
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+                sock.sendto(json.dumps(self.client.room.info).encode(), ('239.255.0.0', 50000))
 
-    def broadcast(self):    # 持续广播房间信息，间隔一秒
-        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
-            while self.room.status == 0:
-                info: dict[str, Any] = {
-                    'port': self.port,
-                    'name': self.room.name,
-                    'number': len(self.connections)
-                }
-                sock.sendto(json.dumps(info).encode(), ('239.255.0.0', 50000))
-                time.sleep(1)
-
-    def admit(self):    # 持续接收玩家
-        while self.room.status == 0:
+        def admit():    # 接收玩家一次（已设置1秒超时）
             if len(self.connections) < 10:
-                try:
-                    conn, _ = self.sock.accept()
-                except BlockingIOError:
-                    continue
-                else:
-                    conn.settimeout(1)
-                    request: dict[str, Any] = json.loads(conn.recv(1024).decode())
-                    if request['password'] == self.room.password:
-                        names = list(self.connections.keys()) + [self.name]
-                        if (name := request['name']) in names:    # 重名
-                            conn.close()
-                        else:
-                            self.connections[name] = conn
-                            conn.send(json.dumps(names).encode())
+                while True:
+                    try:
+                        conn, _ = self.sock.accept()
+                    except TimeoutError:
+                        break
                     else:
-                        conn.close()
+                        try:
+                            request = json.loads(conn.recv(1024).decode())
+                            if request['password'] == self.client.room.password and not (name := request['name']) in self.connections: # 游戏外重名
+                                self.connections[name] = conn
+                                conn.send(b'')
+                            else:
+                                raise ValueError
+                        except:
+                            conn.close()
 
-    def action(self):   # 持续接收玩家行为
-        while self.room.status == 1:
+        while self.client.room.status == 0:
+            self.client.room.players = list(self.connections)
+            print(self.connections)
+            print(self.client.room.players)
+            broadcast()
+            admit()
+
+    def go(self):
+        def action():   # 持续接收玩家行为
             for conn in self.connections.values():
                 conn.setblocking(False)
                 try:
@@ -64,7 +65,12 @@ class Host:
                 else:
                     self.actions.append(action)
 
-    def sync(self, action: dict[str, Any]): # 同步广播行为，在每次动画加载前执行
-        for conn in self.connections.values():
-            if conn != self.connections[action['player']]:
-                conn.send(json.dumps(action).encode())
+        def sync(): # 同步广播行为，在每次动画加载前执行
+            for action in self.actions:
+                for conn in self.connections.values():
+                    if conn != self.connections[action['player']]:
+                        conn.send(json.dumps(action).encode())
+
+        while self.client.room.status == 1:
+            action()
+            sync()

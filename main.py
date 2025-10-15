@@ -1,5 +1,5 @@
 import pygame, multi, uno, utils
-from typing import Callable
+from typing import Any, Callable
 # 所有游戏内核在主机完成，所以大多数实例对象仅存在于主机
 # 对于客户端的玩家的数据，主机仍留有备份，客户端拥有手牌的卡牌类（主机发送json标明卡牌属性），仅此而已
 # 当然，客户端需要知道弃牌堆顶的牌，并通过rule判断自己可以打出什么，主机也应该脱离内核实现同样的架构
@@ -61,7 +61,8 @@ class UnoGame:
         },
         'columns': {
             'tag': pygame.image.load('assets/images/columns/tag.png'),
-            'content': pygame.image.load('assets/images/columns/content.png')
+            'content': pygame.image.load('assets/images/columns/content.png'),
+            'refresh': pygame.image.load('assets/images/columns/refresh.png')
         }
     }
 
@@ -84,30 +85,6 @@ class UnoGame:
         for category, subdict in images.items()
     }
 
-    class Column(pygame.Surface):
-        def __init__(self, rect: pygame.Rect, head: int, tag: str = '', contents: list[str] = []): # 也可以还是用宽高（size）毕竟Column不需要定位
-            super().__init__(rect.size, pygame.SRCALPHA)
-
-            self.tag = utils.scale(UnoGame.images['columns']['tag'], rect.size)
-            if tag:
-                font = UnoGame.fonts['tag']
-                tag_surface = font.render(tag, True, UnoGame.TEXT_COLOR)
-                tag_rect = tag_surface.get_rect(center=self.get_rect(top=head / 2).midtop)
-                self.tag.blit(tag_surface, tag_rect)
-            self.content = utils.scale(UnoGame.images['columns']['content'], (rect.width, rect.height - head))
-            if contents:
-                for line, content in enumerate(contents):
-                    font = UnoGame.fonts['content']
-                    content_surface = font.render(content, True, UnoGame.TEXT_COLOR)
-                    content_rect = content_surface.get_rect(topleft=(16, 16 + 32 * line))
-                    self.content.blit(content_surface, content_rect)
-
-            self.blit(self.tag, (0, 0))
-            self.blit(self.content, (0, head))
-
-            self.rect = rect
-            self.contents = contents
-
     class Input(pygame.Surface):    # TODO: 输入事件类型？
         def __init__(self, rect: pygame.Rect, hint: str = ''):
             super().__init__(rect.size, pygame.SRCALPHA)
@@ -122,6 +99,7 @@ class UnoGame:
             self.activated = False
             self.text = ''
 
+            self.update()
             UnoGame.inputs.append(self)
 
         @property
@@ -134,7 +112,7 @@ class UnoGame:
             except IndexError:
                 return False
 
-        def update(self, event: pygame.event.Event):
+        def update(self, event: pygame.event.Event = pygame.event.Event(pygame.USEREVENT)):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 self.activated = self.hover
 
@@ -159,8 +137,6 @@ class UnoGame:
                     hint_rect = hint_surface.get_rect(center=self.area.get_rect().center)
                     self.area.blit(hint_surface, hint_rect)
 
-    inputs: list[Input] = []
-
     class Button(pygame.Surface):
         def __init__(self, image: pygame.Surface, rect: pygame.Rect, action: Callable[[], None], slice: bool = False, text: str = ''):
             super().__init__(rect.size, pygame.SRCALPHA)
@@ -168,7 +144,7 @@ class UnoGame:
             if slice:
                 self.surface = utils.scale(image, rect.size)
             else:
-                self.surface = pygame.transform.scale(image, rect.size)
+                self.surface = pygame.transform.smoothscale(image, rect.size)
             if text:
                 font = UnoGame.fonts['button']
                 text_surface = font.render(text, True, UnoGame.TEXT_COLOR)
@@ -180,6 +156,7 @@ class UnoGame:
             self.mask = pygame.mask.from_surface(self.surface)
             self.highlight = self.mask.to_surface(setcolor=UnoGame.HIGHLIGHT_COLOR, unsetcolor=(0, 0, 0, 0))
 
+            self.update()
             UnoGame.buttons.append(self)
 
         @property
@@ -192,131 +169,165 @@ class UnoGame:
             except IndexError:
                 return False
 
-        def update(self, event: pygame.event.Event):
+        def update(self, event: pygame.event.Event = pygame.event.Event(pygame.USEREVENT)):
             self.blit(self.surface, (0, 0))
             if self.hover:
                 self.blit(self.highlight, (0, 0))
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     self.action()
 
-    buttons: list[Button] = []
+    class Column(pygame.Surface):
+        def __init__(self, rect: pygame.Rect, head: int, tag: str = '', contents: list[str] = [], refresh: bool = False): # 也可以还是用宽高（size）毕竟Column不需要定位
+            super().__init__(rect.size, pygame.SRCALPHA)
+
+            self.back = utils.scale(UnoGame.images['columns']['tag'], rect.size)
+            self.front = utils.scale(UnoGame.images['columns']['content'], (rect.width, rect.height - head))
+            self.rect = rect
+            self.tag = tag
+            self.contents = contents
+
+            self.update()
+            if refresh:
+                UnoGame.Button(UnoGame.images['columns']['refresh'], pygame.Rect(rect.right - 50, rect.top + 10, 41, 36), self.update)
+
+        def update(self):
+            head = self.back.get_height() - self.front.get_height()
+
+            if self.tag:
+                font = UnoGame.fonts['tag']
+                tag_surface = font.render(self.tag, True, UnoGame.TEXT_COLOR)
+                tag_rect = tag_surface.get_rect(center=self.get_rect(top=head / 2).midtop)
+                self.back.blit(tag_surface, tag_rect)
+            self.blit(self.back, (0, 0))
+
+            if self.contents:
+                for line, content in enumerate(self.contents):
+                    font = UnoGame.fonts['content']
+                    content_surface = font.render(content, True, UnoGame.TEXT_COLOR)
+                    content_rect = content_surface.get_rect(topleft=(16, 16 + 32 * line))
+                    self.front.blit(content_surface, content_rect)
+            self.blit(self.front, (0, head))
+
+            UnoGame.columns.append(self)
 
     class Message(pygame.Surface):  # 弹出在屏幕上方的错误或提示
         pass
 
+    inputs: list[Input] = []
+    buttons: list[Button] = []
+    columns: list[Column] = []
+    messages: list[Message] = []
+
     host: multi.Host
     client: multi.Client
-    # room: multi.Room 本地存room应该不至于，但是确实需要暂存房间信息...
 
     @classmethod
     def menu(cls):
+        cls.inputs.clear()
+        cls.buttons.clear()
         cls.screen.fill(cls.BACKGROUND)
-        column = cls.Column(pygame.Rect(300, 150, 200, 300), 50, 'MENU')
-        cls.screen.blit(column, column.rect)
         info_1 = pygame.transform.scale(cls.images['info']['cards_text'], (64, 64))
         cls.screen.blit(info_1, (10, 10))
         info_2 = pygame.transform.scale(cls.images['info']['players_2_10'], (64, 64))
         cls.screen.blit(info_2, (84, 10))
 
-        cls.inputs.clear()
-
-        cls.buttons.clear()
-        cls.Button(cls.images['buttons']['rectangle_basic'], pygame.Rect(325, 225, 150, 50), cls.create, slice=True, text='CREATE')
+        cls.Button(cls.images['buttons']['rectangle_color'], pygame.Rect(325, 225, 150, 50), cls.create, slice=True, text='CREATE')
         cls.Button(cls.images['buttons']['rectangle_basic'], pygame.Rect(325, 300, 150, 50), cls.join, slice=True, text='JOIN')
         cls.Button(cls.images['buttons']['rectangle_line'], pygame.Rect(325, 375, 150, 50), quit, slice=True, text='QUIT')
 
+        cls.Column(pygame.Rect(300, 150, 200, 300), 50, 'MENU')
+
     @classmethod
     def create(cls):
-        cls.screen.fill(cls.BACKGROUND)
-        column = cls.Column(pygame.Rect(250, 100, 300, 400), 50,
-            tag='CREATE',
-            contents=['CREATING A ROOM', 'WITH YOUR PLAYER NAME.']
-        )
-        cls.screen.blit(column, column.rect)
-
         cls.inputs.clear()
-        room_name = cls.Input(pygame.Rect(275, 250, 100, 50), 'ROOM')
-        name = cls.Input(pygame.Rect(425, 250, 100, 50), 'NAME')
-        password = cls.Input(pygame.Rect(325, 325, 150, 50), 'PASSWORD')
+        cls.buttons.clear()
+        cls.screen.fill(cls.BACKGROUND)
+
+        room_name = cls.Input(pygame.Rect(275, 300, 125, 50), 'ROOM')
+        name = cls.Input(pygame.Rect(425, 300, 100, 50), 'NAME')
+        password = cls.Input(pygame.Rect(275, 375, 125, 50), 'PASSWORD')
 
         def host():
-            cls.host = multi.Host(name.text, room_name.text, int(password.text))    # 将要改成host不再需要name（和主机玩家独立运作），只需房间名
-            cls.client = multi.Client(name.text)
-            cls.room()
+            try:
+                cls.host = multi.Host(name.text, room_name.text, int(password.text))
+                cls.client = cls.host.client
+                cls.room()
+            except ValueError:
+                pass    # TODO
 
-        cls.buttons.clear()
-        cls.Button(cls.images['buttons']['rectangle_color'], pygame.Rect(350, 400, 100, 50), host, slice=True, text='OK')
+        cls.Button(cls.images['buttons']['rectangle_color'], pygame.Rect(425, 375, 100, 50), host, slice=True, text='OK')
+
+        cls.Column(pygame.Rect(250, 150, 300, 300), 50,
+            tag='CREATE',
+            contents=['CREATE A ROOM WITH NAME', 'AND YOUR PLAYER NAME.']
+        )
 
     @classmethod
     def join(cls):  # 刷新按钮，点一下重新加载该页面（其他页面比如create也可以刷新，room可以做成动态的也可以刷新）
-        cls.screen.fill(cls.BACKGROUND)
-        column = cls.Column(pygame.Rect(275, 225, 250, 150), 50, 'JOIN')
-        cls.screen.blit(column, column.rect)
-
         cls.inputs.clear()
-        name = cls.Input(pygame.Rect(300, 300, 100, 50), 'NAME')
+        cls.buttons.clear()
+        cls.screen.fill(cls.BACKGROUND)
+
+        name = cls.Input(pygame.Rect(325, 300, 100, 50), 'NAME')
 
         def client():
             cls.client = multi.Client(name.text)
-            cls.search([room for room in cls.client.receive().items()])
+            cls.search(sorted(cls.client.receive(), key=lambda info: info['name']))
 
-        cls.buttons.clear()
-        cls.Button(cls.images['buttons']['square_checkmark'], pygame.Rect(425, 300, 50, 50), client)
+        cls.Button(cls.images['buttons']['square_checkmark'], pygame.Rect(443, 309, 32, 32), client)
+
+        cls.Column(pygame.Rect(300, 225, 200, 150), 50, 'JOIN')
 
     @classmethod
-    def search(cls, rooms: list[tuple[tuple[str, int], dict[str, str]]], page: int = 1):
+    def search(cls, rooms: list[dict[str, Any]], page: int = 1):
+        cls.inputs.clear()
+        cls.buttons.clear()
+        cls.screen.fill(cls.BACKGROUND)
+
         if rooms:
-            room = rooms[page - 1]
-            addr, info = room
-            ip, port = addr
+            info = rooms[page - 1]
+            ip, port = info['addr']
             contents = [
-                f'{info['name']}({info['number']}/10)',
+                f'{info['name']}({len(info['players'])}/10)',
                 f'{ip}:{port}'
             ] # 房间名（人数），主机（ip）
+
+            password = cls.Input(pygame.Rect(400, 300, 125, 50), 'PASSWORD')
+
+            def next():
+                cls.search(rooms, page + 1)
+
+            def prev():
+                cls.search(rooms, page - 1)
+
+            def access():
+                if cls.client.join(info, int(password.text)):
+                    cls.room()
+                else:
+                    cls.search(sorted(cls.client.receive(), key=lambda info: info['name']))    # TODO: Error
+
+            cls.Button(cls.images['buttons']['rectangle_basic'], pygame.Rect(275, 300, 100, 50), cls.join, slice=True, text='REJOIN')
+            cls.Button(cls.images['buttons']['rectangle_color'], pygame.Rect(350, 375, 100, 50), access, slice=True, text='OK')
+            if page < len(rooms):
+                cls.Button(cls.images['buttons']['arrow_right'], pygame.Rect(475, 384, 32, 32), next)
+            if page > 1:
+                cls.Button(cls.images['buttons']['arrow_left'], pygame.Rect(293, 384, 32, 32), prev)
         else:
             contents = ['EMPTY']
 
-        cls.screen.fill(cls.BACKGROUND)
-        column = cls.Column(pygame.Rect(250, 100, 300, 400), 50,
-            tag='SEARCH',
-            contents=contents
-        )
-        cls.screen.blit(column, column.rect)
+            cls.Button(cls.images['buttons']['rectangle_basic'], pygame.Rect(350, 350, 100, 50), cls.join, slice=True, text='REJOIN')
 
-        cls.inputs.clear()
-
-        def next():
-            cls.search(rooms, page + 1)
-
-        def prev():
-            cls.search(rooms, page - 1)
-
-        def refresh():
-            cls.search([room for room in cls.client.receive().items()])
-
-        def access():
-            # try?
-            # cls.client.join()
-            cls.room()
-
-        cls.buttons.clear()
-        cls.Button(cls.images['buttons']['rectangle_basic'], pygame.Rect(350, 275, 100, 50), refresh, slice=True, text='REFRE')
-        if rooms:
-            cls.Button(cls.images['buttons']['rectangle_color'], pygame.Rect(350, 400, 100, 50), access, slice=True, text='OK')
-        if page < len(rooms):
-            cls.Button(cls.images['buttons']['arrow_right'], pygame.Rect(475, 400, 50, 50), next)
-        if page > 1:
-            cls.Button(cls.images['buttons']['arrow_right'], pygame.Rect(275, 400, 50, 50), prev)
+        cls.Column(pygame.Rect(250, 150, 300, 300), 50, 'SEARCH', contents, True)
 
     @classmethod
     def room(cls):
-        cls.screen.fill(cls.BACKGROUND)
-        column = cls.Column(pygame.Rect(250, 100, 300, 400), 50, cls.host.room.name)
-        cls.screen.blit(column, column.rect)
-
         cls.inputs.clear()
-
         cls.buttons.clear()
+        cls.screen.fill(cls.BACKGROUND)
+
+        players: Any = cls.client.room.info['players']
+
+        cls.Column(pygame.Rect(250, 100, 300, 400), 50, cls.client.room.name, players, True)
 
     @classmethod
     def game(cls):
@@ -328,10 +339,14 @@ class UnoGame:
 
         running = True
         while running:
-            for input in cls.inputs:
-                cls.screen.blit(input, input.rect)
+            while cls.columns:
+                # cls.screen.fill(cls.BACKGROUND)
+                column = cls.columns.pop()
+                cls.screen.blit(column, column.rect)
             for button in cls.buttons:
                 cls.screen.blit(button, button.rect)
+            for input in cls.inputs:
+                cls.screen.blit(input, input.rect)
             for event in pygame.event.get():
                 for input in cls.inputs:
                     input.update(event)

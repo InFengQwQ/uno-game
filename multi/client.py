@@ -1,15 +1,13 @@
 from . import Room
 import json, socket, time
 from typing import Any
-# socket udp组播地址：239.255.0.0:50000+ 局域网使用
+# socket udp组播地址：239.255.0.0:50000 局域网使用
 
 class Client:
-    def __init__(self, name: str):
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
+    def __init__(self, name: str, sock: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)):
         self.name = name
-        self.room: Room # TODO
+        self.sock = sock
+        self.room: Room
 
         # self.actions = []
 
@@ -24,25 +22,30 @@ class Client:
             while time.time() - start_time < 1:
                 try:
                     data, (ip, _) = sock.recvfrom(1024)
-                    info: dict[str, Any] = json.loads(data.decode())
-                    addr = (ip, info.pop('port'))
+                    info = json.loads(data.decode())
+                    addr = info['addr'] = (ip, info['addr'][1])
                     rooms[addr] = info
                 except BlockingIOError:
                     continue
                 except:
                     break
-        return rooms
+        return list(rooms.values())
 
-    def join(self, addr: tuple[str, int], name: str, password: int):   # player name and password input
+    def join(self, info: dict[str, Any], password: int):
+        addr: Any = info['addr']
         self.sock.connect(addr)
-        self.sock.setblocking(False)
         request: dict[str, Any] = {
-            'name': name,
+            'name': self.name,
             'password': password
         }
         self.sock.send(json.dumps(request).encode())
-        if names := json.loads(self.sock.recv(1024).decode()):
-            self.connections: list[str] = names
+        try:
+            self.sock.recv(1024)
+        except:
+            return False
+        else:
+            self.room = Room(info['name'], password, info['addr'])
+            return True
 
     def sync(self): # 同步，兼分数结算(此时打破循环)
         while True:

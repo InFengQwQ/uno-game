@@ -1,5 +1,5 @@
 from .room import Room
-from .host import Host
 from .client import Client
+from .host import Host
 
-__all__ = ['Room', 'Host', 'Client']
+__all__ = ['Room', 'Client', 'Host']
