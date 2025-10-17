@@ -1,12 +1,5 @@
-from . import Card
+from . import COLORS, BLACK_COLOR, NUMBER, ACTIONS, WILDS, Card
 import random
-
-
-COLORS = ['red', 'green', 'purple', 'yellow']   # blue -> purple
-BLACK_COLOR = 'black'
-NUMBER = 'number'
-ACTIONS = ['skip', 'reverse', 'draw_two']
-WILDS = ['wild', 'wild_draw_four']
 
 
 class Deck:

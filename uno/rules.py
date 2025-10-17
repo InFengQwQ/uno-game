@@ -1,5 +1,4 @@
-from . import Card, Player
-from .deck import BLACK_COLOR
+from . import BLACK_COLOR, Card, Player
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
