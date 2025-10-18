@@ -1,11 +1,13 @@
+from .constants import *
 from .utils import *
 from .column import Column
 from .input import Input
 from .button import Button
 from .message import Message
-from .screen import *
+from .screen import scene, columns, inputs, buttons, messages, clear, update
 
-__all__ = ['W', 'H',
+__all__ = [
+    'W', 'H',
     'Column', 'Input', 'Button', 'Message',
-    'screen', 'scene', 'columns', 'inputs', 'buttons', 'messages', 'clear', 'update'
+    'scene', 'columns', 'inputs', 'buttons', 'messages', 'clear', 'update'
 ]

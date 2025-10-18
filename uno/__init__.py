@@ -1,4 +1,4 @@
-from .utils import *
+from .constants import *
 from .card import Card
 from .deck import Deck
 from .player import Player

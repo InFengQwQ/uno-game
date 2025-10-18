@@ -2,6 +2,8 @@ from . import W, H, FPS, BACKGROUND_COLOR, Column, Input, Button, Message
 import pygame
 
 
+pygame.init()
+
 pygame.display.set_icon(pygame.image.load('icon.png'))  # 也许可在加载资源之前执行？
 pygame.display.set_caption('Uno Game')
 screen = pygame.display.set_mode((W, H), flags=0)
