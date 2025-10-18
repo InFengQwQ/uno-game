@@ -14,7 +14,6 @@ from ui import *
 
 
 class UnoGame:
-    INIT_COLOR = pygame.Color('#00000000')
     images: dict[str, dict[str, pygame.Surface]] = {
         'info': {
             'cards_text': pygame.image.load('assets/images/info/cards_text.svg'),
