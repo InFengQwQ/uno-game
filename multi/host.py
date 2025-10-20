@@ -18,7 +18,7 @@ class Host:
             raise OSError
         self.sock.listen(10)
         sock, client_sock = socket.socketpair(socket.AF_INET, socket.SOCK_STREAM)
-        self.connections: dict[str, socket.socket] = {name: sock}
+        self.connections: dict[str, dict[str, socket.socket]] = {'unverified': {}, 'verified': {name: sock}}
         self.client = Client(name, client_sock)
         self.client.room = Room(room_name, password, ('127.0.0.1', port))
 
@@ -26,45 +26,56 @@ class Host:
 
     def wait(self): # 一次健康的等待操作
         def admit():    # 接收玩家一次
-            if len(self.connections) < 10:
+            if len(self.connections['verified']) < 10:
                 while True:
                     try:
                         conn, _ = self.sock.accept()
                     except BlockingIOError:
                         break
                     else:
-                        conn.settimeout(1)
-                        try:
-                            request = json.loads(conn.recv(1024).decode())
-                            if request['password'] == self.client.room.password and not (name := request['name']) in self.connections: # 游戏外重名
-                                self.connections[name] = conn
-                                conn.send(b'')
-                            else:
-                                raise ValueError('failed to identify')
-                        except Exception as e:
-                            print(e)
-                            conn.close()
+                        conn.setblocking(False)
+                        self.connections['unverified'][conn.getpeername()] = conn
 
         def sync(): # 同步房间成员
-            self.client.room.players[:] = list(self.connections)
+            for addr, conn in self.connections['unverified'].copy().items():
+                try:
+                    request = json.loads(conn.recv(1024).decode())
+                except BlockingIOError:
+                    continue
+                except Exception as e:
+                    print(e)
+                    conn.close()
+                else:
+                    if len(self.connections['verified']) >= 10:
+                        conn.send(json.dumps({'status': False, 'message': 'room is full'}).encode())
+                        conn.close()
+                    elif (name := request['name']) in self.connections['verified']: # 游戏外重名
+                        conn.send(json.dumps({'status': False, 'message': 'name exists'}).encode())
+                        conn.close()
+                    elif request['password'] != self.client.room.password:
+                        conn.send(json.dumps({'status': False, 'message': 'password is incorrect'}).encode())
+                        conn.close()
+                    else:
+                        conn.send(json.dumps({'status': True}).encode())
+                        self.connections['verified'][name] = conn
+                    del self.connections['unverified'][addr]
 
-            connections = self.connections.copy()
-            for name, conn in self.connections.items():
+            self.client.room.players[:] = list(self.connections['verified'])
+            for name, conn in self.connections['verified'].copy().items():
                 try:
                     conn.send(json.dumps(self.client.room.info).encode())
-                except Exception:
+                except Exception as e:
+                    print(e)
                     conn.close()
-                    del connections[name]
-            self.connections.clear()
-            self.connections.update(connections)
+                    del self.connections['verified'][name]   # 是否要直接删除？不过确实socket失效之后已经没必要存储了
 
+        admit()
         sync()
         self.client.room.broadcast()
-        admit()
 
     def go(self):
         def action():   # 持续接收玩家行为
-            for conn in self.connections.values():
+            for conn in self.connections['verified'].values():
                 try:
                     action: dict[str, Any] = json.loads(conn.recv(1024).decode())
                 except BlockingIOError:
@@ -74,10 +85,9 @@ class Host:
 
         def sync(): # 同步广播行为，在每次动画加载前执行
             for action in self.actions:
-                for conn in self.connections.values():
-                    if conn != self.connections[action['player']]:
+                for conn in self.connections['verified'].values():
+                    if conn != self.connections['verified'][action['player']]:
                         conn.send(json.dumps(action).encode())
 
-        while self.client.room.status == 1:
-            action()
-            sync()
+        action()
+        sync()

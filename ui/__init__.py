@@ -7,7 +7,7 @@ from .message import Message
 from .screen import scene, columns, inputs, buttons, messages, clear, update
 
 __all__ = [
-    'W', 'H',
+    'SCREEN_WIDTH', 'W', 'SCREEN_HEIGHT', 'H', 'FPS',
     'Column', 'Input', 'Button', 'Message',
     'scene', 'columns', 'inputs', 'buttons', 'messages', 'clear', 'update'
 ]

@@ -4,7 +4,7 @@ import pygame
 SCREEN_WIDTH = W = 800
 SCREEN_HEIGHT = H = 600
 # FPS
-FPS = 165
+FPS = 60
 # colors
 BACKGROUND_COLOR = pygame.Color('#3399D9')
 TEXT_COLOR = pygame.Color('#000000')

@@ -1,5 +1,5 @@
 import pygame, multi, ui, uno
-from typing import Any, Callable
+from typing import Callable
 # 所有游戏内核在主机完成，所以大多数实例对象仅存在于主机
 # 对于客户端的玩家的数据，主机仍留有备份，客户端拥有手牌的卡牌类（主机发送json标明卡牌属性），仅此而已
 # 当然，客户端需要知道弃牌堆顶的牌，并通过rule判断自己可以打出什么，主机也应该脱离内核实现同样的架构
@@ -91,7 +91,7 @@ class UnoGame:
     host: multi.Host
     client: multi.Client
 
-    actions: list[Callable[[], None]] = []
+    action: Callable[..., None] = lambda: None
 
     @classmethod
     def menu(cls):
@@ -134,7 +134,6 @@ class UnoGame:
                 cls.host = multi.Host(name.text, room_name.text, int(password.text))
                 cls.client = cls.host.client
                 cls.room()  # 在room中实现action...?
-                cls.actions.append(cls.host.wait)
             except ValueError:
                 pass    # TODO
         ui.buttons.extend([
@@ -162,11 +161,11 @@ class UnoGame:
         ])
 
     @classmethod
-    def search(cls, rooms: list[dict[str, Any]] = multi.Room.rooms, page: int = 1):
-        if rooms:
+    def search(cls, page: int = 1):
+        if multi.Room.rooms:
             ui.clear()
 
-            info = rooms[page - 1]
+            info = multi.Room.rooms[page - 1]
             ip, port = info['addr']
             ui.columns.extend([
                 ui.Column(
@@ -185,21 +184,25 @@ class UnoGame:
             ])
 
             def access():
-                cls.client.join(info, int(password.text))
-                cls.room()
+                try:
+                    cls.client.join(info, int(password.text))
+                except Exception as e:
+                    ui.Message(e)
+                else:
+                    cls.room()
             ui.buttons.extend([
                 ui.Button(cls.images['button']['square_line'], pygame.Rect(ui.W * 11/32, ui.H * 1/2, ui.W * 1/8, ui.H * 1/12), cls.menu, slice=True, text='BACK'), # TODO: 变成刷新键（那么就要固定到一个合适的位置了，如左下角，OK和箭头放在一边
                 ui.Button(cls.images['button']['square_color'], pygame.Rect(ui.W * 7/16, ui.H * 5/8, ui.W * 1/8, ui.H * 1/12), access, slice=True, text='OK')
             ])
-            if page < len(rooms):
+            if page < len(multi.Room.rooms):
                 def next():
-                    cls.search(rooms, page + 1)
+                    cls.search(page + 1)
                 ui.buttons.extend([
                     ui.Button(cls.images['button']['arrow_right'], pygame.Rect(ui.W * 19/32, ui.H * 2/3 - 16, 32, 32), next)
                 ])
             if page > 1:
                 def prev():
-                    cls.search(rooms, page - 1)
+                    cls.search(page - 1)
                 ui.buttons.extend([
                     ui.Button(cls.images['button']['arrow_left'], pygame.Rect(ui.W * 13/32 - 32, ui.H * 2/3 - 16, 32, 32), prev)
                 ])
@@ -222,11 +225,22 @@ class UnoGame:
 
     @classmethod
     def room(cls):
-        ui.clear()
+        if hasattr(cls, 'host'):
+            ui.clear()
 
-        ui.columns.extend([
-            ui.Column(pygame.Rect(ui.W * 5/16, ui.H * 1/6, ui.W * 3/8, ui.H * 2/3), tag=cls.client.room.name, contents=cls.client.room.players)
-        ])
+            ui.columns.extend([
+                ui.Column(pygame.Rect(ui.W * 5/16, ui.H * 1/6, ui.W * 3/8, ui.H * 2/3), tag=cls.client.room.name, contents=cls.client.room.players)
+            ])
+
+            cls.action = cls.host.wait
+        else:
+            ui.clear()
+
+            ui.columns.extend([
+                ui.Column(pygame.Rect(ui.W * 5/16, ui.H * 1/6, ui.W * 3/8, ui.H * 2/3), tag=cls.client.room.name, contents=cls.client.room.players)
+            ])
+
+            cls.action = cls.client.sync
 
     @classmethod
     def game(cls):
@@ -237,8 +251,11 @@ class UnoGame:
         cls.menu()
 
         while ui.update():
-            for action in cls.actions:
-                action()
+            if (pygame.time.get_ticks()/1000 % 1) < 1/ui.FPS:
+                try:
+                    cls.action()
+                except Exception as e:
+                    print(e)
 
         pygame.quit()
 
