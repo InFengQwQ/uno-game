@@ -7,25 +7,33 @@ class Client:
     def __init__(self, name: str, sock: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)):
         self.name = name
         self.sock = sock
-        self.room: Room
 
         self.actions: list[dict[str, Any]] = []
 
     def join(self, info: dict[str, Any], password: int):
         name, addr = info['name'], info['addr']
-        self.sock.connect(addr)
-        request: dict[str, Any] = {
-            'name': self.name,
-            'password': password
-        }
-        self.sock.send(json.dumps(request).encode())
-        reply = json.loads(self.sock.recv(1024).decode())
-        if reply['status']:
-            self.sock.setblocking(False)
-            self.room = Room(name, password, addr)
+        self.sock.settimeout(2)
+        try:
+            self.sock.connect(addr)
+        except (socket.timeout, TimeoutError, OSError):
+            raise Exception('TIME OUT OR ROOM FULL')
         else:
-            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            raise Exception(reply['message']) # Message()
+            request: dict[str, Any] = {
+                'name': self.name,
+                'password': password
+            }
+            self.sock.send(json.dumps(request).encode())
+            try:
+                reply = json.loads(self.sock.recv(1024).decode())
+            except socket.timeout:
+                self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                raise Exception('TIME OUT')
+            if reply['status']:
+                self.sock.setblocking(False)
+                self.room = Room(name, password, addr)
+            else:
+                self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                raise Exception(reply['message']) # Message()
 
     # @property
     # def connected(self):

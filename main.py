@@ -15,6 +15,15 @@ class UnoGame:
             'cards_text': pygame.image.load('assets/images/info/cards_text.svg').convert_alpha(),
             'players_2_10': pygame.image.load('assets/images/info/players_2_10.svg').convert_alpha()
         },
+        'column': {
+            'back': pygame.image.load('assets/images/column/back.svg').convert_alpha(),
+            'front': pygame.image.load('assets/images/column/front.svg').convert_alpha(),
+            'divider': pygame.image.load('assets/images/column/divider.svg').convert_alpha()
+        },
+        'input': {
+            'inactive': pygame.image.load('assets/images/input/inactive.svg').convert_alpha(),
+            'active': pygame.image.load('assets/images/input/active.svg').convert_alpha()
+        },
         'button': {
             **{
                 f'{shape}_{style}': pygame.image.load(f'assets/images/button/default/{shape}_{style}.svg').convert_alpha()
@@ -26,14 +35,8 @@ class UnoGame:
                 for direction in ['left', 'right', 'up', 'down']
             }
         },
-        'input': {
-            'inactive': pygame.image.load('assets/images/input/inactive.svg').convert_alpha(),
-            'active': pygame.image.load('assets/images/input/active.svg').convert_alpha()
-        },
-        'column': {
-            'back': pygame.image.load('assets/images/column/back.svg').convert_alpha(),
-            'front': pygame.image.load('assets/images/column/front.svg').convert_alpha(),
-            'divider': pygame.image.load('assets/images/column/divider.svg').convert_alpha()
+        'message': {
+            'box': pygame.image.load('assets/images/message/box.svg').convert_alpha()
         },
         'cards': {
             'back': pygame.image.load('assets/images/cards/back.png').convert_alpha(),
@@ -59,12 +62,16 @@ class UnoGame:
     }
     fonts: dict[str, pygame.font.Font] = {
         **{
-            default: pygame.font.Font('assets/fonts/Kenney Future.ttf', 24)
-            for default in ['tag']
+            large: pygame.font.Font('assets/fonts/Kenney Future.ttf', 24)
+            for large in ['tag']
         },
         **{
-            small: pygame.font.Font('assets/fonts/Kenney Future.ttf', 16)
-            for small in ['hint', 'text']
+            default: pygame.font.Font('assets/fonts/Kenney Future.ttf', 16)
+            for default in ['hint', 'text']
+        },
+        **{
+            small: pygame.font.Font('assets/fonts/Kenney Future.ttf', 8)
+            for small in ['message']
         },
         **{
             narrow: pygame.font.Font('assets/fonts/Kenney Future Narrow.ttf', 16)
@@ -87,6 +94,8 @@ class UnoGame:
     ui.Input.tap_sound = sounds['tap']
     ui.Button.text_font = fonts['text']
     ui.Button.click_sound = sounds['click']
+    ui.Message.message_image = images['message']['box']
+    ui.Message.message_font = fonts['message']
 
     host: multi.Host
     client: multi.Client
@@ -114,13 +123,15 @@ class UnoGame:
     def create(cls):
         ui.clear()
 
-        contents = [
-            'CREATE A ROOM WITH NAME',
-            'AND YOUR PLAYER NAME.',
-            ''
-        ]
         ui.columns.extend([
-            ui.Column(pygame.Rect(ui.W * 5/16, ui.H * 1/4, ui.W * 3/8, ui.H * 1/2), tag='CREATE', contents=contents)
+            ui.Column(pygame.Rect(ui.W * 5/16, ui.H * 1/4, ui.W * 3/8, ui.H * 1/2),
+                tag='CREATE',
+                contents = [
+                    'CREATE A ROOM WITH NAME',
+                    'AND YOUR PLAYER NAME.',
+                    ''
+                ]
+            )
         ])
 
         ui.inputs.extend([
@@ -130,12 +141,9 @@ class UnoGame:
         ])
 
         def host():
-            try:
-                cls.host = multi.Host(name.text, room_name.text, int(password.text))
-                cls.client = cls.host.client
-                cls.room()  # 在room中实现action...?
-            except ValueError:
-                pass    # TODO
+            cls.host = multi.Host(name.text, room_name.text, int(password.text))
+            cls.client = cls.host.client
+            cls.room()
         ui.buttons.extend([
             ui.Button(cls.images['button']['square_color'], pygame.Rect(ui.W * 17/32, ui.H * 5/8, ui.H * 1/6, ui.H * 1/12), host, slice=True, text='OK')
         ])
@@ -153,8 +161,8 @@ class UnoGame:
         ])
 
         def client():
-            cls.client = multi.Client(name.text)
             multi.Room.receive()
+            cls.client = multi.Client(name.text)
             cls.search()
         ui.buttons.extend([
             ui.Button(cls.images['button']['square_color'], pygame.Rect(ui.W * 17/32, ui.H * 1/2, ui.W * 3/32, ui.H * 1/12), client, slice=True, text='OK')
@@ -172,7 +180,7 @@ class UnoGame:
                     pygame.Rect(ui.W * 5/16, ui.H * 1/4, ui.W * 3/8, ui.H * 1/2),
                     tag='SEARCH',
                     contents=[
-                        f'{info['name']}({len(info['players'])}/10)',
+                        f'{info["name"]}({len(info["players"])}/10)',
                         f'{ip}:{port}',
                         ''
                     ] # 房间名（人数），主机（ip）
@@ -184,12 +192,8 @@ class UnoGame:
             ])
 
             def access():
-                try:
-                    cls.client.join(info, int(password.text))
-                except Exception as e:
-                    ui.Message(e)
-                else:
-                    cls.room()
+                cls.client.join(info, int(password.text))
+                cls.room()
             ui.buttons.extend([
                 ui.Button(cls.images['button']['square_line'], pygame.Rect(ui.W * 11/32, ui.H * 1/2, ui.W * 1/8, ui.H * 1/12), cls.menu, slice=True, text='BACK'), # TODO: 变成刷新键（那么就要固定到一个合适的位置了，如左下角，OK和箭头放在一边
                 ui.Button(cls.images['button']['square_color'], pygame.Rect(ui.W * 7/16, ui.H * 5/8, ui.W * 1/8, ui.H * 1/12), access, slice=True, text='OK')
@@ -250,14 +254,15 @@ class UnoGame:
     def run(cls):
         cls.menu()
 
-        while ui.update():
-            if (pygame.time.get_ticks()/1000 % 1) < 1/ui.FPS:
-                try:
-                    cls.action()
-                except Exception as e:
-                    print(e)
-
-        pygame.quit()
+        while True:
+            try:
+                if ui.update():
+                    if (pygame.time.get_ticks()/1000 % 1) < 1/ui.FPS:
+                        cls.action()
+                else:
+                    break
+            except Exception as e:
+                ui.messages.append(ui.Message(e))
 
 
 # def main():

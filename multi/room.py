@@ -28,8 +28,12 @@ class Room:
         }
 
     def broadcast(self):    # 向239.255.0.0:50000的组广播房间信息一次
-        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
-            sock.sendto(json.dumps(self.info).encode(), ('239.255.0.0', 50000))
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+                sock.sendto(json.dumps(self.info).encode(), ('239.255.0.0', 50000))
+        except OSError as e:
+            print(e)
 
     @classmethod
     def receive(cls):  # 接收房间信息一次

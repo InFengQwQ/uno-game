@@ -11,7 +11,7 @@ class Game:
         self.draw = 0
         for player in self.players:
             player.draw(self.deck, 7)
-        while (top := self.deck.draw_pile.pop()).type == 'wild draw four':
+        while (top := self.deck.draw_pile.pop()).type == 'wild_draw_four':
             self.deck.draw_pile.insert(random.choice(range(len(self.deck.draw_pile))), top)
         Rules.apply_special_effects(top, self)
         self.deck.discard_pile.append(top)

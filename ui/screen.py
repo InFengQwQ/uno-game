@@ -17,31 +17,39 @@ buttons: list[Button] = []
 messages: list[Message] = []
 
 def clear():
+    '''Clear all UI elements and reset the scene surface.'''
     scene.__init__((W, H), flags=pygame.SRCALPHA)
     columns.clear()
     inputs.clear()
     buttons.clear()
 
-def update() -> bool:
-    screen.fill(BACKGROUND_COLOR)
-    screen.blit(scene, (0, 0))
-    for column in columns:
-        screen.blit(column, column.rect)
-        column.update()
-    for button in buttons:
-        screen.blit(button, button.rect)
-    for input in inputs:
-        screen.blit(input, input.rect)
-    for event in pygame.event.get():
+def update():
+    '''Update all UI elements and handle user events each frame.'''
+    tick = clock.tick(FPS)
+
+    events = pygame.event.get((pygame.QUIT, pygame.MOUSEMOTION, pygame.MOUSEBUTTONDOWN, pygame.TEXTINPUT, pygame.KEYDOWN))
+    for event in events if events else [pygame.event.Event(pygame.USEREVENT)]:
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            return False
+        for column in columns.copy():
+            column.update()
         for input in inputs.copy():
             input.update(event)
         for button in buttons.copy():
             button.update(event)
-        if event.type == pygame.QUIT:
-            return False
-    pygame.display.flip()
+        for message in messages.copy():
+            message.update(tick)
+            if message.alpha == 0:
+                messages.remove(message)
 
-    clock.tick(FPS)
+    screen.fill(BACKGROUND_COLOR)
+    screen.blit(scene, (0, 0))
+    screen.blits([(column, column.rect) for column in columns])
+    screen.blits([(input, input.rect) for input in inputs])
+    screen.blits([(button, button.rect) for button in buttons])
+    screen.blits([(message, message.rect) for message in messages if message.alpha > 0])
+    pygame.display.flip()
 
     if any(input.hover for input in inputs):
         pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_IBEAM)

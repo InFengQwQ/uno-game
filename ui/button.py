@@ -6,7 +6,8 @@ from typing import Callable
 class Button(pygame.Surface):
     text_font: pygame.font.Font
     click_sound: pygame.mixer.Sound
-    def __init__(self, image: pygame.Surface, rect: pygame.Rect, action: Callable[[], None], slice: bool = False, text: str = ''):
+
+    def __init__(self, image: pygame.Surface, rect: pygame.Rect, action: Callable[..., None], slice: bool = False, text: str = ''):
         super().__init__(rect.size, pygame.SRCALPHA)
 
         if slice:
@@ -23,8 +24,6 @@ class Button(pygame.Surface):
         self.mask = pygame.mask.from_surface(self.surface)
         self.highlight = self.mask.to_surface(setcolor=HIGHLIGHT_COLOR, unsetcolor=(0, 0, 0, 0))
 
-        self.update()
-
     @property
     def hover(self):
         mx, my = pygame.mouse.get_pos()
@@ -35,14 +34,10 @@ class Button(pygame.Surface):
         except IndexError:
             return False
 
-    def update(self, event: pygame.event.Event = pygame.event.Event(pygame.USEREVENT)):
+    def update(self, event: pygame.event.Event):
         self.blit(self.surface, (0, 0))
         if self.hover:
             self.blit(self.highlight, (0, 0))
             if event.type == pygame.MOUSEBUTTONDOWN:
                 Button.click_sound.play()
-                try:
-                    self.action()
-                except Exception as e:
-                    print(e)
-                    # Message(e)
+                self.action()

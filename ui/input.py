@@ -7,6 +7,7 @@ class Input(pygame.Surface):    # TODO: 输入事件类型？
     active_image: pygame.Surface
     hint_font: pygame.font.Font
     tap_sound: pygame.mixer.Sound
+
     def __init__(self, rect: pygame.Rect, hint: str = ''):
         super().__init__(rect.size, pygame.SRCALPHA)
 
@@ -20,8 +21,6 @@ class Input(pygame.Surface):    # TODO: 输入事件类型？
         self.activated = False
         self.text = ''
 
-        self.update()
-
     @property
     def hover(self):
         mx, my = pygame.mouse.get_pos()
@@ -32,7 +31,7 @@ class Input(pygame.Surface):    # TODO: 输入事件类型？
         except IndexError:
             return False
 
-    def update(self, event: pygame.event.Event = pygame.event.Event(pygame.USEREVENT)):
+    def update(self, event: pygame.event.Event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.hover:
                 Input.tap_sound.play()
@@ -43,7 +42,7 @@ class Input(pygame.Surface):    # TODO: 输入事件类型？
         if self.activated:
             if event.type == pygame.TEXTINPUT:
                 self.text += event.text
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_BACKSPACE and self.text:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_BACKSPACE and self.text:  # TODO
                 self.text = self.text[:-1]
             self.blit(self.active, (0, 0))
         else:

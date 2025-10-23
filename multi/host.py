@@ -17,24 +17,30 @@ class Host:
         else:
             raise OSError
         self.sock.listen(10)
-        sock, client_sock = socket.socketpair(socket.AF_INET, socket.SOCK_STREAM)
+        # Always use TCP loopback to create a connected socket pair
+        listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        listener.bind(('127.0.0.1', 0))
+        listener.listen(1)
+        client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client_sock.connect(listener.getsockname())
+        sock, _ = listener.accept()
+        listener.close()
         self.connections: dict[str, dict[str, socket.socket]] = {'unverified': {}, 'verified': {name: sock}}
         self.client = Client(name, client_sock)
         self.client.room = Room(room_name, password, ('127.0.0.1', port))
 
         self.actions: list[dict[str, Any]] = []   # TODO: [{player, type, ...}]
 
-    def wait(self): # 一次健康的等待操作
+    def wait(self): # 一次健康的等待操作    TODO: 完善所有的处理
         def admit():    # 接收玩家一次
-            if len(self.connections['verified']) < 10:
-                while True:
-                    try:
-                        conn, _ = self.sock.accept()
-                    except BlockingIOError:
-                        break
-                    else:
-                        conn.setblocking(False)
-                        self.connections['unverified'][conn.getpeername()] = conn
+            while len(self.connections['verified']) + len(self.connections['unverified']) < 10:
+                try:
+                    conn, _ = self.sock.accept()
+                except BlockingIOError:
+                    break
+                else:
+                    conn.setblocking(False)
+                    self.connections['unverified'][conn.getpeername()] = conn
 
         def sync(): # 同步房间成员
             for addr, conn in self.connections['unverified'].copy().items():
@@ -46,14 +52,11 @@ class Host:
                     print(e)
                     conn.close()
                 else:
-                    if len(self.connections['verified']) >= 10:
-                        conn.send(json.dumps({'status': False, 'message': 'room is full'}).encode())
-                        conn.close()
-                    elif (name := request['name']) in self.connections['verified']: # 游戏外重名
-                        conn.send(json.dumps({'status': False, 'message': 'name exists'}).encode())
+                    if (name := request['name']) in self.connections['verified']: # 游戏外重名
+                        conn.send(json.dumps({'status': False, 'message': 'NAME EXISTS'}).encode())
                         conn.close()
                     elif request['password'] != self.client.room.password:
-                        conn.send(json.dumps({'status': False, 'message': 'password is incorrect'}).encode())
+                        conn.send(json.dumps({'status': False, 'message': 'PASSWORD INCORRECT'}).encode())
                         conn.close()
                     else:
                         conn.send(json.dumps({'status': True}).encode())
