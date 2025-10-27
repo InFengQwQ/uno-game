@@ -17,14 +17,14 @@ buttons: list[Button] = []
 messages: list[Message] = []
 
 def clear():
-    '''Clear all UI elements and reset the scene surface.'''
+    """Clear all UI elements and reset the scene surface."""
     scene.__init__((W, H), flags=pygame.SRCALPHA)
     columns.clear()
     inputs.clear()
     buttons.clear()
 
 def update():
-    '''Update all UI elements and handle user events each frame.'''
+    """Update all UI elements and handle user events each frame."""
     tick = clock.tick(FPS)
 
     events = pygame.event.get((pygame.QUIT, pygame.MOUSEMOTION, pygame.MOUSEBUTTONDOWN, pygame.TEXTINPUT, pygame.KEYDOWN))

@@ -79,8 +79,8 @@ class UnoGame:
         }
     }
     sounds: dict[str, pygame.mixer.Sound] = {
-        'click': pygame.mixer.Sound('assets/audio/sounds/click.ogg'),
-        'tap': pygame.mixer.Sound('assets/audio/sounds/tap.ogg')
+        'click': pygame.mixer.Sound('assets/sounds/click.ogg'),
+        'tap': pygame.mixer.Sound('assets/sounds/tap.ogg')
     }
     # pygame.mixer.music.load('assets/audio/music.ogg') 背景音乐加载，.play()播放
     ui.Column.back_image = images['column']['back']
@@ -149,7 +149,7 @@ class UnoGame:
         ])
 
     @classmethod
-    def join(cls):  # 刷新按钮，点一下重新加载该页面（其他页面比如create也可以刷新，room可以做成动态的也可以刷新）
+    def join(cls):
         ui.clear()
 
         ui.columns.extend([
@@ -183,7 +183,7 @@ class UnoGame:
                         f'{info["name"]}({len(info["players"])}/10)',
                         f'{ip}:{port}',
                         ''
-                    ] # 房间名（人数），主机（ip）
+                    ]
                 )
             ])
 
@@ -195,7 +195,7 @@ class UnoGame:
                 cls.client.join(info, int(password.text))
                 cls.room()
             ui.buttons.extend([
-                ui.Button(cls.images['button']['square_line'], pygame.Rect(ui.W * 11/32, ui.H * 1/2, ui.W * 1/8, ui.H * 1/12), cls.menu, slice=True, text='BACK'), # TODO: 变成刷新键（那么就要固定到一个合适的位置了，如左下角，OK和箭头放在一边
+                ui.Button(cls.images['button']['square_line'], pygame.Rect(ui.W * 11/32, ui.H * 1/2, ui.W * 1/8, ui.H * 1/12), cls.menu, slice=True, text='BACK'),
                 ui.Button(cls.images['button']['square_color'], pygame.Rect(ui.W * 7/16, ui.H * 5/8, ui.W * 1/8, ui.H * 1/12), access, slice=True, text='OK')
             ])
             if page < len(multi.Room.rooms):
