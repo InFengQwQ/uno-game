@@ -1,4 +1,4 @@
-from . import W, TEXT_COLOR, scale
+from . import MESSAGE_RECT, FPS, TEXT_COLOR, scale
 import pygame
 
 
@@ -6,7 +6,7 @@ class Message(pygame.Surface):  # 弹出在屏幕上方的错误或提示
     message_image: pygame.Surface
     message_font: pygame.font.Font
 
-    def __init__(self, message: Exception, rect: pygame.Rect = pygame.Rect((W - 288) // 2, 16, 288, 48), time: int = 2):
+    def __init__(self, message: Exception, rect: pygame.Rect = MESSAGE_RECT, time: int = 2):
         super().__init__(rect.size, pygame.SRCALPHA)
 
         self.blit(scale(self.message_image, rect.size), (0, 0))
@@ -19,6 +19,6 @@ class Message(pygame.Surface):  # 弹出在屏幕上方的错误或提示
         self.time = time
         self.alpha = 255
 
-    def update(self, tick: int):
-        self.alpha = max(0, int(self.alpha - 255 * (int(tick)/1000 / self.time)))
+    def update(self):
+        self.alpha = int(self.alpha - 255 * 1 / (self.time * FPS))
         self.set_alpha(self.alpha)

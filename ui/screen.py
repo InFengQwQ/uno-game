@@ -25,7 +25,7 @@ def clear():
 
 def update():
     """Update all UI elements and handle user events each frame."""
-    tick = clock.tick(FPS)
+    clock.tick(FPS)
 
     events = pygame.event.get((pygame.QUIT, pygame.MOUSEMOTION, pygame.MOUSEBUTTONDOWN, pygame.TEXTINPUT, pygame.KEYDOWN))
     for event in events if events else [pygame.event.Event(pygame.USEREVENT)]:
@@ -39,8 +39,8 @@ def update():
         for button in buttons.copy():
             button.update(event)
         for message in messages.copy():
-            message.update(tick)
-            if message.alpha == 0:
+            message.update()
+            if message.alpha < 0:
                 messages.remove(message)
 
     screen.fill(BACKGROUND_COLOR)

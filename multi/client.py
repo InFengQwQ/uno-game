@@ -14,33 +14,28 @@ class Client:
         self.sock.settimeout(5)
         try:
             self.sock.connect(addr)
-        except (socket.timeout, TimeoutError, OSError):
-            raise Exception(f'TIMEOUT OR ROOM IS FULL')
+        except TimeoutError:
+            raise Exception("Timeout or game has been started")
+        except ConnectionRefusedError:
+            raise Exception("Host is busy or room does not exist")
         else:
-            request: dict[str, Any] = {
+            request: dict[str, str | int] = {
                 'name': self.name,
                 'password': password
             }
             try:
                 self.sock.send(json.dumps(request).encode())
-                reply = json.loads(self.sock.recv(BUFFER_SIZE).decode())
-            except socket.timeout:
+                reply: dict[str, bool | str] = json.loads(self.sock.recv(BUFFER_SIZE).decode())
+            except OSError as e:
                 self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                raise Exception('TIMEOUT OR ROOM IS FULL')
-            except json.JSONDecodeError:
-                self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                raise Exception('SERVER RESPONSE FORMAT ERROR')
-            except Exception as e:
-                self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                raise Exception(f'CONNECTION ERROR: {str(e)}')
-            
-            if reply['status']:
-                self.sock.setblocking(False)
-                self.room = Room(name, password, addr)
-                return True
+                raise Exception(e)
             else:
-                self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                raise Exception(reply.get('message', 'UNKNOWN ERROR'))
+                if reply['status']:
+                    self.sock.setblocking(False)
+                    self.room = Room(name, password, addr)
+                else:
+                    self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    raise Exception(reply['message'])
 
     def sync(self):
         """Synchronize room members."""
@@ -48,10 +43,8 @@ class Client:
             info = json.loads(self.sock.recv(BUFFER_SIZE).decode())
         except BlockingIOError:
             pass
-        except json.JSONDecodeError:
-            pass
-        except Exception:
-            pass
+        except OSError as e:
+            raise Exception(e)
         else:
             if isinstance(info, dict) and 'players' in info:
                 self.room.players[:] = info['players']

@@ -1,12 +1,12 @@
 import pygame
 
 def scale(image: pygame.Surface, size: tuple[int, int], corner: int = 8) -> pygame.Surface:
-    '''Scale nine-slice images: preserves corners, stretches edges and center to fit target size.'''
+    """Scale nine-slice images: preserves corners, stretches edges and center to fit target size."""
     width, height = size
     if width < 2 * corner or height < 2 * corner:
-        raise ValueError('size out of range')
+        raise ValueError("size out of range")
     if image.get_width() < 2 * corner or image.get_height() < 2 * corner:
-        raise ValueError('corner too large')
+        raise ValueError("corner too large")
 
     w, h = image.get_size()
     slices = {

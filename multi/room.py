@@ -49,6 +49,6 @@ class Room:
             else:
                 rooms = {info['addr']: info for info in cls.rooms}
                 info = json.loads(data.decode())
-                addr = info['addr'] = (ip, info['addr'][1])
-                rooms[addr] = info
+                info['addr'] = (ip, info['addr'][1])
+                rooms[info['addr']] = info
                 cls.rooms[:] = list(rooms.values())

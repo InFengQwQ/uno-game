@@ -11,10 +11,10 @@ class Host:
             except OSError:
                 continue
             else:
-                self.sock.listen(10)
+                self.sock.listen(1)
                 break
         else:
-            raise Exception('CAN NOT FIND A FREE PORT')
+            raise Exception("Can not find a free port")
         addr = ('127.0.0.1', port)
         client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client_sock.connect(addr)
@@ -29,38 +29,56 @@ class Host:
     def wait(self):
         """Operation to wait for clients to join the room."""
         def admit():
-            """Accept connections for one time."""
-            while len(self.connections['verified']) + len(self.connections['unverified']) < 10:
-                try:
-                    conn, addr = self.sock.accept()
-                except BlockingIOError:
-                    break
-                else:
-                    conn.setblocking(False)
-                    self.connections['unverified'][addr] = conn
+            """Accept connection for one time."""
+            try:
+                conn, addr = self.sock.accept()
+            except BlockingIOError:
+                pass
+            else:
+                conn.setblocking(False)
+                self.connections['unverified'][addr] = conn
 
-        def sync():
-            """Sync room members."""
+        def verify():
+            """Verify clients' name and password."""
             for addr, conn in self.connections['unverified'].copy().items():
                 try:
                     request = json.loads(conn.recv(BUFFER_SIZE).decode())
                 except BlockingIOError:
                     continue
-                except Exception:
-                    conn.close()
-                    del self.connections['unverified'][addr]
+                except OSError:
+                    pass
                 else:
-                    if (name := request['name']) in self.connections['verified']: # 重名
-                        conn.send(json.dumps({'status': False, 'message': 'NAME EXISTS'}).encode())
-                        conn.close()
+                    reply: dict[str, bool | str]
+                    if len(self.connections['verified']) == 10:
+                        reply = {
+                            'status': False, 'message': "Room is full"
+                        }
+                    elif request['name'] in self.connections['verified']:
+                        reply = {
+                            'status': False, 'message': "Name exists"
+                        }
                     elif request['password'] != self.client.room.password:
-                        conn.send(json.dumps({'status': False, 'message': 'PASSWORD INCORRECT'}).encode())
-                        conn.close()
+                        reply = {
+                            'status': False, 'message': "Password is incorrect"
+                        }
                     else:
-                        conn.send(json.dumps({'status': True}).encode())
-                        self.connections['verified'][name] = conn
-                    del self.connections['unverified'][addr]
+                        reply = {
+                            'status': True
+                        }
+                    try:
+                        conn.send(json.dumps(reply).encode())
+                    except OSError:
+                        pass
+                    else:
+                        if reply['status']:
+                            self.connections['verified'][request['name']] = conn
+                            del self.connections['unverified'][addr]
+                            continue
+                conn.close()
+                del self.connections['unverified'][addr]
 
+        def sync():
+            """Sync room members."""
             self.client.room.players[:] = list(self.connections['verified'])
             for name, conn in self.connections['verified'].copy().items():
                 try:
@@ -68,9 +86,10 @@ class Host:
                 except Exception as e:
                     print(e)
                     conn.close()
-                    del self.connections['verified'][name]   # 是否要直接删除？不过确实socket失效之后已经没必要存储了
+                    del self.connections['verified'][name]
 
         admit()
+        verify()
         sync()
         self.client.room.broadcast()
 
