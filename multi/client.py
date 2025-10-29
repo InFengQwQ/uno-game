@@ -7,6 +7,8 @@ class Client:
     def __init__(self, name: str, sock: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)):
         self.name = name
         self.sock = sock
+
+        self.room: Room
         self.actions: list[dict[str, Any]] = []
 
     def join(self, info: dict[str, Any], password: int):
@@ -49,3 +51,8 @@ class Client:
         else:
             if isinstance(info, dict) and 'players' in info:
                 self.room.players[:] = info['players']
+
+    def quit(self):
+        self.sock.close()
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        del self.room

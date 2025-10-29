@@ -100,7 +100,7 @@ class UnoGame:
     host: multi.Host
     client: multi.Client
 
-    action: Callable[..., None] = lambda: None
+    action: Callable[..., None]
     counter: int = 0
 
     @classmethod
@@ -119,6 +119,8 @@ class UnoGame:
             ui.Button(cls.images['button']['square_basic'], pygame.Rect(ui.W * 13/32, ui.H * 1/2, ui.W * 3/16, ui.H * 1/12), cls.join, slice=True, text="Join"),
             ui.Button(cls.images['button']['square_line'], pygame.Rect(ui.W * 13/32, ui.H * 5/8, ui.W * 3/16, ui.H * 1/12), quit, slice=True, text="Quit")
         ])
+
+        cls.action = lambda: None
 
     @classmethod
     def create(cls):
@@ -164,7 +166,6 @@ class UnoGame:
 
         @ui.Message.catch
         def client():
-            multi.Room.receive()
             cls.client = multi.Client(name.text)
             cls.search()
         ui.buttons.extend([
@@ -173,6 +174,8 @@ class UnoGame:
 
     @classmethod
     def search(cls, page: int = 1):
+        multi.Room.receive()
+        page = max(1, min(page, len(multi.Room.rooms)))
         if multi.Room.rooms:
             ui.clear()
 
@@ -181,7 +184,7 @@ class UnoGame:
             ui.columns.extend([
                 ui.Column(
                     pygame.Rect(ui.W * 5/16, ui.H * 1/4, ui.W * 3/8, ui.H * 1/2),
-                    tag="Search",
+                    tag=f"Search({page}/{len(multi.Room.rooms)})",
                     contents=[
                         f"{info['name']}({len(info['players'])}/10)",
                         f"{ip}:{port}",
@@ -194,12 +197,15 @@ class UnoGame:
                 password := ui.Input(pygame.Rect(ui.W * 1/2, ui.H * 1/2, ui.W * 5/32, ui.H * 1/12), hint="Password")
             ])
 
+            def back():
+                del cls.client
+                cls.menu()
             @ui.Message.catch
             def access():
                 cls.client.join(info, int(password.text))
                 cls.room()
             ui.buttons.extend([
-                ui.Button(cls.images['button']['square_line'], pygame.Rect(ui.W * 11/32, ui.H * 1/2, ui.W * 1/8, ui.H * 1/12), cls.menu, slice=True, text="Back"),
+                ui.Button(cls.images['button']['square_line'], pygame.Rect(ui.W * 11/32, ui.H * 1/2, ui.W * 1/8, ui.H * 1/12), back, slice=True, text="Back"),
                 ui.Button(cls.images['button']['square_color'], pygame.Rect(ui.W * 7/16, ui.H * 5/8, ui.W * 1/8, ui.H * 1/12), access, slice=True, text="OK")
             ])
             if page < len(multi.Room.rooms):
@@ -231,6 +237,8 @@ class UnoGame:
                 ui.Button(cls.images['button']['square_line'], pygame.Rect(ui.W * 7/16, ui.H * 5/8, ui.W * 1/8, ui.H * 1/12), cls.menu, slice=True, text="Back")
             ])
 
+        cls.action = lambda: None
+
     @classmethod
     def room(cls):
         if hasattr(cls, 'host'):
@@ -240,12 +248,27 @@ class UnoGame:
                 ui.Column(pygame.Rect(ui.W * 5/16, ui.H * 1/6, ui.W * 3/8, ui.H * 2/3), tag=cls.client.room.name, contents=cls.client.room.players)
             ])
 
+            def back():
+                del cls.host, cls.client
+                cls.menu()
+            ui.buttons.extend([
+                ui.Button(cls.images['button']['square_line'], pygame.Rect(ui.W * 11/32, ui.H * 17/24, ui.W * 1/8, ui.H * 1/12), back, slice=True, text="Back"),
+                ui.Button(cls.images['button']['square_color'], pygame.Rect(ui.W * 17/32, ui.H * 17/24, ui.W * 1/8, ui.H * 1/12), cls.game, slice=True, text="Start")
+            ])
+
             cls.action = cls.host.wait
         else:
             ui.clear()
 
             ui.columns.extend([
                 ui.Column(pygame.Rect(ui.W * 5/16, ui.H * 1/6, ui.W * 3/8, ui.H * 2/3), tag=cls.client.room.name, contents=cls.client.room.players)
+            ])
+
+            def back():
+                cls.client.quit()
+                cls.search()
+            ui.buttons.extend([
+                ui.Button(cls.images['button']['square_line'], pygame.Rect(ui.W * 7/16, ui.H * 17/24, ui.W * 1/8, ui.H * 1/12), back, slice=True, text="Back")
             ])
 
             cls.action = cls.client.sync
@@ -259,17 +282,14 @@ class UnoGame:
         cls.menu()
 
         while True:
-            try:
-                if ui.update():
-                    if cls.counter > ui.FPS / 2:
-                        ui.Message.catch(cls.action)()
-                        cls.counter = 0
-                    else:
-                        cls.counter += 1
+            if ui.update():
+                if cls.counter > ui.FPS / 2:
+                    ui.Message.catch(cls.action)()
+                    cls.counter = 0
                 else:
-                    break
-            except Exception as e:
-                ui.messages.append(ui.Message(e))
+                    cls.counter += 1
+            else:
+                break
 
 
 # def main():
