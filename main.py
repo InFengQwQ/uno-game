@@ -271,7 +271,13 @@ class UnoGame:
                 ui.Button(cls.images['button']['square_line'], pygame.Rect(ui.W * 7/16, ui.H * 17/24, ui.W * 1/8, ui.H * 1/12), back, slice=True, text="Back")
             ])
 
-            cls.action = cls.client.sync
+            def sync():
+                try:
+                    cls.client.sync()
+                except Exception as e:
+                    back()
+                    raise e
+            cls.action = sync
 
     @classmethod
     def game(cls):

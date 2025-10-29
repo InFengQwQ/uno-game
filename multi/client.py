@@ -30,7 +30,7 @@ class Client:
                 reply: dict[str, bool | str] = json.loads(self.sock.recv(BUFFER_SIZE).decode())
             except OSError as e:
                 self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                raise Exception(e)
+                raise e
             else:
                 if reply['status']:
                     self.sock.setblocking(False)
@@ -39,6 +39,11 @@ class Client:
                     self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                     raise Exception(reply['message'])
 
+    def quit(self):
+        self.sock.close()
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        del self.room
+
     def sync(self):
         """Synchronize room members."""
 
@@ -46,13 +51,10 @@ class Client:
             info = json.loads(self.sock.recv(BUFFER_SIZE).decode())
         except BlockingIOError:
             pass
+        except ConnectionResetError:
+            raise Exception("Room has been closed")
         except OSError as e:
-            raise Exception(e)
+            raise e
         else:
             if isinstance(info, dict) and 'players' in info:
                 self.room.players[:] = info['players']
-
-    def quit(self):
-        self.sock.close()
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        del self.room
