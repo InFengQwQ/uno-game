@@ -39,6 +39,7 @@ class Client:
 
     def sync(self):
         """Synchronize room members."""
+
         try:
             info = json.loads(self.sock.recv(BUFFER_SIZE).decode())
         except BlockingIOError:

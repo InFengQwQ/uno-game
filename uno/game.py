@@ -9,20 +9,19 @@ class Game:
         self.turn = -1   # counterclockwise is positively increasing, and default clockwise
         self.reverse = False
         self.draw = 0
-        
-        # Deal 7 cards to each player
+
         for player in self.players:
             player.draw(self.deck, 7)
-        
-        # Place first card on discard pile
+
         while (top := self.deck.draw_pile.pop()).type == 'wild_draw_four':
             self.deck.draw_pile.insert(random.choice(range(len(self.deck.draw_pile))), top)
-        
+
         Rules.apply_special_effects(top, self)
         self.deck.discard_pile.append(top)
 
     def play_card(self, player: Player, card: Card):
         """Attempt to play a card from a player's hand."""
+
         if is_valid := Rules.is_valid_play(card, self):
             Rules.apply_special_effects(card, self)
             player.discard(self.deck, card)

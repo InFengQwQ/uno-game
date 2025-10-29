@@ -1,5 +1,7 @@
 from . import MESSAGE_RECT, FPS, TEXT_COLOR, scale
 import pygame
+from functools import wraps
+from typing import Callable
 
 
 class Message(pygame.Surface):  # 弹出在屏幕上方的错误或提示
@@ -21,4 +23,22 @@ class Message(pygame.Surface):  # 弹出在屏幕上方的错误或提示
 
     def update(self):
         self.alpha = int(self.alpha - 255 * 1 / (self.time * FPS))
-        self.set_alpha(self.alpha)
+        if self.alpha < 0:
+            messages.remove(self)
+        else:
+            self.set_alpha(self.alpha)
+
+    @staticmethod
+    def catch(func: Callable[..., None]) -> Callable[..., None]:
+        """Catch exceptions and display them as messages."""
+
+        @wraps(func)
+        def wrapper(*args: ..., **kwargs: ...):
+            try:
+                return func(*args, **kwargs)
+            except Exception as e:
+                messages.append(Message(e))
+        return wrapper
+
+
+messages: list[Message] = []

@@ -41,3 +41,6 @@ class Button(pygame.Surface):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 Button.click_sound.play()
                 self.action()
+
+
+buttons: list[Button] = []

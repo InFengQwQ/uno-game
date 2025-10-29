@@ -58,3 +58,6 @@ class Input(pygame.Surface):    # TODO: 输入事件类型？
                 hint_surface = Input.hint_font.render(self.hint, True, HINT_COLOR)
                 hint_rect = hint_surface.get_rect(center=self.area.get_rect().center)
                 self.area.blit(hint_surface, hint_rect)
+
+
+inputs: list[Input] = []

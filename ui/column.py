@@ -39,3 +39,6 @@ class Column(pygame.Surface):
                     divider_rect = divider_surface.get_rect(center=(self.rect.w // 2, 20 + line * H // 20))
                     self.front.blit(divider_surface, divider_rect)
         self.blit(self.front, (0, head))
+
+
+columns: list[Column] = []

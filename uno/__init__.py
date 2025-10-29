@@ -5,6 +5,7 @@ from .player import Player
 from .rules import Rules
 from .game import Game
 
+
 __all__ = [
     'COLORS', 'BLACK_COLOR', 'NUMBER', 'ACTIONS', 'WILDS',
     'Card', 'Deck', 'Player', 'Rules', 'Game'

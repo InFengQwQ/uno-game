@@ -141,6 +141,7 @@ class UnoGame:
             password := ui.Input(pygame.Rect(ui.W * 11/32, ui.H * 5/8, ui.W * 5/32, ui.H * 1/12), hint="Password")
         ])
 
+        @ui.Message.catch
         def host():
             cls.host = multi.Host(name.text, room_name.text, int(password.text))
             cls.client = cls.host.client
@@ -161,6 +162,7 @@ class UnoGame:
             name := ui.Input(pygame.Rect(ui.W * 3/8, ui.H * 1/2, ui.W * 1/8, ui.H * 1/12), hint="Name")
         ])
 
+        @ui.Message.catch
         def client():
             multi.Room.receive()
             cls.client = multi.Client(name.text)
@@ -192,6 +194,7 @@ class UnoGame:
                 password := ui.Input(pygame.Rect(ui.W * 1/2, ui.H * 1/2, ui.W * 5/32, ui.H * 1/12), hint="Password")
             ])
 
+            @ui.Message.catch
             def access():
                 cls.client.join(info, int(password.text))
                 cls.room()
@@ -259,7 +262,7 @@ class UnoGame:
             try:
                 if ui.update():
                     if cls.counter > ui.FPS / 2:
-                        cls.action()
+                        ui.Message.catch(cls.action)()
                         cls.counter = 0
                     else:
                         cls.counter += 1

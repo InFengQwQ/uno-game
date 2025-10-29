@@ -28,8 +28,10 @@ class Host:
 
     def wait(self):
         """Operation to wait for clients to join the room."""
+
         def admit():
             """Accept connection for one time."""
+
             try:
                 conn, addr = self.sock.accept()
             except BlockingIOError:
@@ -40,6 +42,7 @@ class Host:
 
         def verify():
             """Verify clients' name and password."""
+
             for addr, conn in self.connections['unverified'].copy().items():
                 try:
                     request = json.loads(conn.recv(BUFFER_SIZE).decode())
@@ -79,6 +82,7 @@ class Host:
 
         def sync():
             """Sync room members."""
+
             self.client.room.players[:] = list(self.connections['verified'])
             for name, conn in self.connections['verified'].copy().items():
                 try:

@@ -1,6 +1,6 @@
 from . import MULTICAST_GROUP, MULTICAST_PORT, BUFFER_SIZE
 import json, socket
-
+# TODO: 一个房间关闭之后，rooms列表中会保留，这是个问题，应该在主机关闭时删除
 
 class Room:
     RoomInfo = dict[str, str | tuple[str, int] | list[str]]
@@ -17,7 +17,7 @@ class Room:
         self.password = password
 
         self.name = name
-        self.addr = addr    
+        self.addr = addr
         self.players: list[str] = []
 
     @property
@@ -30,17 +30,19 @@ class Room:
 
     def broadcast(self):
         """Broadcast room information to the multicast group."""
+
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
                 sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                 sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 1)
                 sock.sendto(json.dumps(self.info).encode(), (MULTICAST_GROUP, MULTICAST_PORT))
-        except OSError as e:
-            print(e)
+        except OSError:
+            pass
 
     @classmethod
     def receive(cls):
         """Receive room information from the multicast group."""
+
         while True:
             try:
                 data, (ip, _) = cls.sock.recvfrom(BUFFER_SIZE)
@@ -49,6 +51,7 @@ class Room:
             else:
                 rooms = {info['addr']: info for info in cls.rooms}
                 info = json.loads(data.decode())
-                info['addr'] = (ip, info['addr'][1])
+                port = info['addr'][1]
+                info['addr'] = (ip, port)
                 rooms[info['addr']] = info
-                cls.rooms[:] = list(rooms.values())
+                cls.rooms[:] = sorted(list(rooms.values()), key=lambda info: info['name'])
