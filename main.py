@@ -175,19 +175,19 @@ class UnoGame:
     @classmethod
     def search(cls, page: int = 1):
         multi.Room.receive()
-        page = max(1, min(page, len(multi.Room.rooms)))
         if multi.Room.rooms:
+            page = min(page, len(multi.Room.rooms))
+            info = sorted(multi.Room.rooms.values())[page - 1]
+
             ui.clear()
 
-            info = multi.Room.rooms[page - 1]
-            ip, port = info['addr']
             ui.columns.extend([
                 ui.Column(
                     pygame.Rect(ui.W * 5/16, ui.H * 1/4, ui.W * 3/8, ui.H * 1/2),
                     tag=f"Search({page}/{len(multi.Room.rooms)})",
                     contents=[
-                        f"{info['name']}({len(info['players'])}/10)",
-                        f"{ip}:{port}",
+                        f"{info.name}({len(info.players)}/10)",
+                        f"{info.ip}:{info.port}",
                         ''
                     ]
                 )
@@ -197,15 +197,12 @@ class UnoGame:
                 password := ui.Input(pygame.Rect(ui.W * 1/2, ui.H * 1/2, ui.W * 5/32, ui.H * 1/12), hint="Password")
             ])
 
-            def back():
-                del cls.client
-                cls.menu()
             @ui.Message.catch
             def access():
                 cls.client.join(info, int(password.text))
                 cls.room()
             ui.buttons.extend([
-                ui.Button(cls.images['button']['square_line'], pygame.Rect(ui.W * 11/32, ui.H * 1/2, ui.W * 1/8, ui.H * 1/12), back, slice=True, text="Back"),
+                ui.Button(cls.images['button']['square_line'], pygame.Rect(ui.W * 11/32, ui.H * 1/2, ui.W * 1/8, ui.H * 1/12), cls.menu, slice=True, text="Back"),
                 ui.Button(cls.images['button']['square_color'], pygame.Rect(ui.W * 7/16, ui.H * 5/8, ui.W * 1/8, ui.H * 1/12), access, slice=True, text="OK")
             ])
             if page < len(multi.Room.rooms):
@@ -265,7 +262,7 @@ class UnoGame:
             ])
 
             def back():
-                cls.client.quit()
+                cls.client.reset()
                 cls.search()
             ui.buttons.extend([
                 ui.Button(cls.images['button']['square_line'], pygame.Rect(ui.W * 7/16, ui.H * 17/24, ui.W * 1/8, ui.H * 1/12), back, slice=True, text="Back")

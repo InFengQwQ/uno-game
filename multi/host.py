@@ -11,18 +11,19 @@ class Host:
             except OSError:
                 continue
             else:
+                self.sock.setblocking(False)
                 self.sock.listen(1)
                 break
         else:
             raise Exception("Can not find a free port")
+
         addr = ('127.0.0.1', port)
-        client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client_sock.connect(addr)
-        sock, _ = self.sock.accept()
-        self.sock.setblocking(False)
-        self.connections: dict[str, dict[str, socket.socket]] = {'unverified': {}, 'verified': {name: sock}}
-        self.client = Client(name, client_sock)
+        self.client = Client(name)
+        self.client.sock.connect(addr)
         self.client.room = Room(room_name, password, addr)
+
+        conn, _ = self.sock.accept()
+        self.connections: dict[str, dict[str, socket.socket]] = {'unverified': {}, 'verified': {name: conn}}
 
         self.actions: list[dict[str, str | int]] = []
 
@@ -86,7 +87,7 @@ class Host:
             self.client.room.players[:] = list(self.connections['verified'])
             for name, conn in self.connections['verified'].copy().items():
                 try:
-                    conn.send(json.dumps(self.client.room.info).encode())
+                    conn.send(str(self.client.room.info).encode())
                 except Exception as e:
                     print(e)
                     conn.close()

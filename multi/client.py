@@ -1,18 +1,18 @@
 from . import BUFFER_SIZE, Room
 import json, socket
-from typing import Any
 
 
 class Client:
-    def __init__(self, name: str, sock: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)):
+    def __init__(self, name: str):
         self.name = name
-        self.sock = sock
 
+        self.sock: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.room: Room
-        self.actions: list[dict[str, Any]] = []
 
-    def join(self, info: dict[str, Any], password: int):
-        name, addr = info['name'], info['addr']
+    def join(self, info: Room.Info, password: int):
+        """Join a room."""
+
+        name, addr = info.name, info.addr
         self.sock.settimeout(5)
         try:
             self.sock.connect(addr)
@@ -29,26 +29,29 @@ class Client:
                 self.sock.send(json.dumps(request).encode())
                 reply: dict[str, bool | str] = json.loads(self.sock.recv(BUFFER_SIZE).decode())
             except OSError as e:
-                self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self.reset()
                 raise e
             else:
                 if reply['status']:
                     self.sock.setblocking(False)
                     self.room = Room(name, password, addr)
                 else:
-                    self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    self.reset()
                     raise Exception(reply['message'])
 
-    def quit(self):
+    def reset(self):
+        """Reset the client."""
+
         self.sock.close()
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        del self.room
+        if hasattr(self, 'room'):
+            del self.room
 
     def sync(self):
         """Synchronize room members."""
 
         try:
-            info = json.loads(self.sock.recv(BUFFER_SIZE).decode())
+            info = Room.Info(**json.loads(self.sock.recv(BUFFER_SIZE).decode()))
         except BlockingIOError:
             pass
         except ConnectionResetError:
@@ -56,5 +59,4 @@ class Client:
         except OSError as e:
             raise e
         else:
-            if isinstance(info, dict) and 'players' in info:
-                self.room.players[:] = info['players']
+            self.room.players[:] = info.players
