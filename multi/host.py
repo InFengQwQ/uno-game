@@ -11,8 +11,8 @@ class Host:
             except OSError:
                 continue
             else:
-                self.sock.setblocking(False)
                 self.sock.listen(1)
+                self.sock.setblocking(False)
                 break
         else:
             raise Exception("Can not find a free port")
@@ -87,7 +87,7 @@ class Host:
             self.client.room.players[:] = list(self.connections['verified'])
             for name, conn in self.connections['verified'].copy().items():
                 try:
-                    conn.send(str(self.client.room.info).encode())
+                    conn.send(json.dumps(self.client.room.info).encode())
                 except Exception as e:
                     print(e)
                     conn.close()

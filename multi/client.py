@@ -51,7 +51,7 @@ class Client:
         """Synchronize room members."""
 
         try:
-            info = Room.Info(**json.loads(self.sock.recv(BUFFER_SIZE).decode()))
+            info = Room.Info.from_dict(json.loads(self.sock.recv(BUFFER_SIZE).decode()))
         except BlockingIOError:
             pass
         except ConnectionResetError:

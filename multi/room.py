@@ -5,22 +5,22 @@ import json, socket
 class Room:
     """A room in the multiplayer game."""
 
-    class Info():
-        def __init__(self, name: str, ip: str, port: int, players: list[str]):
+    class Info:
+        """A room information as a dictionary."""
+
+        def __init__(self, name: str, addr: tuple[str , int], players: list[str]):
             self.name = name
-            self.addr = self.ip, self.port = ip, port
+            self.addr = self.ip, self.port = addr
             self.players = players
 
-        def str(self):
-            return json.dumps({
-                'name': self.name,
-                'ip': self.ip,
-                'port': self.port,
-                'players': self.players
-            })
+        def __hash__(self):
+            return hash(self.addr)
 
         def __eq__(self, other: object):
-            return isinstance(other, Room.Info) and self.name == other.name
+            if isinstance(other, Room.Info):
+                return self.addr == other.addr
+            else:
+                return NotImplemented
 
         def __lt__(self, other: object):
             if isinstance(other, Room.Info):
@@ -28,7 +28,25 @@ class Room:
             else:
                 return NotImplemented
 
-    rooms: dict[tuple[str, int], Info] = {}
+        def to_dict(self) -> dict[str, str | int | list[str]]:
+            return {
+                'name': self.name,
+                'ip': self.ip,
+                'port': self.port,
+                'players': self.players
+            }
+
+        @classmethod
+        def from_dict(cls, info: dict[str, str | int | list[str]]):
+            name = info['name'] if isinstance(info['name'], str) else None
+            addr = (info['ip'], info['port']) if isinstance(info['ip'], str) and isinstance(info['port'], int) else None
+            players = info['players'] if isinstance(info['players'], list) else None
+            if name and addr and players:
+                return cls(name, addr, players)
+            else:
+                raise Exception('Invalid room information.')
+
+    rooms: set[Info] = set()
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -46,7 +64,7 @@ class Room:
 
     @property
     def info(self):
-        return Room.Info(self.name, self.ip, self.port, self.players)
+        return Room.Info(self.name, self.addr, self.players).to_dict()
 
     def broadcast(self):
         """Broadcast room information to the multicast group."""
@@ -54,7 +72,7 @@ class Room:
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 1)
-            sock.sendto(str(self.info).encode(), (MULTICAST_GROUP, MULTICAST_PORT))
+            sock.sendto(json.dumps(self.info).encode(), (MULTICAST_GROUP, MULTICAST_PORT))
 
     @classmethod
     def receive(cls):
@@ -66,7 +84,7 @@ class Room:
             except BlockingIOError:
                 break
             else:
-                info = cls.Info(**json.loads(data.decode()))
-                port = info.port
+                info = Room.Info.from_dict(json.loads(data.decode()))
+                _, port = info.addr
                 info.addr = ip, port
-                cls.rooms[info.addr] = info
+                cls.rooms.add(info)

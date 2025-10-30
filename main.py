@@ -177,7 +177,7 @@ class UnoGame:
         multi.Room.receive()
         if multi.Room.rooms:
             page = min(page, len(multi.Room.rooms))
-            info = sorted(multi.Room.rooms.values())[page - 1]
+            info = sorted(multi.Room.rooms)[page - 1]
 
             ui.clear()
 
