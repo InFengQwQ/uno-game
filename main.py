@@ -247,6 +247,7 @@ class UnoGame:
 
             def back():
                 cls.host.close()    # TODO: 查找房间的界面才是创建房间的地方
+                del cls.host
                 cls.menu()
             ui.Button.buttons.extend([
                 ui.Button(cls.images['button']['square_line'], pygame.Rect(ui.W * 11/32, ui.H * 17/24, ui.W * 1/8, ui.H * 1/12), back, slice=True, text="Back"),
