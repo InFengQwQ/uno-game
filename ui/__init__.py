@@ -1,14 +1,14 @@
 from .constants import *
 from .utils import *
-from .column import Column, columns
-from .input import Input, inputs
-from .button import Button, buttons
-from .message import Message, messages
+from .column import Column
+from .input import Input
+from .button import Button
+from .message import Message
 from .screen import scene, clear, update
 
 
 __all__ = [
     'W', 'H', 'FPS', 'BACKGROUND_COLOR', 'TEXT_COLOR',
-    'Column', 'columns', 'Input', 'inputs', 'Button', 'buttons', 'Message', 'messages',
+    'Column', 'Input', 'Button', 'Message',
     'scene', 'clear', 'update'
 ]

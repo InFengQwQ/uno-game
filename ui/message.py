@@ -5,6 +5,8 @@ from typing import Callable
 
 
 class Message(pygame.Surface):  # 弹出在屏幕上方的错误或提示
+    messages: list['Message'] = []
+
     message_image: pygame.Surface
     message_font: pygame.font.Font
 
@@ -24,12 +26,12 @@ class Message(pygame.Surface):  # 弹出在屏幕上方的错误或提示
     def update(self):
         self.alpha = int(self.alpha - 255 * 1 / (self.time * FPS))
         if self.alpha < 0:
-            messages.remove(self)
+            Message.messages.remove(self)
         else:
             self.set_alpha(self.alpha)
 
-    @staticmethod
-    def catch(func: Callable[..., None]) -> Callable[..., None]:
+    @classmethod
+    def catch(cls, func: Callable[..., None]) -> Callable[..., None]:
         """Catch exceptions and display them as messages."""
 
         @wraps(func)
@@ -37,8 +39,5 @@ class Message(pygame.Surface):  # 弹出在屏幕上方的错误或提示
             try:
                 return func(*args, **kwargs)
             except Exception as e:
-                messages.append(Message(e))
+                cls.messages.append(Message(e))
         return wrapper
-
-
-messages: list[Message] = []

@@ -1,5 +1,5 @@
-from . import HOST_PORT_RANGE, BUFFER_SIZE, Client, Room
-import json, socket
+from . import HOST_PORT_RANGE, BUFFER_SIZE, to_stream, from_stream, Client, Room
+import socket
 
 
 class Host:
@@ -27,6 +27,14 @@ class Host:
 
         self.actions: list[dict[str, str | int]] = []
 
+    def close(self):
+        self.client.reset()
+        self.sock.close()
+        for conn in self.connections['unverified'].values():
+            conn.close()
+        for conn in self.connections['verified'].values():
+            conn.close()
+
     def wait(self):
         """Operation to wait for clients to join the room."""
 
@@ -46,7 +54,7 @@ class Host:
 
             for addr, conn in self.connections['unverified'].copy().items():
                 try:
-                    request = json.loads(conn.recv(BUFFER_SIZE).decode())
+                    request = from_stream(conn.recv(BUFFER_SIZE))[-1]
                 except BlockingIOError:
                     continue
                 except OSError:
@@ -70,7 +78,7 @@ class Host:
                             'status': True
                         }
                     try:
-                        conn.send(json.dumps(reply).encode())
+                        conn.send(to_stream(reply))
                     except OSError:
                         pass
                     else:
@@ -78,7 +86,7 @@ class Host:
                             self.connections['verified'][request['name']] = conn
                             del self.connections['unverified'][addr]
                             continue
-                conn.close()
+                conn.shutdown(socket.SHUT_RDWR)
                 del self.connections['unverified'][addr]
 
         def sync():
@@ -87,9 +95,8 @@ class Host:
             self.client.room.players[:] = list(self.connections['verified'])
             for name, conn in self.connections['verified'].copy().items():
                 try:
-                    conn.send(json.dumps(self.client.room.info).encode())
-                except Exception as e:
-                    print(e)
+                    conn.send(to_stream(self.client.room.info))
+                except ConnectionError:
                     conn.close()
                     del self.connections['verified'][name]
 
@@ -102,17 +109,17 @@ class Host:
         def action():   # 持续接收玩家行为
             for conn in self.connections['verified'].values():
                 try:
-                    action = json.loads(conn.recv(BUFFER_SIZE).decode())
+                    actions = from_stream(conn.recv(BUFFER_SIZE))
                 except BlockingIOError:
                     continue
                 else:
-                    self.actions.append(action)
+                    self.actions.extend(actions)
 
         def sync(): # 同步广播行为，在每次动画加载前执行
             for action in self.actions:
                 for conn in self.connections['verified'].values():
                     if conn != self.connections['verified'][str(action['player'])]:
-                        conn.send(json.dumps(action).encode())
+                        conn.send(to_stream(action))
 
         action()
         sync()

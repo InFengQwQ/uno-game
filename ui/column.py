@@ -3,11 +3,14 @@ import pygame
 
 
 class Column(pygame.Surface):
+    columns: list['Column'] = []
+
     back_image: pygame.Surface
     front_image: pygame.Surface
     divider_image: pygame.Surface
     tag_font: pygame.font.Font
     content_font: pygame.font.Font
+
     def __init__(self, rect: pygame.Rect, head: int = 48, tag: str = '', contents: list[str] = []):
         super().__init__(rect.size, pygame.SRCALPHA)
 
@@ -41,4 +44,3 @@ class Column(pygame.Surface):
         self.blit(self.front, (0, head))
 
 
-columns: list[Column] = []

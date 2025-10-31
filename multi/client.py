@@ -1,5 +1,5 @@
-from . import BUFFER_SIZE, Room
-import json, socket
+from . import BUFFER_SIZE, to_stream, from_stream, Room
+import socket
 
 
 class Client:
@@ -8,6 +8,14 @@ class Client:
 
         self.sock: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.room: Room
+
+    def reset(self):
+        """Reset the client."""
+
+        self.sock.close()
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        if hasattr(self, 'room'):
+            del self.room
 
     def join(self, info: Room.Info, password: int):
         """Join a room."""
@@ -26,9 +34,9 @@ class Client:
                 'password': password
             }
             try:
-                self.sock.send(json.dumps(request).encode())
-                reply: dict[str, bool | str] = json.loads(self.sock.recv(BUFFER_SIZE).decode())
-            except OSError as e:
+                self.sock.send(to_stream(request))
+                reply: dict[str, bool | str] = from_stream(self.sock.recv(BUFFER_SIZE))[-1]
+            except Exception as e:
                 self.reset()
                 raise e
             else:
@@ -39,24 +47,18 @@ class Client:
                     self.reset()
                     raise Exception(reply['message'])
 
-    def reset(self):
-        """Reset the client."""
-
-        self.sock.close()
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        if hasattr(self, 'room'):
-            del self.room
-
     def sync(self):
         """Synchronize room members."""
 
         try:
-            info = Room.Info.from_dict(json.loads(self.sock.recv(BUFFER_SIZE).decode()))
-        except BlockingIOError:
+            info = Room.Info.from_dict(from_stream(self.sock.recv(BUFFER_SIZE))[-1])
+        except (BlockingIOError, IndexError):
             pass
         except ConnectionResetError:
+            self.reset()
             raise Exception("Room has been closed")
         except OSError as e:
+            self.reset()
             raise e
         else:
             self.room.players[:] = info.players

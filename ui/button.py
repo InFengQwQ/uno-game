@@ -4,6 +4,8 @@ from typing import Callable
 
 
 class Button(pygame.Surface):
+    buttons: list['Button'] = []
+
     text_font: pygame.font.Font
     click_sound: pygame.mixer.Sound
 
@@ -41,6 +43,3 @@ class Button(pygame.Surface):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 Button.click_sound.play()
                 self.action()
-
-
-buttons: list[Button] = []

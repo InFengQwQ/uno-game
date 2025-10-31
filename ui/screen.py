@@ -1,4 +1,4 @@
-from . import W, H, FPS, BACKGROUND_COLOR, columns, inputs, buttons, messages
+from . import W, H, FPS, BACKGROUND_COLOR, Column, Input, Button, Message
 import pygame
 
 
@@ -14,9 +14,9 @@ def clear():
     """Clear all UI elements and reset the scene surface."""
 
     scene.__init__((W, H), flags=pygame.SRCALPHA)
-    columns.clear()
-    inputs.clear()
-    buttons.clear()
+    Column.columns.clear()
+    Input.inputs.clear()
+    Button.buttons.clear()
 
 def update():
     """Update all UI elements and handle user events each frame."""
@@ -28,24 +28,24 @@ def update():
         if event.type == pygame.QUIT:
             pygame.quit()
             return False
-        for column in columns.copy():
+        for column in Column.columns.copy():
             column.update()
-        for input in inputs.copy():
+        for input in Input.inputs.copy():
             input.update(event)
-        for button in buttons.copy():
+        for button in Button.buttons.copy():
             button.update(event)
-        for message in messages.copy():
+        for message in Message.messages.copy():
             message.update()
 
     screen.fill(BACKGROUND_COLOR)
     screen.blit(scene, (0, 0))
-    screen.blits([(column, column.rect) for column in columns])
-    screen.blits([(input, input.rect) for input in inputs])
-    screen.blits([(button, button.rect) for button in buttons])
-    screen.blits([(message, message.rect) for message in messages if message.alpha > 0])
+    screen.blits([(column, column.rect) for column in Column.columns])
+    screen.blits([(input, input.rect) for input in Input.inputs])
+    screen.blits([(button, button.rect) for button in Button.buttons])
+    screen.blits([(message, message.rect) for message in Message.messages if message.alpha > 0])
     pygame.display.flip()
 
-    if any(input.hover for input in inputs):
+    if any(input.hover for input in Input.inputs):
         pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_IBEAM)
     else:
         pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)

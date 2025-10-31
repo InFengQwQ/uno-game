@@ -1,5 +1,5 @@
-from . import MULTICAST_GROUP, MULTICAST_PORT, BUFFER_SIZE
-import json, socket
+from . import MULTICAST_GROUP, MULTICAST_PORT, BUFFER_SIZE, to_stream, from_stream
+import socket
 # TODO: 一个房间关闭之后，rooms列表中会保留，这是个问题，应该在主机关闭时删除
 
 class Room:
@@ -37,10 +37,10 @@ class Room:
             }
 
         @classmethod
-        def from_dict(cls, info: dict[str, str | int | list[str]]):
-            name = info['name'] if isinstance(info['name'], str) else None
-            addr = (info['ip'], info['port']) if isinstance(info['ip'], str) and isinstance(info['port'], int) else None
-            players = info['players'] if isinstance(info['players'], list) else None
+        def from_dict(cls, d: dict[str, str | int | list[str]]):
+            name = d['name'] if isinstance(d['name'], str) else None
+            addr = (d['ip'], d['port']) if isinstance(d['ip'], str) and isinstance(d['port'], int) else None
+            players = d['players'] if isinstance(d['players'], list) else None
             if name and addr and players:
                 return cls(name, addr, players)
             else:
@@ -72,19 +72,19 @@ class Room:
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 1)
-            sock.sendto(json.dumps(self.info).encode(), (MULTICAST_GROUP, MULTICAST_PORT))
+            sock.sendto(to_stream(self.info), (MULTICAST_GROUP, MULTICAST_PORT))
 
     @classmethod
     def receive(cls):
         """Receive room information from the multicast group."""
 
-        while True:
-            try:
-                data, (ip, _) = cls.sock.recvfrom(BUFFER_SIZE)
-            except BlockingIOError:
-                break
-            else:
-                info = Room.Info.from_dict(json.loads(data.decode()))
+        try:
+            data, (ip, _) = cls.sock.recvfrom(BUFFER_SIZE)
+        except BlockingIOError:
+            pass
+        else:
+            for d in from_stream(data):
+                info = Room.Info.from_dict(d)
                 _, port = info.addr
                 info.addr = ip, port
                 cls.rooms.add(info)

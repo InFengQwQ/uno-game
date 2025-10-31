@@ -1,5 +1,3 @@
-"""Constants used across the multiplayer module."""
-
 # Multicast group address and port for room discovery
 MULTICAST_GROUP = '239.255.0.0'
 MULTICAST_PORT = 50000
