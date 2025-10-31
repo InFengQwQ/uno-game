@@ -145,7 +145,13 @@ class UnoGame:
 
         @ui.Message.catch
         def host():
-            cls.host = multi.Host(name.text, room_name.text, int(password.text))
+            try:
+                pwd = int(password.text)
+                if pwd < 0 or pwd != float(password.text):
+                    raise ValueError
+            except ValueError:
+                raise ValueError("Password should be a number.")    # TODO: 在ui中添加提示（实为错误，Exception的子类)
+            cls.host = multi.Host(room_name.text, name.text, pwd)
             cls.client = cls.host.client
             cls.room()
         ui.Button.buttons.extend([

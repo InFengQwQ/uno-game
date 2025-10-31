@@ -1,9 +1,16 @@
-from . import HOST_PORT_RANGE, BUFFER_SIZE, to_stream, from_stream, Client, Room
+from . import HOST_PORT_RANGE, BUFFER_SIZE, to_bytes, from_stream, Info, Request, Response, Client, Room
 import socket
 
 
 class Host:
-    def __init__(self, name: str, room_name: str, password: int):
+    def __init__(self, room_name: str, name: str, password: int):
+        if not (0 < len(room_name) < BUFFER_SIZE / 32):
+            raise ValueError("Room name is empty or too long")
+        if not (0 < len(name) < BUFFER_SIZE / 32):
+            raise ValueError("Name is empty or too long")
+        if not (0 < password < 2 ** (BUFFER_SIZE / 32)):
+            raise ValueError("Password is out of range")
+
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         for port in HOST_PORT_RANGE:
             try:
@@ -54,50 +61,44 @@ class Host:
 
             for addr, conn in self.connections['unverified'].copy().items():
                 try:
-                    request = from_stream(conn.recv(BUFFER_SIZE))[-1]
+                    data = conn.recv(BUFFER_SIZE)
                 except BlockingIOError:
                     continue
-                except OSError:
-                    pass
+                except ConnectionResetError:
+                    conn.shutdown(socket.SHUT_RDWR)
+                    del self.connections['unverified'][addr]
                 else:
-                    reply: dict[str, bool | str]
-                    if len(self.connections['verified']) == 10:
-                        reply = {
-                            'status': False, 'message': "Room is full"
-                        }
-                    elif request['name'] in self.connections['verified']:
-                        reply = {
-                            'status': False, 'message': "Name exists"
-                        }
-                    elif request['password'] != self.client.room.password:
-                        reply = {
-                            'status': False, 'message': "Password is incorrect"
-                        }
-                    else:
-                        reply = {
-                            'status': True
-                        }
-                    try:
-                        conn.send(to_stream(reply))
-                    except OSError:
-                        pass
-                    else:
-                        if reply['status']:
-                            self.connections['verified'][request['name']] = conn
-                            del self.connections['unverified'][addr]
-                            continue
-                conn.shutdown(socket.SHUT_RDWR)
-                del self.connections['unverified'][addr]
+                    for obj in from_stream(data):
+                        if request := Request.from_dict(obj):
+                            if len(self.connections['verified']) >= 10:
+                                response = Response(False, "Room is full")
+                            elif request.name in self.connections['verified']:
+                                response = Response(False, "Name is already taken")
+                            elif request.password != self.client.room.password:
+                                response = Response(False, "Password is incorrect")
+                            else:
+                                response = Response(True, '')
+                            try:
+                                conn.send(to_bytes(response.to_dict()))
+                            except ConnectionAbortedError:
+                                conn.shutdown(socket.SHUT_RDWR)
+                                del self.connections['unverified'][addr]
+                            else:
+                                if response.status:
+                                    self.connections['verified'][request.name] = conn
+                                    del self.connections['unverified'][addr]
+                                    continue
 
         def sync():
             """Sync room members."""
 
             self.client.room.players[:] = list(self.connections['verified'])
+            info = Info(self.client.room.name, self.client.room.addr, self.client.room.players)
             for name, conn in self.connections['verified'].copy().items():
                 try:
-                    conn.send(to_stream(self.client.room.info))
+                    conn.send(to_bytes(info.to_dict()))
                 except ConnectionError:
-                    conn.close()
+                    conn.shutdown(socket.SHUT_RDWR)
                     del self.connections['verified'][name]
 
         admit()
@@ -119,7 +120,7 @@ class Host:
             for action in self.actions:
                 for conn in self.connections['verified'].values():
                     if conn != self.connections['verified'][str(action['player'])]:
-                        conn.send(to_stream(action))
+                        conn.send(to_bytes(action))
 
         action()
         sync()

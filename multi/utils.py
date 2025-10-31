@@ -1,22 +1,89 @@
+from . import InfoDict, RequestDict, ResponseDict, JsonSerializable
 import json
 
 
-def to_stream(d: dict) -> bytes:
+def to_bytes(obj: JsonSerializable):
     try:
-        return json.dumps(d).encode()
+        return json.dumps(obj).encode()
     except json.JSONDecodeError:
         return b''
 
-def from_stream(stream: bytes) -> list[dict]:   # TODO: 单个值时返回单列表
+def from_packet(packet: bytes):
+    result = None
     try:
-        data = stream.decode()
-        result = []
-        i = j = 0
-        for a, b in zip(data[:-1], data[1:]):
-            if a in ['}', ']'] and b in ['[', '{']:
-                i, j = j, data.index(b)
-                result.append(data[i:j])
-        result.append(data[j:])
-        return [d for d in map(json.loads, result)]
+        result = json.loads(packet.decode())
     except json.JSONDecodeError:
-        return []
+        pass
+    return result
+
+def from_stream(stream: bytes):
+    data = ''
+    result: list[JsonSerializable] = []
+    for c in stream.decode():
+        data += c
+        try:
+            result.append(json.loads(data))
+        except json.JSONDecodeError:
+            pass
+        else:
+            data = ''
+    return result
+
+class Info():
+    def __init__(self, name: str, addr: tuple[str, int], players: list[str]):
+        self.name = name
+        self.addr = self.ip, self.port = addr
+        self.players = players
+
+    def __hash__(self):
+        return hash(self.addr)
+
+    def __eq__(self, other: object):
+        if isinstance(other, Info):
+            return self.addr == other.addr
+        else:
+            return NotImplemented
+
+    def __lt__(self, other: object):
+        if isinstance(other, Info):
+            return self.name < other.name
+        else:
+            return NotImplemented
+
+    def to_dict(self) -> InfoDict:
+        return {
+            'name': self.name,
+            'port': self.port,
+            'players': self.players
+        }
+
+    @classmethod
+    def from_dict(cls, obj: JsonSerializable, ip: str):
+        if isinstance(name := obj['name'], str) and isinstance(port := obj['port'], int) and isinstance(players := obj['players'], list):
+            return cls(name, (ip, port), players)
+
+class Request():
+    def __init__(self, name: str, password: int):
+        self.name = name
+        self.password = password
+
+    def to_dict(self) -> RequestDict:
+        return self.__dict__
+
+    @classmethod
+    def from_dict(cls, obj: JsonSerializable):
+        if isinstance(name := obj['name'], str) and isinstance(password := obj['password'], int):
+            return cls(name, password)
+
+class Response():
+    def __init__(self, status: bool, message: str):
+        self.status = status
+        self.message = message
+
+    def to_dict(self) -> ResponseDict:
+        return self.__dict__
+
+    @classmethod
+    def from_dict(cls, obj: JsonSerializable):
+        if isinstance(status := obj['status'], bool) and isinstance(message := obj['message'], str):
+            return cls(status, message)
