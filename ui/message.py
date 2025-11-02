@@ -31,6 +31,11 @@ class Message(pygame.Surface):  # 弹出在屏幕上方的错误或提示
             self.set_alpha(self.alpha)
 
     @classmethod
+    def update_all(cls):
+        for message in cls.messages.copy():
+            message.update()
+
+    @classmethod
     def catch(cls, func: Callable[..., None]) -> Callable[..., None]:
         """Catch exceptions and display them as messages."""
 

@@ -12,4 +12,5 @@ BUFFER_SIZE = 1024
 InfoDict = dict[str, str | int | list[str]]
 RequestDict = dict[str, str | int]
 ResponseDict = dict[str, bool | str]
-JsonSerializable = InfoDict | RequestDict | ResponseDict
+ActionDict = dict[str, str | int]
+JsonSerializable = InfoDict | RequestDict | ResponseDict | ActionDict

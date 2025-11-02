@@ -1,4 +1,4 @@
-from . import HOST_PORT_RANGE, BUFFER_SIZE, to_bytes, from_stream, Info, Request, Response, Client, Room
+from . import HOST_PORT_RANGE, BUFFER_SIZE, to_bytes, from_stream, Info, Request, Response, Action, Client, Room
 import socket
 
 
@@ -32,7 +32,7 @@ class Host:
         conn, _ = self.sock.accept()
         self.connections: dict[str, dict[str, socket.socket]] = {'unverified': {}, 'verified': {name: conn}}
 
-        self.actions: list[dict[str, str | int]] = []
+        self.actions: list[Action] = []
 
     def close(self):
         self.client.reset()
@@ -110,17 +110,19 @@ class Host:
         def action():   # 持续接收玩家行为
             for conn in self.connections['verified'].values():
                 try:
-                    actions = from_stream(conn.recv(BUFFER_SIZE))
+                    data = conn.recv(BUFFER_SIZE)
                 except BlockingIOError:
                     continue
                 else:
-                    self.actions.extend(actions)
+                    for action in from_stream(data):
+                        if action := Action.from_dict(action):
+                            self.actions.append(action)
 
         def sync(): # 同步广播行为，在每次动画加载前执行
             for action in self.actions:
-                for conn in self.connections['verified'].values():
-                    if conn != self.connections['verified'][str(action['player'])]:
-                        conn.send(to_bytes(action))
+                for name, conn in self.connections['verified'].items():
+                    if name != action.name:
+                        conn.send(to_bytes(action.to_dict()))
 
         action()
         sync()

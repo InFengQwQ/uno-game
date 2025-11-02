@@ -1,4 +1,4 @@
-from . import InfoDict, RequestDict, ResponseDict, JsonSerializable
+from . import InfoDict, RequestDict, ResponseDict, ActionDict, JsonSerializable
 import json
 
 
@@ -87,3 +87,17 @@ class Response():
     def from_dict(cls, obj: JsonSerializable):
         if isinstance(status := obj['status'], bool) and isinstance(message := obj['message'], str):
             return cls(status, message)
+
+class Action():
+    def __init__(self, name: str, action: str, value: int):
+        self.name = name
+        self.action = action
+        self.value = value
+
+    def to_dict(self) -> ActionDict:
+        return self.__dict__
+
+    @classmethod
+    def from_dict(cls, obj: JsonSerializable):
+        if isinstance(name := obj['name'], str) and isinstance(action := obj['action'], str) and isinstance(value := obj['value'], int):
+            return cls(name, action, value)

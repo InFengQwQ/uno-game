@@ -43,4 +43,7 @@ class Column(pygame.Surface):
                     self.front.blit(divider_surface, divider_rect)
         self.blit(self.front, (0, head))
 
-
+    @classmethod
+    def update_all(cls):
+        for column in cls.columns.copy():
+            column.update()

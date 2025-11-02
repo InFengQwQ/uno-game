@@ -43,3 +43,8 @@ class Button(pygame.Surface):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 Button.click_sound.play()
                 self.action()
+
+    @classmethod
+    def update_all(cls, event: pygame.event.Event):
+        for button in cls.buttons.copy():
+            button.update(event)
