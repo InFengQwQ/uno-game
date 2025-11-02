@@ -27,7 +27,7 @@ class Client:
         try:
             self.sock.connect(info.addr)
         except TimeoutError:
-            raise OSError("Timeout or game has been started")
+            raise OSError("Timeout or game is ongoing")
         except ConnectionRefusedError:
             raise OSError("Host is busy or room does not exist")
         else:
@@ -42,7 +42,7 @@ class Client:
                     data = self.sock.recv(BUFFER_SIZE)
                 except TimeoutError as e:
                     self.reset()
-                    raise e
+                    raise OSError("Timeout or room is full")
                 except ConnectionResetError:
                     self.reset()
                     raise OSError("Room has been closed")

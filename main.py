@@ -132,7 +132,7 @@ class UnoGame:
                 contents = [
                     "Create a room with name",
                     "and your player name.",
-                    ""
+                    ''
                 ]
             )
         ])
@@ -150,10 +150,11 @@ class UnoGame:
                 if pwd < 0 or pwd != float(password.text):
                     raise ValueError
             except ValueError:
-                raise ValueError("Password should be a number.")    # TODO: 在ui中添加提示（实为错误，Exception的子类)
-            cls.host = multi.Host(room_name.text, name.text, pwd)
-            cls.client = cls.host.client
-            cls.room()
+                raise ValueError("Password should be a number")    # TODO: 在ui中添加提示（实为错误，Exception的子类)
+            else:
+                cls.host = multi.Host(room_name.text, name.text, pwd)
+                cls.client = cls.host.client
+                cls.room()
         ui.Button.buttons.extend([
             ui.Button(cls.images['button']['square_color'], pygame.Rect(ui.W * 17/32, ui.H * 5/8, ui.H * 1/6, ui.H * 1/12), host, slice=True, text="OK")
         ])
@@ -205,8 +206,15 @@ class UnoGame:
 
             @ui.Message.catch
             def access():
-                cls.client.join(info, int(password.text))
-                cls.room()
+                try:
+                    pwd = int(password.text)
+                    if pwd < 0 or pwd != float(password.text):
+                        raise ValueError
+                except ValueError:
+                    raise ValueError("Password should be a number")
+                else:
+                    cls.client.join(info, pwd)
+                    cls.room()
             ui.Button.buttons.extend([
                 ui.Button(cls.images['button']['square_line'], pygame.Rect(ui.W * 11/32, ui.H * 1/2, ui.W * 1/8, ui.H * 1/12), cls.menu, slice=True, text="Back"),
                 ui.Button(cls.images['button']['square_color'], pygame.Rect(ui.W * 7/16, ui.H * 5/8, ui.W * 1/8, ui.H * 1/12), access, slice=True, text="OK")
@@ -291,15 +299,14 @@ class UnoGame:
     def run(cls):
         cls.menu()
 
-        while True:
-            if ui.update():
-                if cls.counter > ui.FPS / 2:
-                    ui.Message.catch(cls.action)()
-                    cls.counter = 0
-                else:
-                    cls.counter += 1
+        while ui.update():
+            if cls.counter > ui.FPS / 2:
+                ui.Message.catch(cls.action)()
+                cls.counter = 0
             else:
-                break
+                cls.counter += 1
+        
+        quit()
 
 
 # def main():

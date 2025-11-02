@@ -2,6 +2,17 @@ from . import MESSAGE_RECT, FPS, TEXT_COLOR, scale
 import pygame
 from functools import wraps
 from typing import Callable
+import logging
+
+logging.basicConfig(
+    level=logging.ERROR,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('error.log'),  # 输出到文件
+        logging.StreamHandler()            # 输出到控制台
+    ]
+)
+logger = logging.getLogger(__name__)
 
 
 class Message(pygame.Surface):  # 弹出在屏幕上方的错误或提示
@@ -44,5 +55,6 @@ class Message(pygame.Surface):  # 弹出在屏幕上方的错误或提示
             try:
                 return func(*args, **kwargs)
             except Exception as e:
+                logger.error(f"函数 {func.__name__} 发生异常: {str(e)}", exc_info=True)
                 cls.messages.append(Message(e))
         return wrapper

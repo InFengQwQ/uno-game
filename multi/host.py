@@ -16,7 +16,7 @@ class Host:
             try:
                 self.sock.bind(('0.0.0.0', port))
             except OSError:
-                continue
+                pass
             else:
                 self.sock.listen(1)
                 self.sock.setblocking(False)
@@ -60,34 +60,31 @@ class Host:
             """Verify clients' name and password."""
 
             for addr, conn in self.connections['unverified'].copy().items():
-                try:
-                    data = conn.recv(BUFFER_SIZE)
-                except BlockingIOError:
-                    continue
-                except ConnectionResetError:
-                    conn.shutdown(socket.SHUT_RDWR)
-                    del self.connections['unverified'][addr]
-                else:
-                    for obj in from_stream(data):
-                        if request := Request.from_dict(obj):
-                            if len(self.connections['verified']) >= 10:
-                                response = Response(False, "Room is full")
-                            elif request.name in self.connections['verified']:
-                                response = Response(False, "Name is already taken")
-                            elif request.password != self.client.room.password:
-                                response = Response(False, "Password is incorrect")
-                            else:
-                                response = Response(True, '')
-                            try:
-                                conn.send(to_bytes(response.to_dict()))
-                            except ConnectionAbortedError:
-                                conn.shutdown(socket.SHUT_RDWR)
-                                del self.connections['unverified'][addr]
-                            else:
-                                if response.status:
-                                    self.connections['verified'][request.name] = conn
+                if len(self.connections['verified']) < 10:
+                    try:
+                        data = conn.recv(BUFFER_SIZE)
+                    except BlockingIOError:
+                        pass
+                    except ConnectionResetError:
+                        del self.connections['unverified'][addr]
+                    else:
+                        for obj in from_stream(data):
+                            if request := Request.from_dict(obj):
+                                match request.name, request.password:
+                                    case name, _ if name in self.connections['verified']:
+                                        response = Response(False, "Name is already taken")
+                                    case _, password if password != self.client.room.password:
+                                        response = Response(False, "Password is incorrect")
+                                    case _:
+                                        response = Response(True, '')
+                                try:
+                                    conn.send(to_bytes(response.to_dict()))
+                                except ConnectionAbortedError:
                                     del self.connections['unverified'][addr]
-                                    continue
+                                else:
+                                    if response.status:
+                                        self.connections['verified'][request.name] = conn
+                                        del self.connections['unverified'][addr]
 
         def sync():
             """Sync room members."""
@@ -98,7 +95,6 @@ class Host:
                 try:
                     conn.send(to_bytes(info.to_dict()))
                 except ConnectionError:
-                    conn.shutdown(socket.SHUT_RDWR)
                     del self.connections['verified'][name]
 
         admit()
@@ -108,11 +104,13 @@ class Host:
 
     def go(self):
         def action():   # 持续接收玩家行为
-            for conn in self.connections['verified'].values():
+            for name, conn in self.connections['verified'].items():
                 try:
                     data = conn.recv(BUFFER_SIZE)
                 except BlockingIOError:
-                    continue
+                    pass
+                except ConnectionError:
+                    self.client.room.players.remove(name)
                 else:
                     for action in from_stream(data):
                         if action := Action.from_dict(action):

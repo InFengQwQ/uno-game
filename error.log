@@ -1,0 +1,14 @@
+2025-11-03 00:03:47,201 - ERROR - 函数 access 发生异常: 'status'
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 216, in access
+    cls.client.join(info, pwd)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "f:\projects\uno-game\multi\client.py", line 51, in join
+    if response := Response.from_dict(obj):
+                   ~~~~~~~~~~~~~~~~~~^^^^^
+  File "f:\projects\uno-game\multi\utils.py", line 90, in from_dict
+    if isinstance(status := obj['status'], bool) and isinstance(message := obj['message'], str):
+                            ~~~^^^^^^^^^^
+KeyError: 'status'
