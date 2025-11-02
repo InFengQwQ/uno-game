@@ -59,7 +59,7 @@ class Info():
 
     @classmethod
     def from_dict(cls, obj: JsonSerializable, ip: str):
-        if isinstance(name := obj['name'], str) and isinstance(port := obj['port'], int) and isinstance(players := obj['players'], list):
+        if obj.keys() == {'name': None, 'port': None, 'players': None}.keys() and isinstance(name := obj['name'], str) and isinstance(port := obj['port'], int) and isinstance(players := obj['players'], list):
             return cls(name, (ip, port), players)
 
 class Request():
@@ -72,7 +72,7 @@ class Request():
 
     @classmethod
     def from_dict(cls, obj: JsonSerializable):
-        if isinstance(name := obj['name'], str) and isinstance(password := obj['password'], int):
+        if obj.keys() == cls.__dict__.keys() and isinstance(name := obj['name'], str) and isinstance(password := obj['password'], int):
             return cls(name, password)
 
 class Response():
@@ -85,7 +85,7 @@ class Response():
 
     @classmethod
     def from_dict(cls, obj: JsonSerializable):
-        if isinstance(status := obj['status'], bool) and isinstance(message := obj['message'], str):
+        if obj.keys() == cls.__dict__.keys() and isinstance(status := obj['status'], bool) and isinstance(message := obj['message'], str):
             return cls(status, message)
 
 class Action():
@@ -99,5 +99,5 @@ class Action():
 
     @classmethod
     def from_dict(cls, obj: JsonSerializable):
-        if isinstance(name := obj['name'], str) and isinstance(action := obj['action'], str) and isinstance(value := obj['value'], int):
+        if obj.keys() == cls.__dict__.keys() and isinstance(name := obj['name'], str) and isinstance(action := obj['action'], str) and isinstance(value := obj['value'], int):
             return cls(name, action, value)

@@ -12,3 +12,37 @@ Traceback (most recent call last):
     if isinstance(status := obj['status'], bool) and isinstance(message := obj['message'], str):
                             ~~~^^^^^^^^^^
 KeyError: 'status'
+2025-11-03 00:29:30,571 - ERROR - 函数 access 发生异常: Timeout or room is full
+Traceback (most recent call last):
+  File "f:\projects\uno-game\multi\client.py", line 42, in join
+    data = self.sock.recv(BUFFER_SIZE)
+TimeoutError: timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 216, in access
+    cls.client.join(info, pwd)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "f:\projects\uno-game\multi\client.py", line 45, in join
+    raise OSError("Timeout or room is full")
+OSError: Timeout or room is full
+2025-11-03 00:30:16,096 - ERROR - 函数 access 发生异常: Timeout or room is full
+Traceback (most recent call last):
+  File "f:\projects\uno-game\multi\client.py", line 42, in join
+    data = self.sock.recv(BUFFER_SIZE)
+TimeoutError: timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 216, in access
+    cls.client.join(info, pwd)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "f:\projects\uno-game\multi\client.py", line 45, in join
+    raise OSError("Timeout or room is full")
+OSError: Timeout or room is full
