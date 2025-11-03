@@ -287,15 +287,15 @@ class UnoGame:
         cls.menu()
 
         @ui.Message.catch
-        def a():    # 我想不出名字
+        def network():    # 我想不出名字
             if hasattr(cls, 'client'):
                 cls.client.run()
             if hasattr(cls, 'host'):
                 cls.host.run()
 
         while ui.update():
-            if cls.counter > ui.FPS / 2:
-                a()
+            if cls.counter > ui.FPS * multi.RUN_INTERVAL:
+                network()
                 cls.counter = 0
             else:
                 cls.counter += 1

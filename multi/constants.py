@@ -1,3 +1,6 @@
+# How long to execute a single run() loop
+RUN_INTERVAL = 0.1
+
 # Multicast group address and port for room discovery
 MULTICAST_GROUP = '239.255.0.0'
 MULTICAST_PORT = 50000

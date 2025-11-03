@@ -8,7 +8,7 @@ from .screen import scene, clear, update
 
 
 __all__ = [
-    'W', 'H', 'FPS', 'BACKGROUND_COLOR', 'TEXT_COLOR',
+    'W', 'H', 'FPS',
     'Column', 'Input', 'Button', 'Message',
     'scene', 'clear', 'update'
 ]

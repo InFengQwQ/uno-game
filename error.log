@@ -313,3 +313,661 @@ Traceback (most recent call last):
   File "f:\projects\uno-game\multi\client.py", line 57, in join
     raise Exception(response.message)
 Exception: Name is already taken
+2025-11-03 19:40:02,326 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:40:02,855 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:40:03,389 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:40:03,920 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:40:04,457 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:40:04,991 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:40:05,526 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:40:06,059 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:40:06,593 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:40:07,127 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:40:07,665 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:40:08,202 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:40:08,734 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:40:09,271 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:40:09,803 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:40:10,339 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:40:10,872 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:40:11,409 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:40:11,940 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:40:12,477 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:40:13,008 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:40:13,542 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:40:14,071 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:40:14,607 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:40:15,141 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:40:15,668 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:40:16,203 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:40:16,736 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:40:17,267 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:40:17,798 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:41:20,404 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:41:20,931 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:41:21,460 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:41:21,986 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:41:22,522 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:41:23,060 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:41:23,586 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:41:24,113 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:41:24,642 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:41:25,301 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:41:25,832 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:41:26,366 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:41:26,899 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:41:27,429 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:41:27,962 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:41:28,485 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-03 19:41:29,014 - ERROR - 函数 a 发生异常: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 292, in a
+    cls.client.run()
+    ~~~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 75, in run
+    sync()
+    ~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 63, in sync
+    if not self.sock.recv(1, socket.MSG_PEEK):
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。

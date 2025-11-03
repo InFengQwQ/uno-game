@@ -57,6 +57,7 @@ class Client:
                             raise Exception(response.message)
 
     def run(self):
+        """Run the client."""
 
         def sync(): # 但是没法回到主界面啊...
             try:
@@ -72,4 +73,4 @@ class Client:
             if info := Room.rooms.get(self.room.addr):
                 self.room.players[:] = info.players
                 self.room.status = info.status
-        sync()
+            sync()
