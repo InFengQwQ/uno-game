@@ -1,4 +1,7 @@
-import pygame, multi, ui, uno
+from ui import *
+from multi import *
+from uno import *
+import pygame
 # 所有游戏内核在主机完成，所以大多数实例对象仅存在于主机
 # 对于客户端的玩家的数据，主机仍留有备份，客户端拥有手牌的卡牌类（主机发送json标明卡牌属性），仅此而已
 # 当然，客户端需要知道弃牌堆顶的牌，并通过rule判断自己可以打出什么，主机也应该脱离内核实现同样的架构
@@ -7,7 +10,16 @@ import pygame, multi, ui, uno
 
 # 主机同时拥有Host和Client，独立运行
 
-# W和H在column里也有，应该改，考虑一下它们的归属问题（问一下ai结构问题吧） （已改）
+
+BUTTON_SHAPES = ['square', 'round']
+BUTTON_STYLES = ['basic', 'line', 'color']
+ARROW_DIRECTIONS = ['left', 'right', 'up', 'down']
+
+LARGE_TEXTS = ['tag']
+DEFAULT_TEXTS = ['hint', 'text']
+SMALL_TEXTS = ['message']
+NARROW_TEXTS = ['content']
+
 class UnoGame:
     images: dict[str, dict[str, pygame.Surface]] = {
         'info': {
@@ -26,12 +38,12 @@ class UnoGame:
         'button': {
             **{
                 f'{shape}_{style}': pygame.image.load(f'assets/images/button/default/{shape}_{style}.svg').convert_alpha()
-                for shape in ['square', 'round']
-                for style in ['basic', 'line', 'color']
+                for shape in BUTTON_SHAPES
+                for style in BUTTON_STYLES
             },
             **{
                 f'arrow_{direction}': pygame.image.load(f'assets/images/button/arrow/{direction}.svg').convert_alpha()
-                for direction in ['left', 'right', 'up', 'down']
+                for direction in ARROW_DIRECTIONS
             }
         },
         'message': {
@@ -41,40 +53,40 @@ class UnoGame:
             'back': pygame.image.load('assets/images/cards/back.png').convert_alpha(),
             **{
                 f'{color}_empty': pygame.image.load(f'assets/images/cards/{color}_empty.png').convert_alpha()
-                for color in uno.COLORS
+                for color in COLORS
             },
             **{
                 f'{color}_{value}': pygame.image.load(f'assets/images/cards/numbers/{color}_{value}.png').convert_alpha()
-                for color in uno.COLORS
-                for value in range(10)
+                for color in COLORS
+                for value in NUMBERS
             },
             **{
                 f'{color}_{action}': pygame.image.load(f'assets/images/cards/actions/{color}_{action}.png').convert_alpha()
-                for color in uno.COLORS
-                for action in uno.ACTIONS
+                for color in COLORS
+                for action in ACTIONS
             },
             **{
-                wild: pygame.image.load(f'assets/images/cards/wilds/{wild}.png').convert_alpha()
-                for wild in uno.WILDS
+                f'{BLACK_COLOR}_{wild}': pygame.image.load(f'assets/images/cards/wilds/{wild}.png').convert_alpha()
+                for wild in WILDS
             }
         }
     }
     fonts: dict[str, pygame.font.Font] = {
         **{
             large: pygame.font.Font('assets/fonts/Kenney Future.ttf', 24)
-            for large in ['tag']
+            for large in LARGE_TEXTS
         },
         **{
             default: pygame.font.Font('assets/fonts/Kenney Future.ttf', 16)
-            for default in ['hint', 'text']
+            for default in DEFAULT_TEXTS
         },
         **{
             small: pygame.font.Font('assets/fonts/Kenney Future.ttf', 8)
-            for small in ['message']
+            for small in SMALL_TEXTS
         },
         **{
             narrow: pygame.font.Font('assets/fonts/Kenney Future Narrow.ttf', 16)
-            for narrow in ['content']
+            for narrow in NARROW_TEXTS
         }
     }
     sounds: dict[str, pygame.mixer.Sound] = {
@@ -82,74 +94,74 @@ class UnoGame:
         'tap': pygame.mixer.Sound('assets/sounds/tap.ogg')
     }
     # pygame.mixer.music.load('assets/audio/music.ogg') 背景音乐加载，.play()播放
-    ui.Column.back_image = images['column']['back']
-    ui.Column.front_image = images['column']['front']
-    ui.Column.divider_image = images['column']['divider']
-    ui.Column.tag_font = fonts['tag']
-    ui.Column.content_font = fonts['content']
-    ui.Input.inactive_image = images['input']['inactive']
-    ui.Input.active_image = images['input']['active']
-    ui.Input.hint_font = fonts['hint']
-    ui.Input.tap_sound = sounds['tap']
-    ui.Button.text_font = fonts['text']
-    ui.Button.click_sound = sounds['click']
-    ui.Message.message_image = images['message']['box']
-    ui.Message.message_font = fonts['message']
+    Column.back_image = images['column']['back']
+    Column.front_image = images['column']['front']
+    Column.divider_image = images['column']['divider']
+    Column.tag_font = fonts['tag']
+    Column.content_font = fonts['content']
+    Input.inactive_image = images['input']['inactive']
+    Input.active_image = images['input']['active']
+    Input.hint_font = fonts['hint']
+    Input.tap_sound = sounds['tap']
+    Button.text_font = fonts['text']
+    Button.click_sound = sounds['click']
+    Message.message_image = images['message']['box']
+    Message.message_font = fonts['message']
 
-    host: multi.Host
-    client: multi.Client
+    host: Host
+    client: Client
 
     counter: int = 0
 
     @classmethod
     def menu(cls):
-        ui.clear()
+        clear()
 
-        ui.scene.blit(pygame.transform.scale(cls.images['info']['cards_text'], (64, 64)), (10, 10))
-        ui.scene.blit(pygame.transform.scale(cls.images['info']['players_2_10'], (64, 64)), (84, 10))
+        scene.blit(pygame.transform.scale(cls.images['info']['cards_text'], (64, 64)), (10, 10))
+        scene.blit(pygame.transform.scale(cls.images['info']['players_2_10'], (64, 64)), (84, 10))
 
-        ui.Column.columns.extend([
-            ui.Column(pygame.Rect(ui.W * 3/8, ui.H * 1/4, ui.W * 1/4, ui.H * 1/2), tag="Menu")
+        Column.columns.extend([
+            Column(pygame.Rect(W * 3/8, H * 1/4, W * 1/4, H * 1/2), tag="Menu")
         ])
 
-        ui.Button.buttons.extend([
-            ui.Button(cls.images['button']['square_color'], pygame.Rect(ui.W * 13/32, ui.H * 3/8, ui.W * 3/16, ui.H * 1/12), cls.enter, slice=True, text="Enter"),
-            ui.Button(cls.images['button']['square_basic'], pygame.Rect(ui.W * 13/32, ui.H * 1/2, ui.W * 3/16, ui.H * 1/12), lambda: None, slice=True, text="Options"),
-            ui.Button(cls.images['button']['square_line'], pygame.Rect(ui.W * 13/32, ui.H * 5/8, ui.W * 3/16, ui.H * 1/12), quit, slice=True, text="Quit")
+        Button.buttons.extend([
+            Button(cls.images['button']['square_color'], pygame.Rect(W * 13/32, H * 3/8, W * 3/16, H * 1/12), cls.enter, slice=True, text="Enter"),
+            Button(cls.images['button']['square_basic'], pygame.Rect(W * 13/32, H * 1/2, W * 3/16, H * 1/12), lambda: None, slice=True, text="Options"),
+            Button(cls.images['button']['square_line'], pygame.Rect(W * 13/32, H * 5/8, W * 3/16, H * 1/12), quit, slice=True, text="Quit")
         ])
 
     @classmethod
     def enter(cls):
-        ui.clear()
+        clear()
 
-        ui.Column.columns.extend([
-            ui.Column(pygame.Rect(ui.W * 11/32, ui.H * 3/8, ui.W * 5/16, ui.H * 1/4), tag="Join")
+        Column.columns.extend([
+            Column(pygame.Rect(W * 11/32, H * 3/8, W * 5/16, H * 1/4), tag="Join")
         ])
 
-        ui.Input.inputs.extend([
-            name := ui.Input(pygame.Rect(ui.W * 3/8, ui.H * 1/2, ui.W * 1/8, ui.H * 1/12), hint="Name")
+        Input.inputs.extend([
+            name := Input(pygame.Rect(W * 3/8, H * 1/2, W * 1/8, H * 1/12), hint="Name")
         ])
 
-        @ui.Message.catch
+        @Message.catch
         def client():
-            cls.client = multi.Client(name.text)
+            cls.client = Client(name.text)
             cls.search()
-        ui.Button.buttons.extend([
-            ui.Button(cls.images['button']['square_color'], pygame.Rect(ui.W * 17/32, ui.H * 1/2, ui.W * 3/32, ui.H * 1/12), client, slice=True, text="OK")
+        Button.buttons.extend([
+            Button(cls.images['button']['square_color'], pygame.Rect(W * 17/32, H * 1/2, W * 3/32, H * 1/12), client, slice=True, text="OK")
         ])
 
     @classmethod
     def search(cls, page: int = 1):
-        if multi.Room.rooms:
-            page = min(page, len(multi.Room.rooms))
-            info = sorted(multi.Room.rooms.values())[page - 1]
+        if Room.rooms:
+            page = min(page, len(Room.rooms))
+            info = sorted(Room.rooms.values())[page - 1]
 
-            ui.clear()
+            clear()
 
-            ui.Column.columns.extend([
-                ui.Column(
-                    pygame.Rect(ui.W * 5/16, ui.H * 3/16, ui.W * 3/8, ui.H * 5/8),
-                    tag=f"Search({page}/{len(multi.Room.rooms)})",
+            Column.columns.extend([
+                Column(
+                    pygame.Rect(W * 5/16, H * 3/16, W * 3/8, H * 5/8),
+                    tag=f"Search({page}/{len(Room.rooms)})",
                     contents=[
                         f"{info.name}({len(info.players)}/10)",
                         f"{info.ip}:{info.port}",
@@ -158,11 +170,11 @@ class UnoGame:
                 )
             ])
 
-            ui.Input.inputs.extend([
-                password := ui.Input(pygame.Rect(ui.W * 1/2, ui.H * 7/16, ui.W * 5/32, ui.H * 1/12), hint="Password")
+            Input.inputs.extend([
+                password := Input(pygame.Rect(W * 1/2, H * 7/16, W * 5/32, H * 1/12), hint="Password")
             ])
 
-            @ui.Message.catch
+            @Message.catch
             def access():
                 try:
                     pwd = int(password.text)
@@ -173,30 +185,30 @@ class UnoGame:
                 else:
                     cls.client.join(info, pwd)
                     cls.room()
-            ui.Button.buttons.extend([
-                ui.Button(cls.images['button']['square_color'], pygame.Rect(ui.W * 11/32, ui.H * 7/16, ui.W * 1/8, ui.H * 1/12), access, slice=True, text="OK"),
-                ui.Button(cls.images['button']['square_color'], pygame.Rect(ui.W * 11/32, ui.H * 9/16, ui.W * 1/8, ui.H * 1/12), cls.create, slice=True, text="Create"),
-                ui.Button(cls.images['button']['square_line'], pygame.Rect(ui.W * 11/32, ui.H * 11/16, ui.W * 1/8, ui.H * 1/12), cls.menu, slice=True, text="Back"),
-                ui.Button(cls.images['button']['square_basic'], pygame.Rect(ui.W * 1/2, ui.H * 11/16, ui.W * 5/32, ui.H * 1/12), cls.search, slice=True, text="Refresh")
+            Button.buttons.extend([
+                Button(cls.images['button']['square_color'], pygame.Rect(W * 11/32, H * 7/16, W * 1/8, H * 1/12), access, slice=True, text="OK"),
+                Button(cls.images['button']['square_color'], pygame.Rect(W * 11/32, H * 9/16, W * 1/8, H * 1/12), cls.create, slice=True, text="Create"),
+                Button(cls.images['button']['square_line'], pygame.Rect(W * 11/32, H * 11/16, W * 1/8, H * 1/12), cls.menu, slice=True, text="Back"),
+                Button(cls.images['button']['square_basic'], pygame.Rect(W * 1/2, H * 11/16, W * 5/32, H * 1/12), cls.search, slice=True, text="Refresh")
             ])
-            if page < len(multi.Room.rooms):
+            if page < len(Room.rooms):
                 def next():
                     cls.search(page + 1)
-                ui.Button.buttons.extend([
-                    ui.Button(cls.images['button']['arrow_right'], pygame.Rect(ui.W * 19/32, ui.H * 29/48 - 16, 32, 32), next)
+                Button.buttons.extend([
+                    Button(cls.images['button']['arrow_right'], pygame.Rect(W * 19/32, H * 29/48 - 16, 32, 32), next)
                 ])
             if page > 1:
                 def prev():
                     cls.search(page - 1)
-                ui.Button.buttons.extend([
-                    ui.Button(cls.images['button']['arrow_left'], pygame.Rect(ui.W * 9/16 - 32, ui.H * 29/48 - 16, 32, 32), prev)
+                Button.buttons.extend([
+                    Button(cls.images['button']['arrow_left'], pygame.Rect(W * 9/16 - 32, H * 29/48 - 16, 32, 32), prev)
                 ])
         else:
-            ui.clear()
+            clear()
 
-            ui.Column.columns.extend([
-                ui.Column(
-                    pygame.Rect(ui.W * 5/16, ui.H * 3/16, ui.W * 3/8, ui.H * 5/8),
+            Column.columns.extend([
+                Column(
+                    pygame.Rect(W * 5/16, H * 3/16, W * 3/8, H * 5/8),
                     tag="Search",
                     contents=[
                         "Empty"
@@ -204,18 +216,18 @@ class UnoGame:
                 )
             ])
 
-            ui.Button.buttons.extend([
-                ui.Button(cls.images['button']['square_color'], pygame.Rect(ui.W * 11/32, ui.H * 9/16, ui.W * 1/8, ui.H * 1/12), cls.create, slice=True, text="Create"),
-                ui.Button(cls.images['button']['square_line'], pygame.Rect(ui.W * 11/32, ui.H * 11/16, ui.W * 1/8, ui.H * 1/12), cls.menu, slice=True, text="Back"),
-                ui.Button(cls.images['button']['square_basic'], pygame.Rect(ui.W * 1/2, ui.H * 11/16, ui.W * 5/32, ui.H * 1/12), cls.search, slice=True, text="Refresh")
+            Button.buttons.extend([
+                Button(cls.images['button']['square_color'], pygame.Rect(W * 11/32, H * 9/16, W * 1/8, H * 1/12), cls.create, slice=True, text="Create"),
+                Button(cls.images['button']['square_line'], pygame.Rect(W * 11/32, H * 11/16, W * 1/8, H * 1/12), cls.menu, slice=True, text="Back"),
+                Button(cls.images['button']['square_basic'], pygame.Rect(W * 1/2, H * 11/16, W * 5/32, H * 1/12), cls.search, slice=True, text="Refresh")
             ])
 
     @classmethod
     def create(cls):
-        ui.clear()
+        clear()
 
-        ui.Column.columns.extend([
-            ui.Column(pygame.Rect(ui.W * 5/16, ui.H * 1/4, ui.W * 3/8, ui.H * 1/2),
+        Column.columns.extend([
+            Column(pygame.Rect(W * 5/16, H * 1/4, W * 3/8, H * 1/2),
                 tag="Create",
                 contents = [
                     "Create a room with name",
@@ -225,12 +237,12 @@ class UnoGame:
             )
         ])
 
-        ui.Input.inputs.extend([
-            name := ui.Input(pygame.Rect(ui.W * 17/32, ui.H * 1/2, ui.H * 1/6, ui.H * 1/12), hint="Name"),
-            password := ui.Input(pygame.Rect(ui.W * 11/32, ui.H * 5/8, ui.W * 5/32, ui.H * 1/12), hint="Password")
+        Input.inputs.extend([
+            name := Input(pygame.Rect(W * 17/32, H * 1/2, H * 1/6, H * 1/12), hint="Name"),
+            password := Input(pygame.Rect(W * 11/32, H * 5/8, W * 5/32, H * 1/12), hint="Password")
         ])
 
-        @ui.Message.catch
+        @Message.catch
         def host():
             try:
                 pwd = int(password.text)
@@ -239,43 +251,43 @@ class UnoGame:
             except ValueError:
                 raise ValueError("Password should be a number")    # TODO: 在ui中添加提示（实为错误，Exception的子类)
             else:
-                cls.host = multi.Host(cls.client, name.text, pwd)
+                cls.host = Host(cls.client, name.text, pwd)
                 cls.room()
-        ui.Button.buttons.extend([
-            ui.Button(cls.images['button']['square_line'], pygame.Rect(ui.W * 11/32, ui.H * 1/2, ui.W * 5/32, ui.H * 1/12), cls.search, slice=True, text="Back"),
-            ui.Button(cls.images['button']['square_color'], pygame.Rect(ui.W * 17/32, ui.H * 5/8, ui.H * 1/6, ui.H * 1/12), host, slice=True, text="OK")
+        Button.buttons.extend([
+            Button(cls.images['button']['square_line'], pygame.Rect(W * 11/32, H * 1/2, W * 5/32, H * 1/12), cls.search, slice=True, text="Back"),
+            Button(cls.images['button']['square_color'], pygame.Rect(W * 17/32, H * 5/8, H * 1/6, H * 1/12), host, slice=True, text="OK")
         ])
 
     @classmethod
     def room(cls):
         if hasattr(cls, 'host'):
-            ui.clear()
+            clear()
 
-            ui.Column.columns.extend([
-                ui.Column(pygame.Rect(ui.W * 5/16, ui.H * 1/8, ui.W * 3/8, ui.H * 3/4), tag=cls.client.room.name, contents=cls.client.room.players)
+            Column.columns.extend([
+                Column(pygame.Rect(W * 5/16, H * 1/8, W * 3/8, H * 3/4), tag=cls.client.room.name, contents=cls.client.room.players)
             ])
 
             def back():
-                cls.host.close()    # TODO: 查找房间的界面才是创建房间的地方
+                cls.host.close()
                 del cls.host
                 cls.client.reset()
                 cls.search()
-            ui.Button.buttons.extend([
-                ui.Button(cls.images['button']['square_line'], pygame.Rect(ui.W * 11/32, ui.H * 3/4, ui.W * 1/8, ui.H * 1/12), back, slice=True, text="Back"),
-                ui.Button(cls.images['button']['square_color'], pygame.Rect(ui.W * 17/32, ui.H * 3/4, ui.W * 1/8, ui.H * 1/12), cls.game, slice=True, text="Start")
+            Button.buttons.extend([
+                Button(cls.images['button']['square_line'], pygame.Rect(W * 11/32, H * 3/4, W * 1/8, H * 1/12), back, slice=True, text="Back"),
+                Button(cls.images['button']['square_color'], pygame.Rect(W * 17/32, H * 3/4, W * 1/8, H * 1/12), cls.game, slice=True, text="Start")
             ])
         else:
-            ui.clear()
+            clear()
 
-            ui.Column.columns.extend([
-                ui.Column(pygame.Rect(ui.W * 5/16, ui.H * 1/8, ui.W * 3/8, ui.H * 3/4), tag=cls.client.room.name, contents=cls.client.room.players)
+            Column.columns.extend([
+                Column(pygame.Rect(W * 5/16, H * 1/8, W * 3/8, H * 3/4), tag=cls.client.room.name, contents=cls.client.room.players)
             ])
 
             def back():
                 cls.client.reset()
                 cls.search()
-            ui.Button.buttons.extend([
-                ui.Button(cls.images['button']['square_line'], pygame.Rect(ui.W * 7/16, ui.H * 3/4, ui.W * 1/8, ui.H * 1/12), back, slice=True, text="Back")
+            Button.buttons.extend([
+                Button(cls.images['button']['square_line'], pygame.Rect(W * 7/16, H * 3/4, W * 1/8, H * 1/12), back, slice=True, text="Back")
             ])
 
     @classmethod
@@ -286,15 +298,15 @@ class UnoGame:
     def run(cls):
         cls.menu()
 
-        @ui.Message.catch
+        @Message.catch
         def network():    # 我想不出名字
             if hasattr(cls, 'client'):
                 cls.client.run()
             if hasattr(cls, 'host'):
                 cls.host.run()
 
-        while ui.update():
-            if cls.counter > ui.FPS * multi.RUN_INTERVAL:
+        while update():
+            if cls.counter > FPS * RUN_INTERVAL:
                 network()
                 cls.counter = 0
             else:
@@ -305,10 +317,10 @@ class UnoGame:
 
 # def main():
 #     names = ['Alice', 'Bob']
-#     players = [uno.Player(name) for name in names]
+#     players = [Player(name) for name in names]
 #     # 到时候尽量多把代码封装到类方法里
 #     while True:
-#         game = uno.Game(players)
+#         game = Game(players)
 #         game.turn += game.reverse
 #         player = game.players[game.turn]   # the first player
 #         while True:
@@ -328,7 +340,7 @@ class UnoGame:
 #                     game.draw = 0
 #                     continue
 #                 # while? or None to continue?
-#                 # card: Optional[uno.Card]
+#                 # card: Optional[Card]
 #                 if card:
 #                     if game.play_card(player, card):
 #                         # play card
@@ -346,7 +358,7 @@ class UnoGame:
 #                             # reserve
 #                             pass
 #             finally:
-#                 if uno.Rules.is_winner(player):
+#                 if Rules.is_winner(player):
 #                     break
 #                 else:
 #                     game.turn += 1 if game.reverse else -1

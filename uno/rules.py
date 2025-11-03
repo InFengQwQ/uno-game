@@ -31,7 +31,7 @@ class Rules:
                 game.reverse = not game.reverse
         elif card.type == 'draw_two':
             game.draw += 2
-        elif card.type == 'wild_draw_four':
+        elif card.type == 'draw_four':
             game.draw += 4
 
     @staticmethod

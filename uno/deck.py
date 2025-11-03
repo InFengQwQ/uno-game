@@ -1,4 +1,4 @@
-from . import COLORS, BLACK_COLOR, NUMBER, ACTIONS, WILDS, Card
+from . import COLORS, BLACK_COLOR, NUMBER, NUMBERS, NONZERO_NUMBERS, ACTIONS, WILDS, Card
 import random
 
 
@@ -7,12 +7,11 @@ class Deck:
         self.draw_pile: list[Card] = []
         self.discard_pile: list[Card] = []
         for color in COLORS:
-            self.draw_pile.append(Card(color, NUMBER, 0))
-            for _ in range(2):
-                for value in range(1, 10):
+            for numbers in NUMBERS, NONZERO_NUMBERS:
+                for value in numbers:
                     self.draw_pile.append(Card(color, NUMBER, value))
                 for action in ACTIONS:
-                    self.draw_pile.append(Card(color, action, 20))
+                    self.draw_pile.append(Card(color, action, 20))  # 分数值也可以放到constants.py中
             for wild in WILDS:
                 self.draw_pile.append(Card(BLACK_COLOR, wild, 50))
         random.shuffle(self.draw_pile)
