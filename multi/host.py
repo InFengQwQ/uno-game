@@ -79,17 +79,8 @@ class Host:
                                         self.connections['verified'][request.name] = conn
                                         del self.connections['unverified'][addr]
 
-            def sync():
-                self.room.players[:] = list(self.connections['verified'])
-                for name, conn in self.connections['verified'].copy().items():
-                    try:
-                        conn.send(b'')
-                    except ConnectionError:
-                        del self.connections['verified'][name]
-
             admit()
             verify()
-            sync()
 
         def go():
             def action():   # 持续接收玩家行为
@@ -98,21 +89,27 @@ class Host:
                         data = conn.recv(BUFFER_SIZE)
                     except BlockingIOError:
                         pass
-                    except ConnectionError:
+                    except ConnectionResetError:
                         self.room.players.remove(name)
                     else:
                         for obj in from_stream(data):
                             action = Action.from_dict(obj)
                             self.actions.append(action)
 
-            def sync(): # 同步广播行为，在每次动画加载前执行
                 for action in self.actions:
                     for name, conn in self.connections['verified'].items():
                         if name != action.name:
                             conn.send(to_bytes(action.to_dict()))
 
             action()
-            sync()
+
+        def sync(): # 对吗？
+            self.room.players[:] = list(self.connections['verified'])
+            for name, conn in self.connections['verified'].copy().items():
+                try:
+                    conn.send(b'')
+                except ConnectionError:
+                    del self.connections['verified'][name]
 
         match self.room.status:
             case 0:
@@ -121,4 +118,5 @@ class Host:
                 go()
             case _:
                 pass
+        sync()
         self.room.broadcast()
