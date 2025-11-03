@@ -34,7 +34,7 @@ class Client:
             request = Request(self.name, password)
             try:
                 self.sock.send(to_bytes(request.to_dict()))
-            except ConnectionAbortedError as e:
+            except ConnectionError as e:
                 self.reset()
                 raise e
             else:
@@ -43,7 +43,7 @@ class Client:
                 except TimeoutError as e:
                     self.reset()
                     raise OSError("Timeout or room is full")
-                except ConnectionResetError:
+                except ConnectionError:
                     self.reset()
                     raise OSError("Room has been closed")
                 else:
@@ -58,27 +58,18 @@ class Client:
 
     def run(self):
 
-        def sync():
-            """Synchronize room members."""
-
+        def sync(): # 但是没法回到主界面啊...
             try:
-                data = self.sock.recv(BUFFER_SIZE)
+                if not self.sock.recv(1, socket.MSG_PEEK):
+                    raise ConnectionError
             except BlockingIOError:
                 pass
-            except ConnectionResetError:
+            except ConnectionError:
                 self.reset()
-                raise OSError("Room has been closed")
-            except OSError as e:
-                self.reset()
-                raise e
-            else:
-                for obj in from_stream(data):
-                    info = Info.from_dict(obj, '')
-                    self.room.players[:] = info.players
 
         Room.receive()
         if hasattr(self, 'room'):
             if info := Room.rooms.get(self.room.addr):
                 self.room.players[:] = info.players
                 self.room.status = info.status
-            sync()
+        sync()

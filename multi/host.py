@@ -58,7 +58,7 @@ class Host:
                             data = conn.recv(BUFFER_SIZE)
                         except BlockingIOError:
                             pass
-                        except ConnectionResetError:
+                        except ConnectionError:
                             del self.connections['unverified'][addr]
                         else:
                             for obj in from_stream(data):
@@ -72,7 +72,7 @@ class Host:
                                         response = Response(True, '')
                                 try:
                                     conn.send(to_bytes(response.to_dict()))
-                                except ConnectionAbortedError:
+                                except ConnectionError:
                                     del self.connections['unverified'][addr]
                                 else:
                                     if response.status:
@@ -89,7 +89,7 @@ class Host:
                         data = conn.recv(BUFFER_SIZE)
                     except BlockingIOError:
                         pass
-                    except ConnectionResetError:
+                    except ConnectionError:
                         self.room.players.remove(name)
                     else:
                         for obj in from_stream(data):
@@ -103,11 +103,14 @@ class Host:
 
             action()
 
-        def sync(): # 对吗？
+        def sync():
             self.room.players[:] = list(self.connections['verified'])
             for name, conn in self.connections['verified'].copy().items():
                 try:
-                    conn.send(b'')
+                    if not conn.recv(1, socket.MSG_PEEK):
+                        raise ConnectionError
+                except BlockingIOError:
+                    pass
                 except ConnectionError:
                     del self.connections['verified'][name]
 
