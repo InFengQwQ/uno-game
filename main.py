@@ -66,7 +66,7 @@ class UnoGame:
                 for action in ACTIONS
             },
             **{
-                f'{BLACK_COLOR}_{wild}': pygame.image.load(f'assets/images/cards/wilds/{wild}.png').convert_alpha()
+                f'{BLACK_COLOR}_{wild}': pygame.image.load(f'assets/images/cards/wilds/{BLACK_COLOR}_{wild}.png').convert_alpha()
                 for wild in WILDS
             }
         }
@@ -299,7 +299,7 @@ class UnoGame:
         cls.menu()
 
         @Message.catch
-        def network():    # 我想不出名字
+        def network():
             if hasattr(cls, 'client'):
                 cls.client.run()
             if hasattr(cls, 'host'):
