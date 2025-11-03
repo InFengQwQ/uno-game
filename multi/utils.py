@@ -30,19 +30,17 @@ def from_stream(stream: bytes):
     return result
 
 class Info():
-    def __init__(self, name: str, addr: tuple[str, int], players: list[str]):
+    def __init__(self, name: str, addr: tuple[str, int], players: list[str], status: int):
         self.name = name
         self.addr = self.ip, self.port = addr
         self.players = players
+        self.status = status
 
-    def __hash__(self):
-        return hash(self.addr)
-
-    def __eq__(self, other: object):
-        if isinstance(other, Info):
-            return self.addr == other.addr
-        else:
-            return NotImplemented
+    # def __eq__(self, other: object):
+    #     if isinstance(other, Info):
+    #         return self.addr == other.addr
+    #     else:
+    #         return NotImplemented
 
     def __lt__(self, other: object):
         if isinstance(other, Info):
@@ -54,13 +52,21 @@ class Info():
         return {
             'name': self.name,
             'port': self.port,
-            'players': self.players
+            'players': self.players,
+            'status': self.status
         }
 
     @classmethod
     def from_dict(cls, obj: JsonSerializable, ip: str):
-        if obj.keys() == {'name': None, 'port': None, 'players': None}.keys() and isinstance(name := obj['name'], str) and isinstance(port := obj['port'], int) and isinstance(players := obj['players'], list):
-            return cls(name, (ip, port), players)
+        if (
+            isinstance(name := obj['name'], str) and
+            isinstance(port := obj['port'], int) and
+            isinstance(players := obj['players'], list) and
+            isinstance(status := obj['status'], int)
+        ):
+            return cls(name, (ip, port), players, status)
+        else:
+            raise TypeError
 
 class Request():
     def __init__(self, name: str, password: int):
@@ -72,8 +78,13 @@ class Request():
 
     @classmethod
     def from_dict(cls, obj: JsonSerializable):
-        if obj.keys() == cls.__dict__.keys() and isinstance(name := obj['name'], str) and isinstance(password := obj['password'], int):
+        if (
+            isinstance(name := obj['name'], str) and
+            isinstance(password := obj['password'], int)
+        ):
             return cls(name, password)
+        else:
+            raise TypeError
 
 class Response():
     def __init__(self, status: bool, message: str):
@@ -85,8 +96,13 @@ class Response():
 
     @classmethod
     def from_dict(cls, obj: JsonSerializable):
-        if obj.keys() == cls.__dict__.keys() and isinstance(status := obj['status'], bool) and isinstance(message := obj['message'], str):
+        if (
+            isinstance(status := obj['status'], bool) and
+            isinstance(message := obj['message'], str)
+        ):
             return cls(status, message)
+        else:
+            raise TypeError
 
 class Action():
     def __init__(self, name: str, action: str, value: int):
@@ -99,5 +115,11 @@ class Action():
 
     @classmethod
     def from_dict(cls, obj: JsonSerializable):
-        if obj.keys() == cls.__dict__.keys() and isinstance(name := obj['name'], str) and isinstance(action := obj['action'], str) and isinstance(value := obj['value'], int):
+        if (
+            isinstance(name := obj['name'], str) and
+            isinstance(action := obj['action'], str) and
+            isinstance(value := obj['value'], int)
+        ):
             return cls(name, action, value)
+        else:
+            raise TypeError

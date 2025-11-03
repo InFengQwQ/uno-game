@@ -48,28 +48,37 @@ class Client:
                     raise OSError("Room has been closed")
                 else:
                     for obj in from_stream(data):
-                        if response := Response.from_dict(obj):
-                            if response.status:
-                                self.sock.setblocking(False)
-                                self.room = Room(info.name, password, info.addr)
-                            else:
-                                self.reset()
-                                raise Exception(response.message)
+                        response = Response.from_dict(obj)
+                        if response.status:
+                            self.sock.setblocking(False)
+                            self.room = Room(info.name, password, info.addr)
+                        else:
+                            self.reset()
+                            raise Exception(response.message)
 
-    def sync(self):
-        """Synchronize room members."""
+    def run(self):
 
-        try:
-            data = self.sock.recv(BUFFER_SIZE)
-        except BlockingIOError:
-            pass
-        except ConnectionResetError:
-            self.reset()
-            raise OSError("Room has been closed")
-        except OSError as e:
-            self.reset()
-            raise e
-        else:
-            for obj in from_stream(data):
-                if info := Info.from_dict(obj, ''):
+        def sync():
+            """Synchronize room members."""
+
+            try:
+                data = self.sock.recv(BUFFER_SIZE)
+            except BlockingIOError:
+                pass
+            except ConnectionResetError:
+                self.reset()
+                raise OSError("Room has been closed")
+            except OSError as e:
+                self.reset()
+                raise e
+            else:
+                for obj in from_stream(data):
+                    info = Info.from_dict(obj, '')
                     self.room.players[:] = info.players
+
+        Room.receive()
+        if hasattr(self, 'room'):
+            if info := Room.rooms.get(self.room.addr):
+                self.room.players[:] = info.players
+                self.room.status = info.status
+            sync()

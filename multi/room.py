@@ -5,7 +5,7 @@ import socket
 class Room:
     """A room in the multiplayer game."""
 
-    rooms: set[Info] = set()
+    rooms: dict[tuple[str, int], Info] = {}
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -20,14 +20,15 @@ class Room:
         self.addr = self.ip, self.port = addr
 
         self.players: list[str] = []
+        self.status = 0
 
     def broadcast(self):
         """Broadcast room information to the multicast group."""
 
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
-            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            # sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 1)
-            sock.sendto(to_bytes(Info(self.name, self.addr, self.players).to_dict()), (MULTICAST_GROUP, MULTICAST_PORT))
+            sock.sendto(to_bytes(Info(self.name, self.addr, self.players, self.status).to_dict()), (MULTICAST_GROUP, MULTICAST_PORT))
 
     @classmethod
     def receive(cls):
@@ -39,5 +40,5 @@ class Room:
             pass
         else:
             if obj := from_packet(data):
-                if info := Info.from_dict(obj, ip):
-                    cls.rooms.add(info)
+                info = Info.from_dict(obj, ip)
+                cls.rooms[info.addr] = info
