@@ -108,8 +108,7 @@ class UnoGame:
     Message.message_image = images['message']['box']
     Message.message_font = fonts['message']
 
-    host: Host
-    client: Client
+    role: Client | Host
 
     counter: int = 0
 
@@ -125,33 +124,34 @@ class UnoGame:
         ])
 
         Button.buttons.extend([
-            Button(cls.images['button']['square_color'], pygame.Rect(W * 13/32, H * 3/8, W * 3/16, H * 1/12), cls.enter, slice=True, text="Enter"),
-            Button(cls.images['button']['square_basic'], pygame.Rect(W * 13/32, H * 1/2, W * 3/16, H * 1/12), lambda: None, slice=True, text="Options"),
+            Button(cls.images['button']['square_color'], pygame.Rect(W * 13/32, H * 3/8, W * 3/16, H * 1/12), cls.create, slice=True, text="Create"),
+            Button(cls.images['button']['square_basic'], pygame.Rect(W * 13/32, H * 1/2, W * 3/16, H * 1/12), cls.join, slice=True, text="Join"),
             Button(cls.images['button']['square_line'], pygame.Rect(W * 13/32, H * 5/8, W * 3/16, H * 1/12), quit, slice=True, text="Quit")
         ])
 
+    # @classmethod
+    # def enter(cls):
+    #     clear()
+
+    #     Column.columns.extend([
+    #         Column(pygame.Rect(W * 11/32, H * 3/8, W * 5/16, H * 1/4), tag="Join")
+    #     ])
+
+    #     Input.inputs.extend([
+    #         name := Input(pygame.Rect(W * 3/8, H * 1/2, W * 1/8, H * 1/12), hint="Name")
+    #     ])
+
+    #     @Message.catch
+    #     def client():
+    #         cls.client = Client(name.text)
+    #         cls.join()
+    #     Button.buttons.extend([
+    #         Button(cls.images['button']['square_color'], pygame.Rect(W * 17/32, H * 1/2, W * 3/32, H * 1/12), client, slice=True, text="OK")
+    #     ])
+
     @classmethod
-    def enter(cls):
-        clear()
-
-        Column.columns.extend([
-            Column(pygame.Rect(W * 11/32, H * 3/8, W * 5/16, H * 1/4), tag="Join")
-        ])
-
-        Input.inputs.extend([
-            name := Input(pygame.Rect(W * 3/8, H * 1/2, W * 1/8, H * 1/12), hint="Name")
-        ])
-
-        @Message.catch
-        def client():
-            cls.client = Client(name.text)
-            cls.search()
-        Button.buttons.extend([
-            Button(cls.images['button']['square_color'], pygame.Rect(W * 17/32, H * 1/2, W * 3/32, H * 1/12), client, slice=True, text="OK")
-        ])
-
-    @classmethod
-    def search(cls, page: int = 1):
+    def join(cls, page: int = 1):
+        Room.receive()
         if Room.rooms:
             page = min(page, len(Room.rooms))
             info = sorted(Room.rooms.values())[page - 1]
@@ -171,11 +171,12 @@ class UnoGame:
             ])
 
             Input.inputs.extend([
+                name := Input(pygame.Rect(W * 11/32, H * 7/16, W * 1/8, H * 1/12), hint="Name"),
                 password := Input(pygame.Rect(W * 1/2, H * 7/16, W * 5/32, H * 1/12), hint="Password")
             ])
 
             @Message.catch
-            def access():
+            def access():   # 可能有误
                 try:
                     pwd = int(password.text)
                     if pwd < 0 or pwd != float(password.text):
@@ -183,23 +184,24 @@ class UnoGame:
                 except ValueError:
                     raise ValueError("Password should be a number")
                 else:
-                    cls.client.join(info, pwd)
+                    client = Client(name.text)
+                    client.join(info, pwd)
+                    cls.role = client
                     cls.room()
             Button.buttons.extend([
-                Button(cls.images['button']['square_color'], pygame.Rect(W * 11/32, H * 7/16, W * 1/8, H * 1/12), access, slice=True, text="OK"),
-                Button(cls.images['button']['square_color'], pygame.Rect(W * 11/32, H * 9/16, W * 1/8, H * 1/12), cls.create, slice=True, text="Create"),
+                Button(cls.images['button']['square_color'], pygame.Rect(W * 11/32, H * 9/16, W * 1/8, H * 1/12), access, slice=True, text="OK"),
                 Button(cls.images['button']['square_line'], pygame.Rect(W * 11/32, H * 11/16, W * 1/8, H * 1/12), cls.menu, slice=True, text="Back"),
-                Button(cls.images['button']['square_basic'], pygame.Rect(W * 1/2, H * 11/16, W * 5/32, H * 1/12), cls.search, slice=True, text="Refresh")
+                Button(cls.images['button']['square_basic'], pygame.Rect(W * 1/2, H * 11/16, W * 5/32, H * 1/12), cls.join, slice=True, text="Refresh")
             ])
             if page < len(Room.rooms):
                 def next():
-                    cls.search(page + 1)
+                    cls.join(page + 1)
                 Button.buttons.extend([
                     Button(cls.images['button']['arrow_right'], pygame.Rect(W * 19/32, H * 29/48 - 16, 32, 32), next)
                 ])
             if page > 1:
                 def prev():
-                    cls.search(page - 1)
+                    cls.join(page - 1)
                 Button.buttons.extend([
                     Button(cls.images['button']['arrow_left'], pygame.Rect(W * 9/16 - 32, H * 29/48 - 16, 32, 32), prev)
                 ])
@@ -217,9 +219,8 @@ class UnoGame:
             ])
 
             Button.buttons.extend([
-                Button(cls.images['button']['square_color'], pygame.Rect(W * 11/32, H * 9/16, W * 1/8, H * 1/12), cls.create, slice=True, text="Create"),
                 Button(cls.images['button']['square_line'], pygame.Rect(W * 11/32, H * 11/16, W * 1/8, H * 1/12), cls.menu, slice=True, text="Back"),
-                Button(cls.images['button']['square_basic'], pygame.Rect(W * 1/2, H * 11/16, W * 5/32, H * 1/12), cls.search, slice=True, text="Refresh")
+                Button(cls.images['button']['square_basic'], pygame.Rect(W * 1/2, H * 11/16, W * 5/32, H * 1/12), cls.join, slice=True, text="Refresh")
             ])
 
     @classmethod
@@ -238,7 +239,8 @@ class UnoGame:
         ])
 
         Input.inputs.extend([
-            name := Input(pygame.Rect(W * 17/32, H * 1/2, H * 1/6, H * 1/12), hint="Name"),
+            name := Input(pygame.Rect(W * 11/32, H * 1/2, W * 1/8, H * 1/12), hint="Name"), # 上排三等分给back留空间
+            room_name := Input(pygame.Rect(W * 17/32, H * 1/2, H * 1/6, H * 1/12), hint="Room"),
             password := Input(pygame.Rect(W * 11/32, H * 5/8, W * 5/32, H * 1/12), hint="Password")
         ])
 
@@ -251,43 +253,30 @@ class UnoGame:
             except ValueError:
                 raise ValueError("Password should be a number")    # TODO: 在ui中添加提示（实为错误，Exception的子类)
             else:
-                cls.host = Host(cls.client, name.text, pwd)
+                cls.role = Host(name.text, room_name.text, pwd)
                 cls.room()
         Button.buttons.extend([
-            Button(cls.images['button']['square_line'], pygame.Rect(W * 11/32, H * 1/2, W * 5/32, H * 1/12), cls.search, slice=True, text="Back"),
             Button(cls.images['button']['square_color'], pygame.Rect(W * 17/32, H * 5/8, H * 1/6, H * 1/12), host, slice=True, text="OK")
         ])
 
     @classmethod
     def room(cls):
-        if hasattr(cls, 'host'):
-            clear()
+        clear()
 
-            Column.columns.extend([
-                Column(pygame.Rect(W * 5/16, H * 1/8, W * 3/8, H * 3/4), tag=cls.client.room.name, contents=cls.client.room.players)
-            ])
+        Column.columns.extend([
+            Column(pygame.Rect(W * 5/16, H * 1/8, W * 3/8, H * 3/4), tag=cls.role.room.name, contents=cls.role.room.players)
+        ])
 
-            def back():
-                cls.host.close()
-                del cls.host
-                cls.client.reset()
-                cls.search()
+        Button.buttons.extend([
+            Button(cls.images['button']['square_line'], pygame.Rect(W * 11/32, H * 3/4, W * 1/8, H * 1/12), cls.role.close, slice=True, text="Back"),
+        ])
+
+        if isinstance(cls.role, Host):
+            def start():
+                cls.role.room.status = 1
+                cls.game()
             Button.buttons.extend([
-                Button(cls.images['button']['square_line'], pygame.Rect(W * 11/32, H * 3/4, W * 1/8, H * 1/12), back, slice=True, text="Back"),
-                Button(cls.images['button']['square_color'], pygame.Rect(W * 17/32, H * 3/4, W * 1/8, H * 1/12), cls.game, slice=True, text="Start")
-            ])
-        else:
-            clear()
-
-            Column.columns.extend([
-                Column(pygame.Rect(W * 5/16, H * 1/8, W * 3/8, H * 3/4), tag=cls.client.room.name, contents=cls.client.room.players)
-            ])
-
-            def back():
-                cls.client.reset()
-                cls.search()
-            Button.buttons.extend([
-                Button(cls.images['button']['square_line'], pygame.Rect(W * 7/16, H * 3/4, W * 1/8, H * 1/12), back, slice=True, text="Back")
+                Button(cls.images['button']['square_color'], pygame.Rect(W * 17/32, H * 3/4, W * 1/8, H * 1/12), start, slice=True, text="Start")
             ])
 
     @classmethod
@@ -300,14 +289,16 @@ class UnoGame:
 
         @Message.catch
         def network():
-            if hasattr(cls, 'client'):
-                cls.client.run()
-            if hasattr(cls, 'host'):
-                cls.host.run()
+            try:
+                cls.role.run()  # 缺乏game开始转界面
+            except ClosedError:
+                del cls.role
+                cls.menu()
 
         while update():
             if cls.counter > FPS * RUN_INTERVAL:
-                network()
+                if hasattr(cls, 'role'):
+                    network()
                 cls.counter = 0
             else:
                 cls.counter += 1

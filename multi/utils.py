@@ -123,3 +123,6 @@ class Action():
             return cls(name, action, value)
         else:
             raise TypeError
+
+class ClosedError(Exception):
+    pass

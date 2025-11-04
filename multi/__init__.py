@@ -7,6 +7,6 @@ from .host import Host
 
 __all__ = [
     'RUN_INTERVAL',
-    'Info', 'Action',
+    'Info', 'Action', 'ClosedError',
     'Room', 'Client', 'Host'
 ]
