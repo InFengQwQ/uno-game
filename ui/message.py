@@ -8,7 +8,7 @@ logging.basicConfig(
     level=logging.ERROR,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('error.log'),  # 输出到文件
+        logging.FileHandler('message.log'),  # 输出到文件
         logging.StreamHandler()            # 输出到控制台
     ]
 )
