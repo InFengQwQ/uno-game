@@ -26,21 +26,18 @@ class Host:
         else:
             raise Exception("Can not find a free port")
         self.room = Room(room_name, password, ('127.0.0.1', port))
+        self.room.players.append(self.name)
         self.connections: dict[str, dict[str, socket.socket]] = {'unverified': {}, 'verified': {}}
 
         self.actions: list[Action] = []
 
-    def close(self):
+    def close(self, reason: Exception | str = ''):
         self.sock.close()
         for conn in self.connections['unverified'].values():
             conn.close()
         for conn in self.connections['verified'].values():
             conn.close()
-        self.room.status = -1
-
-    def reset(self):
-        self.close()
-        self.__init__(self.name, self.room.name, self.room.password)
+        raise ClosedError(reason)
 
     def wait(self):
         while True:
@@ -58,18 +55,20 @@ class Host:
             except BlockingIOError:
                 continue
             except ConnectionError:
-                pass
+                self.connections['unverified'].pop(addr)
             else:
+                self.connections['unverified'].pop(addr)
                 for obj in from_stream(data):
                     request = Request.from_dict(obj)
-                    if 1 + len(self.connections['verified']) < 10:
+                    if len(self.room.players) < 10:
                         match request.name, request.password:
-                            case name, _ if name in self.connections['verified']:
+                            case name, _ if name in self.room.players:
                                 response = Response(False, "Name is already taken")
                             case _, password if password != self.room.password:
                                 response = Response(False, "Password is incorrect")
                             case _:
                                 response = Response(True, '')
+                                self.room.players.append(request.name)
                                 self.connections['verified'][request.name] = conn
                     else:
                         response = Response(False, "Room is full")
@@ -77,8 +76,6 @@ class Host:
                         conn.send(to_bytes(response.to_dict()))
                     except ConnectionError:
                         pass
-
-            del self.connections['unverified'][addr]
 
     def go(self):
         def action():   # 持续接收玩家行为
@@ -88,7 +85,7 @@ class Host:
                 except BlockingIOError:
                     pass
                 except ConnectionError:
-                    self.room.players.remove(name)
+                    self.connections['verified'].pop(name)
                 else:
                     for obj in from_stream(data):
                         action = Action.from_dict(obj)
@@ -102,9 +99,6 @@ class Host:
         action()
 
     def sync(self):
-        self.room.players.clear()
-        self.room.players.append(self.name)
-        self.room.players.extend(self.connections['verified'])
         for name, conn in self.connections['verified'].copy().items():
             try:
                 if not conn.recv(1, socket.MSG_PEEK):
@@ -112,12 +106,11 @@ class Host:
             except BlockingIOError:
                 pass
             except ConnectionError:
-                del self.connections['verified'][name]
+                self.room.players.remove(name)
+                self.connections['verified'].pop(name)
         self.room.broadcast()
 
     def run(self):
-        if self.room.status == -1:
-            raise ClosedError
         match self.room.status:
             case 0:
                 self.wait()

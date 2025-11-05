@@ -1,4 +1,4 @@
-from . import BUFFER_SIZE, to_bytes, from_stream, Info, Request, Response, Room
+from . import BUFFER_SIZE, to_bytes, from_stream, Info, Request, Response, ClosedError, Room
 import socket
 
 
@@ -12,14 +12,11 @@ class Client:
         self.sock: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.room: Room
 
-    def close(self):
+    def close(self, reason: Exception | str = ''):
         self.sock.close()
         if hasattr(self, 'room'):
             del self.room
-
-    def reset(self):
-        self.close()
-        self.__init__(self.name)
+        raise ClosedError(reason)
 
     def join(self, info: Info, password: int):
         """Join a room."""
@@ -36,17 +33,14 @@ class Client:
             try:
                 self.sock.send(to_bytes(request.to_dict()))
             except ConnectionError as e:
-                self.close()
-                raise e
+                self.close(e)
             else:
                 try:
                     data = self.sock.recv(BUFFER_SIZE)
                 except TimeoutError as e:
-                    self.close()
-                    raise e
+                    self.close(e)
                 except ConnectionError as e:
-                    self.close()
-                    raise e
+                    self.close(e)
                 else:
                     for obj in from_stream(data):
                         response = Response.from_dict(obj)
@@ -54,8 +48,7 @@ class Client:
                             self.sock.setblocking(False)
                             self.room = Room(info.name, password, info.addr)
                         else:
-                            self.close()
-                            raise Exception(response.message)
+                            self.close(response.message)
 
     def wait(self):
         pass
@@ -71,8 +64,8 @@ class Client:
                 raise ConnectionError
         except BlockingIOError:
             pass
-        except ConnectionError:
-            self.reset()
+        except ConnectionError as e:
+            self.close(e)
 
     def run(self):
         if hasattr(self, 'room'):

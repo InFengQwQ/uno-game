@@ -971,3 +971,829 @@ Traceback (most recent call last):
     if not self.sock.recv(1, socket.MSG_PEEK):
            ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
 OSError: [WinError 10057] 由于套接字没有连接并且(当使用一个 sendto 调用发送数据报套接字时)没有提供地址，发送或接收数据的请求没有被接受。
+2025-11-05 15:19:11,475 - ERROR - 函数 access 发生异常: Name is already taken
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 188, in access
+    client.join(info, pwd)
+    ~~~~~~~~~~~^^^^^^^^^^^
+  File "f:\projects\uno-game\multi\client.py", line 58, in join
+    raise Exception(response.message)
+Exception: Name is already taken
+2025-11-05 15:51:19,311 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:19,448 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:19,582 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:19,712 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:19,846 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:19,979 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:20,112 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:20,249 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:20,383 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:20,510 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:20,638 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:20,771 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:20,905 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:21,040 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:21,170 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:21,301 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:21,436 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:21,568 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:21,699 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:21,831 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:21,964 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:22,098 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:22,226 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:22,361 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:22,495 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:22,621 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:22,761 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:22,888 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:23,019 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:23,153 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:23,284 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:23,411 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:23,543 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:23,676 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:23,809 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:23,940 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:24,074 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:24,202 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:24,333 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:24,463 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:24,597 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:24,730 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:24,857 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:24,991 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:25,122 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:25,256 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:25,388 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:51:25,519 - ERROR - 函数 network 发生异常: [WinError 10038] 在一个非套接字上尝试了一个操作。
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 279, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 116, in run
+    self.wait()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\host.py", line 45, in wait
+    conn, addr = self.sock.accept()
+                 ~~~~~~~~~~~~~~~~^^
+  File "D:\DevEnv\Runtimes\Python313\Lib\socket.py", line 295, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。

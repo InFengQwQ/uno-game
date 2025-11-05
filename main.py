@@ -129,26 +129,6 @@ class UnoGame:
             Button(cls.images['button']['square_line'], pygame.Rect(W * 13/32, H * 5/8, W * 3/16, H * 1/12), quit, slice=True, text="Quit")
         ])
 
-    # @classmethod
-    # def enter(cls):
-    #     clear()
-
-    #     Column.columns.extend([
-    #         Column(pygame.Rect(W * 11/32, H * 3/8, W * 5/16, H * 1/4), tag="Join")
-    #     ])
-
-    #     Input.inputs.extend([
-    #         name := Input(pygame.Rect(W * 3/8, H * 1/2, W * 1/8, H * 1/12), hint="Name")
-    #     ])
-
-    #     @Message.catch
-    #     def client():
-    #         cls.client = Client(name.text)
-    #         cls.join()
-    #     Button.buttons.extend([
-    #         Button(cls.images['button']['square_color'], pygame.Rect(W * 17/32, H * 1/2, W * 3/32, H * 1/12), client, slice=True, text="OK")
-    #     ])
-
     @classmethod
     def join(cls, page: int = 1):
         Room.receive()
@@ -239,8 +219,8 @@ class UnoGame:
         ])
 
         Input.inputs.extend([
-            name := Input(pygame.Rect(W * 11/32, H * 1/2, W * 1/8, H * 1/12), hint="Name"), # 上排三等分给back留空间
-            room_name := Input(pygame.Rect(W * 17/32, H * 1/2, H * 1/6, H * 1/12), hint="Room"),
+            name := Input(pygame.Rect(W * 29/64, H * 1/2, W * 3/32, H * 1/12), hint="Name"), # 上排三等分给back留空间
+            room_name := Input(pygame.Rect(W * 9/16, H * 1/2, W * 3/32, H * 1/12), hint="Room"),
             password := Input(pygame.Rect(W * 11/32, H * 5/8, W * 5/32, H * 1/12), hint="Password")
         ])
 
@@ -256,7 +236,8 @@ class UnoGame:
                 cls.role = Host(name.text, room_name.text, pwd)
                 cls.room()
         Button.buttons.extend([
-            Button(cls.images['button']['square_color'], pygame.Rect(W * 17/32, H * 5/8, H * 1/6, H * 1/12), host, slice=True, text="OK")
+            Button(cls.images['button']['square_line'], pygame.Rect(W * 11/32, H * 1/2, W * 3/32, H * 1/12), cls.menu, slice=True, text='Back'),
+            Button(cls.images['button']['square_color'], pygame.Rect(W * 17/32, H * 5/8, W * 1/8, H * 1/12), host, slice=True, text="OK")
         ])
 
     @classmethod
@@ -267,8 +248,14 @@ class UnoGame:
             Column(pygame.Rect(W * 5/16, H * 1/8, W * 3/8, H * 3/4), tag=cls.role.room.name, contents=cls.role.room.players)
         ])
 
+        def back():
+            try:
+                cls.role.close()
+            except ClosedError:
+                del cls.role
+                cls.menu()
         Button.buttons.extend([
-            Button(cls.images['button']['square_line'], pygame.Rect(W * 11/32, H * 3/4, W * 1/8, H * 1/12), cls.role.close, slice=True, text="Back"),
+            Button(cls.images['button']['square_line'], pygame.Rect(W * 11/32, H * 3/4, W * 1/8, H * 1/12), back, slice=True, text="Back"),
         ])
 
         if isinstance(cls.role, Host):
@@ -291,9 +278,10 @@ class UnoGame:
         def network():
             try:
                 cls.role.run()  # 缺乏game开始转界面
-            except ClosedError:
+            except ClosedError as e:
                 del cls.role
                 cls.menu()
+                raise e
 
         while update():
             if cls.counter > FPS * RUN_INTERVAL:
