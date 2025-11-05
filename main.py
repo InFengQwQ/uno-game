@@ -270,6 +270,7 @@ class UnoGame:
     @classmethod
     def run(cls):
         cls.menu()
+        counter = update()
 
         @Message.catch
         def network():
@@ -280,17 +281,15 @@ class UnoGame:
                 cls.menu()
                 raise e
 
-        counter = 0
-        while update():
-            if counter > FPS * RUN_INTERVAL:
-                Room.update()
+        while counter := update(counter):
+            if not int(counter % (FPS * RUN_INTERVAL)):
                 if hasattr(cls, 'role'):
                     network()
-                counter = 0
-            else:
+            if not int(counter % (FPS * ROOM_UPDATE_INTERVAL)):
+                Room.update()
+            if not int(counter % (FPS * ROOM_RECEIVE_INTERVAL)):
                 Room.receive()
-                counter += 1
-        
+
         quit()
 
 

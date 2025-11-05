@@ -1,5 +1,6 @@
 # How long to execute a single run() loop
-RUN_INTERVAL = 0.1
+RUN_INTERVAL = ROOM_UPDATE_INTERVAL = 1
+ROOM_RECEIVE_INTERVAL = 0.5
 
 # Multicast group address and port for room discovery
 MULTICAST_GROUP = '239.255.0.0'

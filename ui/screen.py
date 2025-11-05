@@ -19,7 +19,7 @@ def clear():
     Input.inputs.clear()
     Button.buttons.clear()
 
-def update():
+def update(counter: int = 0):
     """Update all UI elements and handle user events each frame."""
 
     clock.tick(FPS)
@@ -32,7 +32,7 @@ def update():
         Message.update_all()
         if event.type == pygame.QUIT:
             pygame.quit()
-            return False
+            return 0
 
     screen.fill(BACKGROUND_COLOR)
     screen.blit(scene, (0, 0))
@@ -47,4 +47,4 @@ def update():
     else:
         pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
-    return True
+    return counter + 1

@@ -36,12 +36,6 @@ class Info():
         self.players = players
         self.status = status
 
-    # def __eq__(self, other: object):
-    #     if isinstance(other, Info):
-    #         return self.addr == other.addr
-    #     else:
-    #         return NotImplemented
-
     def __lt__(self, other: object):
         if isinstance(other, Info):
             return self.name < other.name
