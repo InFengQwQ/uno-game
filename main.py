@@ -2,6 +2,7 @@ from ui import *
 from multi import *
 from uno import *
 import pygame
+from sys import exit
 # 所有游戏内核在主机完成，所以大多数实例对象仅存在于主机
 # 对于客户端的玩家的数据，主机仍留有备份，客户端拥有手牌的卡牌类（主机发送json标明卡牌属性），仅此而已
 # 当然，客户端需要知道弃牌堆顶的牌，并通过rule判断自己可以打出什么，主机也应该脱离内核实现同样的架构
@@ -124,7 +125,7 @@ class UnoGame:
         Button.buttons.extend([
             Button(cls.images['button']['square_color'], pygame.Rect(W * 13/32, H * 3/8, W * 3/16, H * 1/12), cls.create, slice=True, text="Create"),
             Button(cls.images['button']['square_basic'], pygame.Rect(W * 13/32, H * 1/2, W * 3/16, H * 1/12), cls.join, slice=True, text="Join"),
-            Button(cls.images['button']['square_line'], pygame.Rect(W * 13/32, H * 5/8, W * 3/16, H * 1/12), quit, slice=True, text="Quit")
+            Button(cls.images['button']['square_line'], pygame.Rect(W * 13/32, H * 5/8, W * 3/16, H * 1/12), exit, slice=True, text="Quit")
         ])
 
     @classmethod
@@ -290,7 +291,7 @@ class UnoGame:
             if not int(counter % (FPS * ROOM_RECEIVE_INTERVAL)):
                 Room.receive()
 
-        quit()
+        exit()
 
 
 # def main():
