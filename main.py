@@ -110,8 +110,6 @@ class UnoGame:
 
     role: Client | Host
 
-    counter: int = 0
-
     @classmethod
     def menu(cls):
         clear()
@@ -283,13 +281,14 @@ class UnoGame:
                 cls.menu()
                 raise e
 
+        counter = 0
         while update():
-            if cls.counter > FPS * RUN_INTERVAL:
+            if counter > FPS * RUN_INTERVAL:
                 if hasattr(cls, 'role'):
                     network()
-                cls.counter = 0
+                counter = 0
             else:
-                cls.counter += 1
+                counter += 1
         
         quit()
 
