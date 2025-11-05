@@ -61,11 +61,9 @@ class Client:
 
         try:
             if not self.sock.recv(1, socket.MSG_PEEK):
-                raise ConnectionError
+                self.close("Failed to connect to the host")
         except BlockingIOError:
             pass
-        except ConnectionError as e:
-            self.close(e)
 
     def run(self):
         if hasattr(self, 'room'):

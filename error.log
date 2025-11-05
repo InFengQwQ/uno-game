@@ -1797,3 +1797,103 @@ Traceback (most recent call last):
     fd, addr = self._accept()
                ~~~~~~~~~~~~^^
 OSError: [WinError 10038] 在一个非套接字上尝试了一个操作。
+2025-11-05 15:55:56,925 - ERROR - 函数 host 发生异常: Password should be a number
+Traceback (most recent call last):
+  File "f:\projects\uno-game\main.py", line 230, in host
+    pwd = int(password.text)
+ValueError: invalid literal for int() with base 10: ''
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 234, in host
+    raise ValueError("Password should be a number")    # TODO: 在ui中添加提示（实为错误，Exception的子类)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Password should be a number
+2025-11-05 15:55:58,886 - ERROR - 函数 host 发生异常: Password should be a number
+Traceback (most recent call last):
+  File "f:\projects\uno-game\main.py", line 230, in host
+    pwd = int(password.text)
+ValueError: invalid literal for int() with base 10: ''
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 234, in host
+    raise ValueError("Password should be a number")    # TODO: 在ui中添加提示（实为错误，Exception的子类)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Password should be a number
+2025-11-05 15:55:59,484 - ERROR - 函数 host 发生异常: Password should be a number
+Traceback (most recent call last):
+  File "f:\projects\uno-game\main.py", line 230, in host
+    pwd = int(password.text)
+ValueError: invalid literal for int() with base 10: ''
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 234, in host
+    raise ValueError("Password should be a number")    # TODO: 在ui中添加提示（实为错误，Exception的子类)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Password should be a number
+2025-11-05 15:56:51,614 - ERROR - 函数 host 发生异常: Password should be a number
+Traceback (most recent call last):
+  File "f:\projects\uno-game\main.py", line 232, in host
+    raise ValueError
+ValueError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 234, in host
+    raise ValueError("Password should be a number")    # TODO: 在ui中添加提示（实为错误，Exception的子类)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Password should be a number
+2025-11-05 15:56:56,626 - ERROR - 函数 host 发生异常: Password should be a number
+Traceback (most recent call last):
+  File "f:\projects\uno-game\main.py", line 232, in host
+    raise ValueError
+ValueError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 234, in host
+    raise ValueError("Password should be a number")    # TODO: 在ui中添加提示（实为错误，Exception的子类)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Password should be a number
+2025-11-05 16:00:19,621 - ERROR - 函数 network 发生异常: 
+Traceback (most recent call last):
+  File "f:\projects\uno-game\multi\client.py", line 64, in sync
+    raise ConnectionError
+ConnectionError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 284, in network
+    raise e
+  File "f:\projects\uno-game\main.py", line 280, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 73, in run
+    self.sync()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 68, in sync
+    self.close(e)
+    ~~~~~~~~~~^^^
+  File "f:\projects\uno-game\multi\client.py", line 19, in close
+    raise ClosedError(reason)
+multi.utils.ClosedError

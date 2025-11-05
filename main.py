@@ -231,7 +231,7 @@ class UnoGame:
                 if pwd < 0 or pwd != float(password.text):
                     raise ValueError
             except ValueError:
-                raise ValueError("Password should be a number")    # TODO: 在ui中添加提示（实为错误，Exception的子类)
+                raise ValueError("Password should be a number")
             else:
                 cls.role = Host(name.text, room_name.text, pwd)
                 cls.room()
