@@ -129,7 +129,6 @@ class UnoGame:
 
     @classmethod
     def join(cls, page: int = 1):
-        Room.receive()
         if Room.rooms:
             page = min(page, len(Room.rooms))
             info = sorted(Room.rooms.values())[page - 1]
@@ -284,10 +283,12 @@ class UnoGame:
         counter = 0
         while update():
             if counter > FPS * RUN_INTERVAL:
+                Room.update()
                 if hasattr(cls, 'role'):
                     network()
                 counter = 0
             else:
+                Room.receive()
                 counter += 1
         
         quit()

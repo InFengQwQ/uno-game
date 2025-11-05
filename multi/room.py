@@ -5,7 +5,8 @@ import socket
 class Room:
     """A room in the multiplayer game."""
 
-    rooms: dict[tuple[str, int], Info] = {} # 整一个列表剔除数次receive之外的值，最新的几次receive合并作为rooms
+    buffer: list[Info] = [] # 整一个列表剔除数次receive之外的值，最新的几次receive合并作为rooms
+    rooms: dict[tuple[str, int], Info] = {}
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -41,4 +42,13 @@ class Room:
             else:
                 if obj := from_packet(data):
                     info = Info.from_dict(obj, ip)
-                    cls.rooms[info.addr] = info
+                    cls.buffer.append(info)
+
+    @classmethod
+    def update(cls):
+        """Merge room information from the buffer and update the rooms list."""
+
+        cls.rooms.clear()
+        while cls.buffer:
+            info = cls.buffer.pop(0)
+            cls.rooms[info.addr] = info

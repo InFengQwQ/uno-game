@@ -1915,3 +1915,21 @@ Traceback (most recent call last):
   File "f:\projects\uno-game\multi\client.py", line 19, in close
     raise ClosedError(reason)
 multi.utils.ClosedError: Failed to connect to the host
+2025-11-05 17:29:55,171 - ERROR - 函数 network 发生异常: Failed to connect to the host
+Traceback (most recent call last):
+  File "f:\projects\uno-game\ui\message.py", line 56, in wrapper
+    return func(*args, **kwargs)
+  File "f:\projects\uno-game\main.py", line 281, in network
+    raise e
+  File "f:\projects\uno-game\main.py", line 277, in network
+    cls.role.run()  # 缺乏game开始转界面
+    ~~~~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 70, in run
+    self.sync()
+    ~~~~~~~~~^^
+  File "f:\projects\uno-game\multi\client.py", line 59, in sync
+    self.close("Failed to connect to the host")
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "f:\projects\uno-game\multi\client.py", line 19, in close
+    raise ClosedError(reason)
+multi.utils.ClosedError: Failed to connect to the host

@@ -102,12 +102,10 @@ class Host:
         for name, conn in self.connections['verified'].copy().items():
             try:
                 if not conn.recv(1, socket.MSG_PEEK):
-                    raise ConnectionError
+                    self.room.players.remove(name)
+                    self.connections['verified'].pop(name)
             except BlockingIOError:
                 pass
-            except ConnectionError:
-                self.room.players.remove(name)
-                self.connections['verified'].pop(name)
         self.room.broadcast()
 
     def run(self):

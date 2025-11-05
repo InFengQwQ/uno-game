@@ -54,16 +54,15 @@ class Client:
         pass
 
     def sync(self): # 但是没法回到主界面啊...
-        Room.receive()
-        if info := Room.rooms.get(self.room.addr):
-            self.room.players[:] = info.players
-            self.room.status = info.status
-
         try:
             if not self.sock.recv(1, socket.MSG_PEEK):
                 self.close("Failed to connect to the host")
         except BlockingIOError:
             pass
+
+        if info := Room.rooms.get(self.room.addr):
+            self.room.players[:] = info.players
+            self.room.status = info.status
 
     def run(self):
         if hasattr(self, 'room'):
