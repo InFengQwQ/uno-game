@@ -30,6 +30,7 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+*.spec
 
 # 单元测试和覆盖率
 htmlcov/
