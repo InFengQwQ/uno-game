@@ -1,10 +1,3 @@
-import sys
-import os
-
-if hasattr(sys, '_MEIPASS'):
-    os.chdir(sys._MEIPASS)  # type: ignore
-
-
 from ui import *
 from multi import *
 from uno import *
@@ -27,93 +20,95 @@ DEFAULT_TEXTS = ['hint', 'text']
 SMALL_TEXTS = ['message']
 NARROW_TEXTS = ['content']
 
+images: dict[str, dict[str, pygame.Surface]] = {
+    'info': {
+        'cards_text': pygame.image.load('assets/images/info/cards_text.svg').convert_alpha(),
+        'players_2_10': pygame.image.load('assets/images/info/players_2_10.svg').convert_alpha()
+    },
+    'column': {
+        'back': pygame.image.load('assets/images/column/back.svg').convert_alpha(),
+        'front': pygame.image.load('assets/images/column/front.svg').convert_alpha(),
+        'divider': pygame.image.load('assets/images/column/divider.svg').convert_alpha()
+    },
+    'input': {
+        'inactive': pygame.image.load('assets/images/input/inactive.svg').convert_alpha(),
+        'active': pygame.image.load('assets/images/input/active.svg').convert_alpha()
+    },
+    'button': {
+        **{
+            f'{shape}_{style}': pygame.image.load(f'assets/images/button/default/{shape}_{style}.svg').convert_alpha()
+            for shape in BUTTON_SHAPES
+            for style in BUTTON_STYLES
+        },
+        **{
+            f'arrow_{direction}': pygame.image.load(f'assets/images/button/arrow/{direction}.svg').convert_alpha()
+            for direction in ARROW_DIRECTIONS
+        }
+    },
+    'message': {
+        'box': pygame.image.load('assets/images/message/box.svg').convert_alpha()
+    },
+    'cards': {
+        'back': pygame.image.load('assets/images/cards/back.png').convert_alpha(),
+        **{
+            f'{color}_empty': pygame.image.load(f'assets/images/cards/{color}_empty.png').convert_alpha()
+            for color in COLORS
+        },
+        **{
+            f'{color}_{value}': pygame.image.load(f'assets/images/cards/numbers/{color}_{value}.png').convert_alpha()
+            for color in COLORS
+            for value in NUMBERS
+        },
+        **{
+            f'{color}_{action}': pygame.image.load(f'assets/images/cards/actions/{color}_{action}.png').convert_alpha()
+            for color in COLORS
+            for action in ACTIONS
+        },
+        **{
+            f'{BLACK_COLOR}_{wild}': pygame.image.load(f'assets/images/cards/wilds/{BLACK_COLOR}_{wild}.png').convert_alpha()
+            for wild in WILDS
+        }
+    }
+}
+fonts: dict[str, pygame.font.Font] = {
+    **{
+        large: pygame.font.Font('assets/fonts/Kenney Future.ttf', 24)
+        for large in LARGE_TEXTS
+    },
+    **{
+        default: pygame.font.Font('assets/fonts/Kenney Future.ttf', 16)
+        for default in DEFAULT_TEXTS
+    },
+    **{
+        small: pygame.font.Font('assets/fonts/Kenney Future.ttf', 8)
+        for small in SMALL_TEXTS
+    },
+    **{
+        narrow: pygame.font.Font('assets/fonts/Kenney Future Narrow.ttf', 16)
+        for narrow in NARROW_TEXTS
+    }
+}
+sounds: dict[str, pygame.mixer.Sound] = {
+    'click': pygame.mixer.Sound('assets/sounds/click.ogg'),
+    'tap': pygame.mixer.Sound('assets/sounds/tap.ogg')
+}
+# pygame.mixer.music.load('assets/audio/music.ogg') 背景音乐加载，.play()播放
+
+Column.back_image = images['column']['back']
+Column.front_image = images['column']['front']
+Column.divider_image = images['column']['divider']
+Column.tag_font = fonts['tag']
+Column.content_font = fonts['content']
+Input.inactive_image = images['input']['inactive']
+Input.active_image = images['input']['active']
+Input.hint_font = fonts['hint']
+Input.tap_sound = sounds['tap']
+Button.text_font = fonts['text']
+Button.click_sound = sounds['click']
+Message.message_image = images['message']['box']
+Message.message_font = fonts['message']
+
 class UnoGame:
-    images: dict[str, dict[str, pygame.Surface]] = {
-        'info': {
-            'cards_text': pygame.image.load('assets/images/info/cards_text.svg').convert_alpha(),
-            'players_2_10': pygame.image.load('assets/images/info/players_2_10.svg').convert_alpha()
-        },
-        'column': {
-            'back': pygame.image.load('assets/images/column/back.svg').convert_alpha(),
-            'front': pygame.image.load('assets/images/column/front.svg').convert_alpha(),
-            'divider': pygame.image.load('assets/images/column/divider.svg').convert_alpha()
-        },
-        'input': {
-            'inactive': pygame.image.load('assets/images/input/inactive.svg').convert_alpha(),
-            'active': pygame.image.load('assets/images/input/active.svg').convert_alpha()
-        },
-        'button': {
-            **{
-                f'{shape}_{style}': pygame.image.load(f'assets/images/button/default/{shape}_{style}.svg').convert_alpha()
-                for shape in BUTTON_SHAPES
-                for style in BUTTON_STYLES
-            },
-            **{
-                f'arrow_{direction}': pygame.image.load(f'assets/images/button/arrow/{direction}.svg').convert_alpha()
-                for direction in ARROW_DIRECTIONS
-            }
-        },
-        'message': {
-            'box': pygame.image.load('assets/images/message/box.svg').convert_alpha()
-        },
-        'cards': {
-            'back': pygame.image.load('assets/images/cards/back.png').convert_alpha(),
-            **{
-                f'{color}_empty': pygame.image.load(f'assets/images/cards/{color}_empty.png').convert_alpha()
-                for color in COLORS
-            },
-            **{
-                f'{color}_{value}': pygame.image.load(f'assets/images/cards/numbers/{color}_{value}.png').convert_alpha()
-                for color in COLORS
-                for value in NUMBERS
-            },
-            **{
-                f'{color}_{action}': pygame.image.load(f'assets/images/cards/actions/{color}_{action}.png').convert_alpha()
-                for color in COLORS
-                for action in ACTIONS
-            },
-            **{
-                f'{BLACK_COLOR}_{wild}': pygame.image.load(f'assets/images/cards/wilds/{BLACK_COLOR}_{wild}.png').convert_alpha()
-                for wild in WILDS
-            }
-        }
-    }
-    fonts: dict[str, pygame.font.Font] = {
-        **{
-            large: pygame.font.Font('assets/fonts/Kenney Future.ttf', 24)
-            for large in LARGE_TEXTS
-        },
-        **{
-            default: pygame.font.Font('assets/fonts/Kenney Future.ttf', 16)
-            for default in DEFAULT_TEXTS
-        },
-        **{
-            small: pygame.font.Font('assets/fonts/Kenney Future.ttf', 8)
-            for small in SMALL_TEXTS
-        },
-        **{
-            narrow: pygame.font.Font('assets/fonts/Kenney Future Narrow.ttf', 16)
-            for narrow in NARROW_TEXTS
-        }
-    }
-    sounds: dict[str, pygame.mixer.Sound] = {
-        'click': pygame.mixer.Sound('assets/sounds/click.ogg'),
-        'tap': pygame.mixer.Sound('assets/sounds/tap.ogg')
-    }
-    # pygame.mixer.music.load('assets/audio/music.ogg') 背景音乐加载，.play()播放
-    Column.back_image = images['column']['back']
-    Column.front_image = images['column']['front']
-    Column.divider_image = images['column']['divider']
-    Column.tag_font = fonts['tag']
-    Column.content_font = fonts['content']
-    Input.inactive_image = images['input']['inactive']
-    Input.active_image = images['input']['active']
-    Input.hint_font = fonts['hint']
-    Input.tap_sound = sounds['tap']
-    Button.text_font = fonts['text']
-    Button.click_sound = sounds['click']
-    Message.message_image = images['message']['box']
-    Message.message_font = fonts['message']
 
     role: Client | Host
 
@@ -121,17 +116,17 @@ class UnoGame:
     def menu(cls):
         clear()
 
-        scene.blit(pygame.transform.scale(cls.images['info']['cards_text'], (64, 64)), (10, 10))
-        scene.blit(pygame.transform.scale(cls.images['info']['players_2_10'], (64, 64)), (84, 10))
+        scene.blit(pygame.transform.scale(images['info']['cards_text'], (64, 64)), (10, 10))
+        scene.blit(pygame.transform.scale(images['info']['players_2_10'], (64, 64)), (84, 10))
 
         Column.columns.extend([
             Column(pygame.Rect(W * 3/8, H * 1/4, W * 1/4, H * 1/2), tag="Menu")
         ])
 
         Button.buttons.extend([
-            Button(cls.images['button']['square_color'], pygame.Rect(W * 13/32, H * 3/8, W * 3/16, H * 1/12), cls.create, slice=True, text="Create"),
-            Button(cls.images['button']['square_basic'], pygame.Rect(W * 13/32, H * 1/2, W * 3/16, H * 1/12), cls.join, slice=True, text="Join"),
-            Button(cls.images['button']['square_line'], pygame.Rect(W * 13/32, H * 5/8, W * 3/16, H * 1/12), sys.exit, slice=True, text="Exit")
+            Button(images['button']['square_color'], pygame.Rect(W * 13/32, H * 3/8, W * 3/16, H * 1/12), cls.create, slice=True, text="Create"),
+            Button(images['button']['square_basic'], pygame.Rect(W * 13/32, H * 1/2, W * 3/16, H * 1/12), cls.join, slice=True, text="Join"),
+            Button(images['button']['square_line'], pygame.Rect(W * 13/32, H * 5/8, W * 3/16, H * 1/12), lambda: None, slice=True, text="Options")
         ])
 
     @classmethod
@@ -173,21 +168,21 @@ class UnoGame:
                     cls.role = client
                     cls.room()
             Button.buttons.extend([
-                Button(cls.images['button']['square_color'], pygame.Rect(W * 11/32, H * 9/16, W * 1/8, H * 1/12), access, slice=True, text="OK"),
-                Button(cls.images['button']['square_line'], pygame.Rect(W * 11/32, H * 11/16, W * 1/8, H * 1/12), cls.menu, slice=True, text="Back"),
-                Button(cls.images['button']['square_basic'], pygame.Rect(W * 1/2, H * 11/16, W * 5/32, H * 1/12), cls.join, slice=True, text="Refresh")
+                Button(images['button']['square_color'], pygame.Rect(W * 11/32, H * 9/16, W * 1/8, H * 1/12), access, slice=True, text="OK"),
+                Button(images['button']['square_line'], pygame.Rect(W * 11/32, H * 11/16, W * 1/8, H * 1/12), cls.menu, slice=True, text="Back"),
+                Button(images['button']['square_basic'], pygame.Rect(W * 1/2, H * 11/16, W * 5/32, H * 1/12), cls.join, slice=True, text="Refresh")
             ])
             if page < len(Room.rooms):
                 def next():
                     cls.join(page + 1)
                 Button.buttons.extend([
-                    Button(cls.images['button']['arrow_right'], pygame.Rect(W * 19/32, H * 29/48 - 16, 32, 32), next)
+                    Button(images['button']['arrow_right'], pygame.Rect(W * 19/32, H * 29/48 - 16, 32, 32), next)
                 ])
             if page > 1:
                 def prev():
                     cls.join(page - 1)
                 Button.buttons.extend([
-                    Button(cls.images['button']['arrow_left'], pygame.Rect(W * 9/16 - 32, H * 29/48 - 16, 32, 32), prev)
+                    Button(images['button']['arrow_left'], pygame.Rect(W * 9/16 - 32, H * 29/48 - 16, 32, 32), prev)
                 ])
         else:
             clear()
@@ -203,8 +198,8 @@ class UnoGame:
             ])
 
             Button.buttons.extend([
-                Button(cls.images['button']['square_line'], pygame.Rect(W * 11/32, H * 11/16, W * 1/8, H * 1/12), cls.menu, slice=True, text="Back"),
-                Button(cls.images['button']['square_basic'], pygame.Rect(W * 1/2, H * 11/16, W * 5/32, H * 1/12), cls.join, slice=True, text="Refresh")
+                Button(images['button']['square_line'], pygame.Rect(W * 11/32, H * 11/16, W * 1/8, H * 1/12), cls.menu, slice=True, text="Back"),
+                Button(images['button']['square_basic'], pygame.Rect(W * 1/2, H * 11/16, W * 5/32, H * 1/12), cls.join, slice=True, text="Refresh")
             ])
 
     @classmethod
@@ -240,8 +235,8 @@ class UnoGame:
                 cls.role = Host(name.text, room_name.text, pwd)
                 cls.room()
         Button.buttons.extend([
-            Button(cls.images['button']['square_line'], pygame.Rect(W * 11/32, H * 1/2, W * 3/32, H * 1/12), cls.menu, slice=True, text='Back'),
-            Button(cls.images['button']['square_color'], pygame.Rect(W * 17/32, H * 5/8, W * 1/8, H * 1/12), host, slice=True, text="OK")
+            Button(images['button']['square_line'], pygame.Rect(W * 11/32, H * 1/2, W * 3/32, H * 1/12), cls.menu, slice=True, text='Back'),
+            Button(images['button']['square_color'], pygame.Rect(W * 17/32, H * 5/8, W * 1/8, H * 1/12), host, slice=True, text="OK")
         ])
 
     @classmethod
@@ -259,7 +254,7 @@ class UnoGame:
                 del cls.role
                 cls.menu()
         Button.buttons.extend([
-            Button(cls.images['button']['square_line'], pygame.Rect(W * 11/32, H * 3/4, W * 1/8, H * 1/12), back, slice=True, text="Back"),
+            Button(images['button']['square_line'], pygame.Rect(W * 11/32, H * 3/4, W * 1/8, H * 1/12), back, slice=True, text="Back"),
         ])
 
         if isinstance(cls.role, Host):
@@ -267,7 +262,7 @@ class UnoGame:
                 cls.role.room.status = 1
                 cls.game()
             Button.buttons.extend([
-                Button(cls.images['button']['square_color'], pygame.Rect(W * 17/32, H * 3/4, W * 1/8, H * 1/12), start, slice=True, text="Start")
+                Button(images['button']['square_color'], pygame.Rect(W * 17/32, H * 3/4, W * 1/8, H * 1/12), start, slice=True, text="Start")
             ])
 
     @classmethod
@@ -356,4 +351,3 @@ class UnoGame:
 
 if __name__ == '__main__':
     UnoGame.run()
-    sys.exit()

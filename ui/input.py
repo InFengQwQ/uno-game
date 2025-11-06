@@ -3,6 +3,7 @@ import pygame
 
 
 class Input(pygame.Surface):    # TODO: 输入事件类型？
+
     inputs: list['Input'] = []
 
     inactive_image: pygame.Surface
@@ -13,18 +14,19 @@ class Input(pygame.Surface):    # TODO: 输入事件类型？
     def __init__(self, rect: pygame.Rect, hint: str = ''):
         super().__init__(rect.size, pygame.SRCALPHA)
 
-        self.inactive = scale(Input.inactive_image, rect.size)
-        self.active = scale(Input.active_image, rect.size)
-        self.area = self.subsurface((8, 8), (rect.w - 16, rect.h - 16))
+        self.inactive_surface = scale(Input.inactive_image, rect.size)
+        self.active_surface = scale(Input.active_image, rect.size)
+        self.text_area = self.subsurface((8, 8), (rect.w - 16, rect.h - 16))
+        self.mask = pygame.mask.from_surface(self.inactive_surface)
 
         self.rect = rect
-        self.mask = pygame.mask.from_surface(self.inactive)
         self.hint = hint
-        self.activated = False
+
+        self.is_activated = False
         self.text = ''
 
     @property
-    def hover(self):
+    def is_hovered(self):
         mx, my = pygame.mouse.get_pos()
         x, y = self.rect.topleft
         pos = mx - x, my - y
@@ -32,33 +34,33 @@ class Input(pygame.Surface):    # TODO: 输入事件类型？
 
     def update(self, event: pygame.event.Event):
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if self.hover:
-                self.activated = True
+            if self.is_hovered:
+                self.is_activated = True
                 Input.tap_sound.play()
             else:
-                self.activated = False
+                self.is_activated = False
 
-        if self.activated:
+        if self.is_activated:
             if event.type == pygame.TEXTINPUT:
                 self.text += event.text
             if event.type == pygame.KEYDOWN and event.key == pygame.K_BACKSPACE:
                 self.text = self.text[:-1] if self.text else ''
             if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-                self.activated = False
-            self.blit(self.active, (0, 0))
+                self.is_activated = False
+            self.blit(self.active_surface, (0, 0))
         else:
-            self.blit(self.inactive, (0, 0))
+            self.blit(self.inactive_surface, (0, 0))
 
         if self.text:
-            font = pygame.font.SysFont(None, self.area.get_rect().h)
+            font = pygame.font.SysFont(None, self.text_area.get_rect().h)
             text_surface = font.render(self.text, True, TEXT_COLOR)
-            text_rect = text_surface.get_rect(midright=self.area.get_rect().midright)
-            self.area.blit(text_surface, text_rect)
+            text_rect = text_surface.get_rect(midright=self.text_area.get_rect().midright)
+            self.text_area.blit(text_surface, text_rect)
         else:
             if self.hint:
                 hint_surface = Input.hint_font.render(self.hint, True, HINT_COLOR)
-                hint_rect = hint_surface.get_rect(center=self.area.get_rect().center)
-                self.area.blit(hint_surface, hint_rect)
+                hint_rect = hint_surface.get_rect(center=self.text_area.get_rect().center)
+                self.text_area.blit(hint_surface, hint_rect)
 
     @classmethod
     def update_all(cls, event: pygame.event.Event):

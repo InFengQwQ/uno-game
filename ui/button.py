@@ -4,6 +4,7 @@ from typing import Callable
 
 
 class Button(pygame.Surface):
+
     buttons: list['Button'] = []
 
     text_font: pygame.font.Font
@@ -20,14 +21,14 @@ class Button(pygame.Surface):
             text_surface = Button.text_font.render(text, True, TEXT_COLOR)
             text_rect = text_surface.get_rect(center=self.get_rect().center)
             self.surface.blit(text_surface, text_rect)
-
-        self.rect = rect
-        self.action = action
         self.mask = pygame.mask.from_surface(self.surface)
         self.highlight = self.mask.to_surface(setcolor=HIGHLIGHT_COLOR, unsetcolor=(0, 0, 0, 0))
 
+        self.rect = rect
+        self.action = action
+
     @property
-    def hover(self):
+    def is_hovered(self):
         mx, my = pygame.mouse.get_pos()
         x, y = self.rect.topleft
         pos = mx - x, my - y
@@ -38,7 +39,7 @@ class Button(pygame.Surface):
 
     def update(self, event: pygame.event.Event):
         self.blit(self.surface, (0, 0))
-        if self.hover:
+        if self.is_hovered:
             self.blit(self.highlight, (0, 0))
             if event.type == pygame.MOUSEBUTTONDOWN:
                 Button.click_sound.play()

@@ -2,8 +2,8 @@ import pygame
 
 
 # screen 只会更大，不能再小了
-SCREEN_WIDTH = W = 960
-SCREEN_HEIGHT = H = 720
+SCREEN_WIDTH = W = 800
+SCREEN_HEIGHT = H = 600
 # FPS
 FPS = 60
 # colors

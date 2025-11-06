@@ -4,11 +4,20 @@ import pygame
 
 pygame.init()
 
-pygame.display.set_icon(pygame.image.load('icon.png'))  # 也许可在加载资源之前执行？
-pygame.display.set_caption('Uno Game')
+def _icon():
+    icon = pygame.Surface((32, 32), pygame.SRCALPHA)
+    colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0)]  # 红绿蓝黄
+    for i, color in enumerate(colors):
+        rect = pygame.Rect(i % 2 * 16, i // 2 * 16, 16, 16)
+        pygame.draw.rect(icon, color, rect)
+    return icon
+
+pygame.display.set_icon(_icon())
+pygame.display.set_caption('Game')
 pygame.key.set_repeat(500, 50)
-screen = pygame.display.set_mode((W, H), flags=0)
-clock = pygame.time.Clock()
+_screen = pygame.display.set_mode((W, H), flags=0)
+_clock = pygame.time.Clock()
+
 scene = pygame.Surface((W, H), pygame.SRCALPHA)
 
 def clear():
@@ -22,7 +31,7 @@ def clear():
 def update(counter: int = 0):
     """Update all UI elements and handle user events each frame."""
 
-    clock.tick(FPS)
+    _clock.tick(FPS)
 
     events = pygame.event.get((pygame.QUIT, pygame.MOUSEMOTION, pygame.MOUSEBUTTONDOWN, pygame.TEXTINPUT, pygame.KEYDOWN))
     for event in events if events else [pygame.event.Event(pygame.USEREVENT)]:
@@ -34,15 +43,15 @@ def update(counter: int = 0):
             pygame.quit()
             return 0
 
-    screen.fill(BACKGROUND_COLOR)
-    screen.blit(scene, (0, 0))
-    screen.blits([(column, column.rect) for column in Column.columns])
-    screen.blits([(input, input.rect) for input in Input.inputs])
-    screen.blits([(button, button.rect) for button in Button.buttons])
-    screen.blits([(message, message.rect) for message in Message.messages if message.alpha > 0])
+    _screen.fill(BACKGROUND_COLOR)
+    _screen.blit(scene, (0, 0))
+    _screen.blits([(column, column.rect) for column in Column.columns])
+    _screen.blits([(input, input.rect) for input in Input.inputs])
+    _screen.blits([(button, button.rect) for button in Button.buttons])
+    _screen.blits([(message, message.rect) for message in Message.messages if message.alpha > 0])
     pygame.display.flip()
 
-    if any(input.hover for input in Input.inputs):
+    if any(input.is_hovered for input in Input.inputs):
         pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_IBEAM)
     else:
         pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
