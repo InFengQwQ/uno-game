@@ -56,9 +56,11 @@ class Client:
     def sync(self): # 但是没法回到主界面啊...
         try:
             if not self.sock.recv(1, socket.MSG_PEEK):
-                self.close("Failed to connect to the host")
+                self.close("Host has closed the connection")
         except BlockingIOError:
             pass
+        except ConnectionError:
+            self.close("Failed to connect to the host")
 
         if info := Room.rooms.get(self.room.addr):
             self.room.players[:] = info.players

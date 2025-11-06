@@ -126,7 +126,7 @@ class UnoGame:
         Button.buttons.extend([
             Button(images['button']['square_color'], pygame.Rect(W * 13/32, H * 3/8, W * 3/16, H * 1/12), cls.create, slice=True, text="Create"),
             Button(images['button']['square_basic'], pygame.Rect(W * 13/32, H * 1/2, W * 3/16, H * 1/12), cls.join, slice=True, text="Join"),
-            Button(images['button']['square_line'], pygame.Rect(W * 13/32, H * 5/8, W * 3/16, H * 1/12), lambda: None, slice=True, text="Options")
+            Button(images['button']['square_basic'], pygame.Rect(W * 13/32, H * 5/8, W * 3/16, H * 1/12), lambda: None, slice=True, text="Options")
         ])
 
     @classmethod

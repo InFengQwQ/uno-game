@@ -12,7 +12,7 @@ logging.basicConfig(
         logging.FileHandler('message.log')
     ]
 )
-__logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 class Message(pygame.Surface):  # 弹出在屏幕上方的错误或提示
 
@@ -55,6 +55,6 @@ class Message(pygame.Surface):  # 弹出在屏幕上方的错误或提示
             try:
                 return func(*args, **kwargs)
             except Exception as e:
-                __logger.error(f"From function {func.__name__}: {str(e)}", exc_info=True)
+                _logger.error(f"From function {func.__name__}: {str(e)}", exc_info=True)
                 cls.messages.append(Message(e))
         return wrapper
