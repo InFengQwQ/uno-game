@@ -1,5 +1,4 @@
-pyinstaller launcher.py ^
-  --name Uno ^
+pyinstaller main.py ^
   --icon icon.ico ^
   --onefile ^
   --windowed ^

@@ -7,8 +7,10 @@ import pygame
 # 当然，客户端需要知道弃牌堆顶的牌，并通过rule判断自己可以打出什么，主机也应该脱离内核实现同样的架构
 # 而且对于摸牌和质疑等操作还需要单独发送数据到交互对象而非全局
 # 而对于其他操作应该不发送给操作者
+import os, sys
 
-# 主机同时拥有Host和Client，独立运行
+def getpath(path: str):
+    return os.path.join(getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__))), path)
 
 
 BUTTON_SHAPES = ['square', 'round']
@@ -22,77 +24,77 @@ NARROW_TEXTS = ['content']
 
 images: dict[str, dict[str, pygame.Surface]] = {
     'info': {
-        'cards_text': pygame.image.load('./assets/images/info/cards_text.svg').convert_alpha(),
-        'players_2_10': pygame.image.load('./assets/images/info/players_2_10.svg').convert_alpha()
+        'cards_text': pygame.image.load(getpath('assets/images/info/cards_text.svg')).convert_alpha(),
+        'players_2_10': pygame.image.load(getpath('assets/images/info/players_2_10.svg')).convert_alpha()
     },
     'column': {
-        'back': pygame.image.load('./assets/images/column/back.svg').convert_alpha(),
-        'front': pygame.image.load('./assets/images/column/front.svg').convert_alpha(),
-        'divider': pygame.image.load('./assets/images/column/divider.svg').convert_alpha()
+        'back': pygame.image.load(getpath('assets/images/column/back.svg')).convert_alpha(),
+        'front': pygame.image.load(getpath('assets/images/column/front.svg')).convert_alpha(),
+        'divider': pygame.image.load(getpath('assets/images/column/divider.svg')).convert_alpha()
     },
     'input': {
-        'inactive': pygame.image.load('./assets/images/input/inactive.svg').convert_alpha(),
-        'active': pygame.image.load('./assets/images/input/active.svg').convert_alpha()
+        'inactive': pygame.image.load(getpath('assets/images/input/inactive.svg')).convert_alpha(),
+        'active': pygame.image.load(getpath('assets/images/input/active.svg')).convert_alpha()
     },
     'button': {
         **{
-            f'{shape}_{style}': pygame.image.load(f'./assets/images/button/default/{shape}_{style}.svg').convert_alpha()
+            f'{shape}_{style}': pygame.image.load(getpath(f'assets/images/button/default/{shape}_{style}.svg')).convert_alpha()
             for shape in BUTTON_SHAPES
             for style in BUTTON_STYLES
         },
         **{
-            f'arrow_{direction}': pygame.image.load(f'./assets/images/button/arrow/{direction}.svg').convert_alpha()
+            f'arrow_{direction}': pygame.image.load(getpath(f'assets/images/button/arrow/{direction}.svg')).convert_alpha()
             for direction in ARROW_DIRECTIONS
         }
     },
     'message': {
-        'box': pygame.image.load('./assets/images/message/box.svg').convert_alpha()
+        'box': pygame.image.load(getpath('assets/images/message/box.svg')).convert_alpha()
     },
     'cards': {
-        'back': pygame.image.load('./assets/images/cards/back.png').convert_alpha(),
+        'back': pygame.image.load(getpath('assets/images/cards/back.png')).convert_alpha(),
         **{
-            f'{color}_empty': pygame.image.load(f'./assets/images/cards/{color}_empty.png').convert_alpha()
+            f'{color}_empty': pygame.image.load(getpath(f'assets/images/cards/{color}_empty.png')).convert_alpha()
             for color in COLORS
         },
         **{
-            f'{color}_{value}': pygame.image.load(f'./assets/images/cards/numbers/{color}_{value}.png').convert_alpha()
+            f'{color}_{value}': pygame.image.load(getpath(f'assets/images/cards/numbers/{color}_{value}.png')).convert_alpha()
             for color in COLORS
             for value in NUMBERS
         },
         **{
-            f'{color}_{action}': pygame.image.load(f'./assets/images/cards/actions/{color}_{action}.png').convert_alpha()
+            f'{color}_{action}': pygame.image.load(getpath(f'assets/images/cards/actions/{color}_{action}.png')).convert_alpha()
             for color in COLORS
             for action in ACTIONS
         },
         **{
-            f'{BLACK_COLOR}_{wild}': pygame.image.load(f'./assets/images/cards/wilds/{BLACK_COLOR}_{wild}.png').convert_alpha()
+            f'{BLACK_COLOR}_{wild}': pygame.image.load(getpath(f'assets/images/cards/wilds/{BLACK_COLOR}_{wild}.png')).convert_alpha()
             for wild in WILDS
         }
     }
 }
 fonts: dict[str, pygame.font.Font] = {
     **{
-        large: pygame.font.Font('./assets/fonts/Kenney Future.ttf', 24)
+        large: pygame.font.Font(getpath('assets/fonts/Kenney Future.ttf'), 24)
         for large in LARGE_TEXTS
     },
     **{
-        default: pygame.font.Font('./assets/fonts/Kenney Future.ttf', 16)
+        default: pygame.font.Font(getpath('assets/fonts/Kenney Future.ttf'), 16)
         for default in DEFAULT_TEXTS
     },
     **{
-        small: pygame.font.Font('./assets/fonts/Kenney Future.ttf', 8)
+        small: pygame.font.Font(getpath('assets/fonts/Kenney Future.ttf'), 8)
         for small in SMALL_TEXTS
     },
     **{
-        narrow: pygame.font.Font('./assets/fonts/Kenney Future Narrow.ttf', 16)
+        narrow: pygame.font.Font(getpath('assets/fonts/Kenney Future Narrow.ttf'), 16)
         for narrow in NARROW_TEXTS
     }
 }
 sounds: dict[str, pygame.mixer.Sound] = {
-    'click': pygame.mixer.Sound('./assets/sounds/click.ogg'),
-    'tap': pygame.mixer.Sound('./assets/sounds/tap.ogg')
+    'click': pygame.mixer.Sound(getpath('assets/sounds/click.ogg')),
+    'tap': pygame.mixer.Sound(getpath('assets/sounds/tap.ogg'))
 }
-# pygame.mixer.music.load('assets/audio/music.ogg') 背景音乐加载，.play()播放
+# pygame.mixer.music.load(f'assets/audio/music.ogg') 背景音乐加载，.play()播放
 
 Column.back_image = images['column']['back']
 Column.front_image = images['column']['front']
