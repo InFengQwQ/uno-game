@@ -1,7 +1,3 @@
-cd ..
-
-pip install -r requirements.txt
-
 pyinstaller launcher.py ^
   --name Uno ^
   --icon icon.ico ^
@@ -9,5 +5,3 @@ pyinstaller launcher.py ^
   --windowed ^
   --add-data "assets;assets" ^
   --clean
-
-pause
