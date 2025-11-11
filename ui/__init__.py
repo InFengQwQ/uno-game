@@ -1,14 +1,13 @@
 from .constants import *
-from .utils import *
 from .column import Column
 from .input import Input
 from .button import Button
 from .message import Message
-from .screen import scene, clear, update
-
+from .screen import *
 
 __all__ = [
-    'W', 'H', 'FPS',
+    'SCREEN_WIDTH', 'SCREEN_HEIGHT', 'FPS',
     'Column', 'Input', 'Button', 'Message',
-    'scene', 'clear', 'update'
 ]
+
+__author__ = 'InFeng'

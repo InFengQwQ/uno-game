@@ -1,10 +1,14 @@
-from . import W, H, FPS, BACKGROUND_COLOR, Column, Input, Button, Message
 import pygame
 
+from .constants import W, H, FPS, BACKGROUND_COLOR
+from .column import Column
+from .input import Input
+from .button import Button
+from .message import Message
 
 pygame.init()
 
-def _icon():
+def _draw_icon():
     icon = pygame.Surface((32, 32), pygame.SRCALPHA)
     colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0)]  # 红绿蓝黄
     for i, color in enumerate(colors):
@@ -12,7 +16,7 @@ def _icon():
         pygame.draw.rect(icon, color, rect)
     return icon
 
-pygame.display.set_icon(_icon())
+pygame.display.set_icon(_draw_icon())
 pygame.display.set_caption('Game')
 pygame.key.set_repeat(500, 50)
 _screen = pygame.display.set_mode((W, H), flags=0)
@@ -45,10 +49,10 @@ def update(counter: int = 0):
 
     _screen.fill(BACKGROUND_COLOR)
     _screen.blit(scene, (0, 0))
-    _screen.blits([(column, column.rect) for column in Column.columns])
-    _screen.blits([(input, input.rect) for input in Input.inputs])
-    _screen.blits([(button, button.rect) for button in Button.buttons])
-    _screen.blits([(message, message.rect) for message in Message.messages if message.alpha > 0])
+    _screen.blits([(column, column.get_rect()) for column in Column.columns])
+    _screen.blits([(input, input.get_rect()) for input in Input.inputs])
+    _screen.blits([(button, button.get_rect()) for button in Button.buttons])
+    _screen.blits([(message, message.get_rect()) for message in Message.messages])
     pygame.display.flip()
 
     if any(input.is_hovered for input in Input.inputs):

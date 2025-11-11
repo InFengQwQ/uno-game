@@ -1,48 +1,89 @@
-from . import TEXT_COLOR, HIGHLIGHT_COLOR, scale
+from typing import Any, Callable
+
 import pygame
-from typing import Callable
+
+from .constants import TEXT_COLOR, HIGHLIGHT_COLOR
+from .utils import slice_scale
 
 
 class Button(pygame.Surface):
 
     buttons: list['Button'] = []
 
-    text_font: pygame.font.Font
-    click_sound: pygame.mixer.Sound
+    @classmethod
+    def init(
+        cls,
+        text_font: pygame.font.Font,
+        click_sound: pygame.mixer.Sound
+    ):
+        cls._text_font = text_font
+        cls._click_sound = click_sound
 
-    def __init__(self, image: pygame.Surface, rect: pygame.Rect, action: Callable[..., None], slice: bool = False, text: str = ''):
+    def __init__(
+        self,
+        image: pygame.Surface,
+        rect: pygame.Rect,
+        action: Callable[..., None],
+        slice: bool = False,
+        text: str = ''
+    ):
         super().__init__(rect.size, pygame.SRCALPHA)
 
-        if slice:
-            self.surface = scale(image, rect.size)
-        else:
-            self.surface = pygame.transform.smoothscale(image, rect.size)
-        if text:
-            text_surface = Button.text_font.render(text, True, TEXT_COLOR)
-            text_rect = text_surface.get_rect(center=self.get_rect().center)
-            self.surface.blit(text_surface, text_rect)
-        self.mask = pygame.mask.from_surface(self.surface)
-        self.highlight = self.mask.to_surface(setcolor=HIGHLIGHT_COLOR, unsetcolor=(0, 0, 0, 0))
-
-        self.rect = rect
         self.action = action
 
+        if slice:
+            self.surface = slice_scale(image, rect.size)
+        else:
+            self.surface = pygame.transform.smoothscale(
+                image, rect.size
+            )
+        if text:
+            text_surface = self._text_font.render(
+                text, True, TEXT_COLOR
+            )
+            text_rect = text_surface.get_rect(
+                center=self.surface.get_rect().center
+            )
+            self.surface.blit(text_surface, text_rect)
+
+        self._rect_topleft = rect.topleft
+        self._mask = pygame.mask.from_surface(self.surface)
+        self._highlight = self._mask.to_surface(
+            setcolor=HIGHLIGHT_COLOR,
+            unsetcolor=pygame.Color('#00000000')
+        )
+
+    def get_rect(self, **kwargs: Any) -> pygame.Rect:
+        """It works like pygame but with default topleft."""
+
+        return super().get_rect(
+            topleft=(
+                self._rect_topleft
+                if hasattr(self, '_rect_topleft')
+                else (0, 0)
+            ),
+            **kwargs
+        )
+
     @property
-    def is_hovered(self):
+    def is_hovered(self) -> bool:
         mx, my = pygame.mouse.get_pos()
-        x, y = self.rect.topleft
-        pos = mx - x, my - y
-        try:
-            return self.mask.get_at(pos)
-        except IndexError:
-            return False
+        x, y = self.get_rect().topleft
+        rel_pos = mx - x, my - y
+
+        return (
+            self.get_rect().collidepoint(mx, my) and
+            bool(self._mask.get_at(rel_pos))
+        )
 
     def update(self, event: pygame.event.Event):
         self.blit(self.surface, (0, 0))
+
         if self.is_hovered:
-            self.blit(self.highlight, (0, 0))
+            self.blit(self._highlight, (0, 0))
+
             if event.type == pygame.MOUSEBUTTONDOWN:
-                Button.click_sound.play()
+                self._click_sound.play()
                 self.action()
 
     @classmethod

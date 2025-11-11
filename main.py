@@ -1,17 +1,26 @@
+from os.path import abspath, dirname, join
+import sys
+
+def getpath(path: str):
+    return join(
+        getattr(sys, '_MEIPASS', dirname(abspath(__file__))),
+        path
+    )
+
+import pygame
+
 from ui import *
+from ui import (
+    W, H,
+    scene, clear, update
+)
 from multi import *
 from uno import *
-import pygame
 # 所有游戏内核在主机完成，所以大多数实例对象仅存在于主机
 # 对于客户端的玩家的数据，主机仍留有备份，客户端拥有手牌的卡牌类（主机发送json标明卡牌属性），仅此而已
 # 当然，客户端需要知道弃牌堆顶的牌，并通过rule判断自己可以打出什么，主机也应该脱离内核实现同样的架构
 # 而且对于摸牌和质疑等操作还需要单独发送数据到交互对象而非全局
 # 而对于其他操作应该不发送给操作者
-import os, sys
-
-def getpath(path: str):
-    return os.path.join(getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__))), path)
-
 
 BUTTON_SHAPES = ['square', 'round']
 BUTTON_STYLES = ['basic', 'line', 'color']
@@ -96,19 +105,28 @@ sounds: dict[str, pygame.mixer.Sound] = {
 }
 # pygame.mixer.music.load(f'assets/audio/music.ogg') 背景音乐加载，.play()播放
 
-Column.back_image = images['column']['back']
-Column.front_image = images['column']['front']
-Column.divider_image = images['column']['divider']
-Column.tag_font = fonts['tag']
-Column.content_font = fonts['content']
-Input.inactive_image = images['input']['inactive']
-Input.active_image = images['input']['active']
-Input.hint_font = fonts['hint']
-Input.tap_sound = sounds['tap']
-Button.text_font = fonts['text']
-Button.click_sound = sounds['click']
-Message.message_image = images['message']['box']
-Message.message_font = fonts['message']
+Column.init(
+    back_image = images['column']['back'],
+    front_image = images['column']['front'],
+    divider_image = images['column']['divider'],
+    tag_font = fonts['tag'],
+    content_font = fonts['content']
+)
+Input.init(
+    inactive_image = images['input']['inactive'],
+    active_image = images['input']['active'],
+    hint_font = fonts['hint'],
+    tap_sound = sounds['tap']
+)
+Button.init(
+    text_font = fonts['text'],
+    click_sound = sounds['click']
+)
+Message.init(
+    message_image = images['message']['box'],
+    message_font = fonts['message']
+)
+
 
 class UnoGame:
 
@@ -273,25 +291,30 @@ class UnoGame:
 
     @classmethod
     def run(cls):
+        """运行游戏。"""
+
         cls.menu()
         counter = update()
+
+        def check_interval(i: float) -> bool:
+            return not int(counter % (FPS * i))
 
         @Message.catch
         def network():
             try:
-                cls.role.run()  # 缺乏game开始转界面
+                cls.role.run()          # 缺乏game开始转界面
             except ClosedError as e:
                 del cls.role
                 cls.menu()
                 raise e
 
         while counter := update(counter):
-            if not int(counter % (FPS * RUN_INTERVAL)):
+            if check_interval(RUN_INTERVAL):
                 if hasattr(cls, 'role'):
                     network()
-            if not int(counter % (FPS * ROOM_UPDATE_INTERVAL)):
+            if check_interval(ROOM_UPDATE_INTERVAL):
                 Room.update()
-            if not int(counter % (FPS * ROOM_RECEIVE_INTERVAL)):
+            if check_interval(ROOM_RECEIVE_INTERVAL):
                 Room.receive()
 
 

@@ -7,6 +7,6 @@ from .game import Game
 
 
 __all__ = [
-    'COLORS', 'BLACK_COLOR', 'NUMBERS', 'ACTIONS', 'WILDS',
+    'COLORS', 'BLACK_COLOR', 'NUMBER', 'NUMBERS', 'ACTIONS', 'WILDS',
     'Card', 'Deck', 'Player', 'Rules', 'Game'
 ]
