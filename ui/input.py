@@ -1,3 +1,4 @@
+from collections import deque
 from typing import Any
 
 import pygame
@@ -17,7 +18,7 @@ class Input(pygame.Surface):
         active_image: pygame.Surface,
         hint_font: pygame.font.Font,
         tap_sound: pygame.mixer.Sound
-    ):          # TODO: 本地存储一些默认资源吧
+    ):          # TODO: 本地存储一些默认资源吧?
         cls._inactive_image = inactive_image
         cls._active_image = active_image
         cls._hint_font = hint_font
@@ -67,7 +68,10 @@ class Input(pygame.Surface):
             bool(self._mask.get_at(rel_pos))
         )
 
-    def update(self, event: pygame.event.Event):
+    def update(
+        self,
+        event: pygame.event.Event = pygame.event.Event(pygame.USEREVENT)
+    ):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.is_hovered:
                 self.is_activated = True
@@ -108,6 +112,9 @@ class Input(pygame.Surface):
             self._text_area.blit(hint_surface, hint_rect)
 
     @classmethod
-    def update_all(cls, event: pygame.event.Event):
-        for input in cls.inputs.copy():
-            input.update(event)
+    def update_all(cls, events: list[pygame.event.Event]):
+        if events:
+            for input in cls.inputs:
+                deque(map(input.update, events), maxlen=0)
+        else:
+            deque(map(Input.update, cls.inputs), maxlen=0)

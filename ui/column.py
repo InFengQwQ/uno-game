@@ -1,3 +1,4 @@
+from collections import deque
 from typing import Any
 
 import pygame
@@ -65,7 +66,10 @@ class Column(pygame.Surface):
             - self.front_surface.get_height()
         )
 
-    def update(self):
+    def update(
+        self,
+        event: pygame.event.Event = pygame.event.Event(pygame.USEREVENT)
+    ):
         self.blit(self.back_surface, (0, 0))
 
         if self.tag:
@@ -93,11 +97,14 @@ class Column(pygame.Surface):
                     self._divider_image, (self.get_width() - 48, 4)
                 )
                 divider_rect = divider_surface.get_rect(
-                    topleft=(24, self.get_head()+24 + line * H/20)
+                    topleft=(24, self.get_head()+20 + line * H/20)
                 )
                 self.blit(divider_surface, divider_rect)
 
     @classmethod
-    def update_all(cls):
-        for column in cls.columns.copy():
-            column.update()
+    def update_all(cls, events: list[pygame.event.Event]):
+        if events:
+            for column in cls.columns:
+                deque(map(column.update, events), maxlen=0)
+        else:
+            deque(map(Column.update, cls.columns), maxlen=0)

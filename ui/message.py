@@ -1,3 +1,4 @@
+from collections import deque
 from functools import wraps
 from typing import Any, Callable
 import logging
@@ -65,7 +66,10 @@ class Message(pygame.Surface):
             **kwargs
         )
 
-    def update(self):
+    def update(
+        self,
+        event: pygame.event.Event = pygame.event.Event(pygame.USEREVENT)
+    ):
         self._alpha = int(self._alpha - 255 * 1/(self._time * FPS))
         if self._alpha < 0:
             self.messages.remove(self)
@@ -73,9 +77,12 @@ class Message(pygame.Surface):
             self.set_alpha(self._alpha)
 
     @classmethod
-    def update_all(cls):
-        for message in cls.messages.copy():
-            message.update()
+    def update_all(cls, events: list[pygame.event.Event]):
+        if events:
+            for message in cls.messages:
+                deque(map(message.update, events), maxlen=0)
+        else:
+            deque(map(Message.update, cls.messages), maxlen=0)
 
     @classmethod
     def catch(cls, func: Callable[..., None]) -> Callable[..., None]:

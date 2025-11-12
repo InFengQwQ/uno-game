@@ -1,3 +1,4 @@
+from collections import deque
 from typing import Any, Callable
 
 import pygame
@@ -76,7 +77,10 @@ class Button(pygame.Surface):
             bool(self._mask.get_at(rel_pos))
         )
 
-    def update(self, event: pygame.event.Event):
+    def update(
+        self,
+        event: pygame.event.Event = pygame.event.Event(pygame.USEREVENT)
+    ):
         self.blit(self.surface, (0, 0))
 
         if self.is_hovered:
@@ -87,6 +91,9 @@ class Button(pygame.Surface):
                 self.action()
 
     @classmethod
-    def update_all(cls, event: pygame.event.Event):
-        for button in cls.buttons.copy():
-            button.update(event)
+    def update_all(cls, events: list[pygame.event.Event]):
+        if events:
+            for button in cls.buttons:
+                deque(map(button.update, events), maxlen=0)
+        else:
+            deque(map(Button.update, cls.buttons), maxlen=0)

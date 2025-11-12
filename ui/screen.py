@@ -1,3 +1,5 @@
+from collections import deque
+
 import pygame
 
 from .constants import W, H, FPS, BACKGROUND_COLOR
@@ -33,26 +35,38 @@ def clear():
     Button.buttons.clear()
 
 def update(counter: int = 0):
-    """Update all UI elements and handle user events each frame."""
+    """Update all UI elements and handle events each frame."""
 
     _clock.tick(FPS)
 
-    events = pygame.event.get((pygame.QUIT, pygame.MOUSEMOTION, pygame.MOUSEBUTTONDOWN, pygame.TEXTINPUT, pygame.KEYDOWN))
-    for event in events if events else [pygame.event.Event(pygame.USEREVENT)]:
-        Column.update_all()
-        Input.update_all(event)
-        Button.update_all(event)
-        Message.update_all()
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            return 0
+    events = pygame.event.get((
+        pygame.QUIT,
+        pygame.MOUSEBUTTONDOWN, pygame.TEXTINPUT, pygame.KEYDOWN,
+        pygame.MOUSEMOTION
+    ))
+    deque(
+        map(
+            lambda Element: Element.update_all(events),
+            (Column, Input, Button, Message),
+        ),
+        maxlen=0
+    )
+    if pygame.event.Event(pygame.QUIT) in events:
+        pygame.quit()
+        return 0
 
     _screen.fill(BACKGROUND_COLOR)
     _screen.blit(scene, (0, 0))
-    _screen.blits([(column, column.get_rect()) for column in Column.columns])
-    _screen.blits([(input, input.get_rect()) for input in Input.inputs])
-    _screen.blits([(button, button.get_rect()) for button in Button.buttons])
-    _screen.blits([(message, message.get_rect()) for message in Message.messages])
+    deque(
+        map(
+            lambda elements: _screen.blits(deque(map(
+                lambda element: (element, element.get_rect()),
+                elements
+            ))),
+            (Column.columns, Input.inputs, Button.buttons, Message.messages)
+        ),
+        maxlen=0
+    )
     pygame.display.flip()
 
     if any(input.is_hovered for input in Input.inputs):
