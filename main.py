@@ -9,11 +9,8 @@ def getpath(path: str):
 
 import pygame
 
-from ui import (
-    W, H, FPS,
-    Column, Input, Button, Message,
-    scene, clear, update
-)
+import ui
+from ui import *
 from multi import *
 from uno import *
 # 所有游戏内核在主机完成，所以大多数实例对象仅存在于主机
@@ -172,16 +169,16 @@ Message.init(
 
 class UnoGame:
 
-    role: Client | Host
+    role: Host | Client
 
     @classmethod
     def menu(cls):
-        clear()
+        ui.clear()
 
-        scene.blit(pygame.transform.scale(
+        ui.scene.blit(pygame.transform.scale(
             images['info']['cards_text'], (64, 64)), (10, 10)
         )
-        scene.blit(pygame.transform.scale(
+        ui.scene.blit(pygame.transform.scale(
             images['info']['players_2_10'], (64, 64)), (84, 10)
         )
 
@@ -216,14 +213,14 @@ class UnoGame:
             page = min(page, len(Room.rooms))
             info = sorted(Room.rooms.values())[page - 1]
 
-            clear()
+            ui.clear()
 
             Column.elements.extend([
                 Column(
                     pygame.Rect(W * 5/16, H * 3/16, W * 3/8, H * 5/8),
                     tag=f"Search({page}/{len(Room.rooms)})",
                     contents=[
-                        f"{info.name}({len(info.players)}/10)",
+                        f"{info.name}({len(info.players)}/{ROOM_CAPACITY})",
                         f"{info.ip}:{info.port}",
                         ''
                     ]
@@ -287,7 +284,7 @@ class UnoGame:
                     )
                 ])
         else:
-            clear()
+            ui.clear()
 
             Column.elements.extend([
                 Column(
@@ -314,7 +311,7 @@ class UnoGame:
 
     @classmethod
     def create(cls):
-        clear()
+        ui.clear()
 
         Column.elements.extend([
             Column(
@@ -364,7 +361,7 @@ class UnoGame:
 
     @classmethod
     def room(cls):
-        clear()
+        ui.clear()
 
         Column.elements.extend([
             Column(
@@ -402,14 +399,15 @@ class UnoGame:
 
     @classmethod
     def game(cls):
-        pass
+        ui.clear()
+
 
     @classmethod
     def run(cls):
         """运行游戏。"""
 
         cls.menu()
-        counter = update()
+        counter = ui.update()
 
         def check_interval(i: float) -> bool:
             return not int(counter % (FPS * i))
@@ -417,13 +415,17 @@ class UnoGame:
         @Message.catch
         def network():
             try:
-                cls.role.run()          # 缺乏game开始转界面
+                cls.role.run()
             except SocketClosedMessage as e:
                 del cls.role
                 cls.menu()
                 raise e
+            except GameStartedMessage:
+                cls.game()
+            except GameEndedMessage:
+                cls.room()
 
-        while counter := update(counter):
+        while counter := ui.update(counter):
             if check_interval(RUN_INTERVAL):
                 if hasattr(cls, 'role'):
                     network()

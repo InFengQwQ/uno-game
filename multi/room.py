@@ -1,11 +1,20 @@
-from . import MULTICAST_GROUP, MULTICAST_PORT, BUFFER_SIZE, to_bytes, from_packet, Info
 import socket
-# TODO: 一个房间关闭之后，rooms列表中会保留，这是个问题，应该在主机关闭时删除（解决方法↓）
+
+from .constants import (
+    MULTICAST_GROUP, MULTICAST_PORT,
+    BUFFER_SIZE,
+    ROOM_WAITING
+)
+from .utils import (
+    to_bytes, from_packet,
+    Info
+)
+
 
 class Room:
     """A room in the multiplayer game."""
 
-    buffer: list[Info] = [] # 整一个列表剔除数次receive之外的值，最新的几次receive合并作为rooms
+    buffer: list[Info] = []
     rooms: dict[tuple[str, int], Info] = {}
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -21,7 +30,7 @@ class Room:
         self.addr = self.ip, self.port = addr
 
         self.players: list[str] = []
-        self.status = 0
+        self.status = ROOM_WAITING
 
     def broadcast(self):
         """Broadcast room information to the multicast group."""

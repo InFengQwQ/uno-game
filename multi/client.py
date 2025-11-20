@@ -1,16 +1,19 @@
 import socket
 
-from .constants import BUFFER_SIZE
-from . utils import (
+from .constants import (
+    BUFFER_SIZE, SOCKET_TIMEOUT,
+    ROOM_ONGOING, ROOM_WAITING
+)
+from .utils import (
     to_bytes, from_stream,
     Info, Request, Response,
     SocketClosedMessage, GameStartedMessage, GameEndedMessage
 )
-
 from .room import Room
 
 
 class Client:
+
     def __init__(self, name: str):
         if not (0 < len(name) < BUFFER_SIZE / 32):
             raise ValueError(
@@ -31,7 +34,7 @@ class Client:
     def join(self, info: Info, password: int):
         """Join a room."""
 
-        self.sock.settimeout(5)
+        self.sock.settimeout(SOCKET_TIMEOUT)
         try:
             self.sock.connect(info.addr)
         except TimeoutError:
@@ -64,35 +67,39 @@ class Client:
                         else:
                             self.close(response.message)
 
-    def wait(self):
-        pass
-
-    def go(self):
-        pass
-
-    def sync(self): # 但是没法回到主界面啊...
-        try:
-            if not self.sock.recv(1, socket.MSG_PEEK):
-                self.close(
-                    "Host has closed the connection"
-                )
-        except BlockingIOError:
-            pass
-        except ConnectionError:
-            self.close(
-                "Failed to connect to the host"
-            )
-
-        if info := Room.rooms.get(self.room.addr):
-            self.room.players[:] = info.players
-            if info.status > self.room.status:
-                self.room.status = 1
-                raise GameStartedMessage
-            elif info.status < self.room.status:
-                self.room.status = 0
-                raise GameEndedMessage
-
     def run(self):
+        def go():
+            pass
+
+        def sync():
+            try:
+                if not self.sock.recv(1, socket.MSG_PEEK):
+                    self.close(
+                        "Host has closed the connection"
+                    )
+            except BlockingIOError:
+                pass
+            except ConnectionError:
+                self.close(
+                    "Failed to connect to the host"
+                )
+
+            if info := Room.rooms.get(self.room.addr):
+                self.room.players[:] = info.players
+                if (
+                    info.status is ROOM_ONGOING and
+                    self.room.status is ROOM_WAITING
+                ):
+                    self.room.status = ROOM_ONGOING
+                    raise GameStartedMessage
+                elif (
+                    info.status is ROOM_WAITING and
+                    self.room.status is ROOM_ONGOING
+                ):
+                    self.room.status = ROOM_WAITING
+                    raise GameEndedMessage
+
         if hasattr(self, 'room'):
-            self.wait()
-            self.sync()
+            if self.room.status is ROOM_ONGOING:
+                go()
+            sync()

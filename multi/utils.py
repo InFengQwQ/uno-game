@@ -6,7 +6,7 @@ from .constants import (
     JsonSerializable
 )
 
-def to_bytes(obj: JsonSerializable):
+def to_bytes(obj: object):
     try:
         return json.dumps(obj).encode()
     except json.JSONDecodeError:
@@ -33,7 +33,9 @@ def from_stream(stream: bytes):
             data = ''
     return result
 
+
 class Info():
+
     def __init__(
         self,
         name: str,
@@ -73,7 +75,9 @@ class Info():
         else:
             raise TypeError
 
+
 class Request():
+
     def __init__(
         self,
         name: str,
@@ -96,7 +100,9 @@ class Request():
         else:
             raise TypeError
 
+
 class Response():
+
     def __init__(
         self,
         status: bool,
@@ -119,7 +125,9 @@ class Response():
         else:
             raise TypeError
 
+
 class Action():
+
     def __init__(
         self,
         name: str,
@@ -145,11 +153,14 @@ class Action():
         else:
             raise TypeError
 
+
 class SocketClosedMessage(Exception):
     pass
 
+
 class GameStartedMessage(Exception):
     pass
+
 
 class GameEndedMessage(Exception):
     pass
