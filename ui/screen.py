@@ -1,5 +1,3 @@
-from collections import deque
-
 import pygame
 
 from .constants import W, H, FPS, BACKGROUND_COLOR
@@ -30,9 +28,8 @@ def clear():
     """Clear all UI elements and reset the scene surface."""
 
     scene.__init__((W, H), flags=pygame.SRCALPHA)
-    Column.columns.clear()
-    Input.inputs.clear()
-    Button.buttons.clear()
+    for Element in (Column, Input, Button):
+        Element.elements.clear()
 
 def update(counter: int = 0):
     """Update all UI elements and handle events each frame."""
@@ -44,32 +41,20 @@ def update(counter: int = 0):
         pygame.MOUSEBUTTONDOWN, pygame.TEXTINPUT, pygame.KEYDOWN,
         pygame.MOUSEMOTION
     ))
-    deque(
-        map(
-            lambda Element: Element.update_all(events),
-            (Column, Input, Button, Message),
-        ),
-        maxlen=0
-    )
+    for Element in (Column, Input, Button, Message):
+        Element.update_all(events)
     if pygame.event.Event(pygame.QUIT) in events:
         pygame.quit()
         return 0
 
     _screen.fill(BACKGROUND_COLOR)
     _screen.blit(scene, (0, 0))
-    deque(
-        map(
-            lambda elements: _screen.blits(deque(map(
-                lambda element: (element, element.get_rect()),
-                elements
-            ))),
-            (Column.columns, Input.inputs, Button.buttons, Message.messages)
-        ),
-        maxlen=0
-    )
+    for Element in (Column, Input, Button, Message):
+        for element in Element.elements:
+            _screen.blit(element, element.get_rect())
     pygame.display.flip()
 
-    if any(input.is_hovered for input in Input.inputs):
+    if any(input.is_hovered for input in Input.elements):
         pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_IBEAM)
     else:
         pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)

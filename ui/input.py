@@ -1,4 +1,3 @@
-from collections import deque
 from typing import Any
 
 import pygame
@@ -9,7 +8,7 @@ from .utils import slice_scale
 
 class Input(pygame.Surface):
 
-    inputs: list['Input'] = []
+    elements: list['Input'] = []
 
     @classmethod
     def init(
@@ -114,7 +113,9 @@ class Input(pygame.Surface):
     @classmethod
     def update_all(cls, events: list[pygame.event.Event]):
         if events:
-            for input in cls.inputs:
-                deque(map(input.update, events), maxlen=0)
+            for input in cls.elements:
+                for event in events:
+                    input.update(event)
         else:
-            deque(map(Input.update, cls.inputs), maxlen=0)
+            for input in cls.elements:
+                input.update()

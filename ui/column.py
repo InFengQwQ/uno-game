@@ -1,4 +1,3 @@
-from collections import deque
 from typing import Any
 
 import pygame
@@ -9,7 +8,7 @@ from .utils import slice_scale
 
 class Column(pygame.Surface):
 
-    columns: list['Column'] = []
+    elements: list['Column'] = []
 
     @classmethod
     def init(
@@ -104,7 +103,9 @@ class Column(pygame.Surface):
     @classmethod
     def update_all(cls, events: list[pygame.event.Event]):
         if events:
-            for column in cls.columns:
-                deque(map(column.update, events), maxlen=0)
+            for column in cls.elements:
+                for event in events:
+                    column.update(event)
         else:
-            deque(map(Column.update, cls.columns), maxlen=0)
+            for column in cls.elements:
+                column.update()

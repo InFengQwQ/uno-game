@@ -1,6 +1,10 @@
-from . import InfoDict, RequestDict, ResponseDict, ActionDict, JsonSerializable
 import json
 
+from .constants import (
+    InfoDict, RequestDict, ResponseDict,
+    ActionDict,
+    JsonSerializable
+)
 
 def to_bytes(obj: JsonSerializable):
     try:
@@ -30,7 +34,13 @@ def from_stream(stream: bytes):
     return result
 
 class Info():
-    def __init__(self, name: str, addr: tuple[str, int], players: list[str], status: int):
+    def __init__(
+        self,
+        name: str,
+        addr: tuple[str, int],
+        players: list[str],
+        status: int
+    ):
         self.name = name
         self.addr = self.ip, self.port = addr
         self.players = players
@@ -64,7 +74,11 @@ class Info():
             raise TypeError
 
 class Request():
-    def __init__(self, name: str, password: int):
+    def __init__(
+        self,
+        name: str,
+        password: int
+    ):
         self.name = name
         self.password = password
 
@@ -83,7 +97,11 @@ class Request():
             raise TypeError
 
 class Response():
-    def __init__(self, status: bool, message: str):
+    def __init__(
+        self,
+        status: bool,
+        message: str
+    ):
         self.status = status
         self.message = message
 
@@ -102,7 +120,12 @@ class Response():
             raise TypeError
 
 class Action():
-    def __init__(self, name: str, action: str, value: int):
+    def __init__(
+        self,
+        name: str,
+        action: str,
+        value: int
+    ):
         self.name = name
         self.action = action
         self.value = value
@@ -122,5 +145,11 @@ class Action():
         else:
             raise TypeError
 
-class ClosedError(Exception):
+class SocketClosedMessage(Exception):
+    pass
+
+class GameStartedMessage(Exception):
+    pass
+
+class GameEndedMessage(Exception):
     pass

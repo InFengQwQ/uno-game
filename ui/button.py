@@ -1,4 +1,3 @@
-from collections import deque
 from typing import Any, Callable
 
 import pygame
@@ -9,7 +8,7 @@ from .utils import slice_scale
 
 class Button(pygame.Surface):
 
-    buttons: list['Button'] = []
+    elements: list['Button'] = []
 
     @classmethod
     def init(
@@ -93,7 +92,9 @@ class Button(pygame.Surface):
     @classmethod
     def update_all(cls, events: list[pygame.event.Event]):
         if events:
-            for button in cls.buttons:
-                deque(map(button.update, events), maxlen=0)
+            for button in cls.elements:
+                for event in events:
+                    button.update(event)
         else:
-            deque(map(Button.update, cls.buttons), maxlen=0)
+            for button in cls.elements:
+                button.update()

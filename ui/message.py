@@ -1,4 +1,3 @@
-from collections import deque
 from functools import wraps
 from typing import Any, Callable
 import logging
@@ -21,7 +20,7 @@ _logger = logging.getLogger(__name__)
 class Message(pygame.Surface):
     """Pop-up message."""
 
-    messages: list['Message'] = []
+    elements: list['Message'] = []
 
     @classmethod
     def init(
@@ -72,17 +71,19 @@ class Message(pygame.Surface):
     ):
         self._alpha = int(self._alpha - 255 * 1/(self._time * FPS))
         if self._alpha < 0:
-            self.messages.remove(self)
+            self.elements.remove(self)
         else:
             self.set_alpha(self._alpha)
 
     @classmethod
     def update_all(cls, events: list[pygame.event.Event]):
         if events:
-            for message in cls.messages:
-                deque(map(message.update, events), maxlen=0)
+            for message in cls.elements:
+                for event in events:
+                    message.update(event)
         else:
-            deque(map(Message.update, cls.messages), maxlen=0)
+            for message in cls.elements:
+                message.update()
 
     @classmethod
     def catch(cls, func: Callable[..., None]) -> Callable[..., None]:
@@ -98,6 +99,6 @@ class Message(pygame.Surface):
                     exc_info=True
                 )
 
-                cls.messages.append(Message(e))
+                cls.elements.append(Message(e))
 
         return wrapper

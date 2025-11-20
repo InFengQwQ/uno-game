@@ -1,4 +1,4 @@
-from . import HOST_PORT_RANGE, BUFFER_SIZE, to_bytes, from_stream, Request, Response, Action, ClosedError, Room
+from . import HOST_PORT_RANGE, BUFFER_SIZE, to_bytes, from_stream, Request, Response, Action, SocketClosedMessage, Room
 import socket
 
 
@@ -8,7 +8,7 @@ class Host:
             raise ValueError("Name is empty or too long")
         if not (0 < len(room_name) < BUFFER_SIZE / 32):
             raise ValueError("Room name is empty or too long")
-        if not (0 < password < 2 ** (BUFFER_SIZE / 32)):
+        if not (0 <= password < 10 ** (BUFFER_SIZE / 32)):
             raise ValueError("Password is out of range")
 
         self.name = name
@@ -27,7 +27,9 @@ class Host:
             raise Exception("Can not find a free port")
         self.room = Room(room_name, password, ('127.0.0.1', port))
         self.room.players.append(self.name)
-        self.connections: dict[str, dict[str, socket.socket]] = {'unverified': {}, 'verified': {}}
+        self.connections: dict[str, dict[str, socket.socket]] = {
+            'unverified': {}, 'verified': {}
+        }
 
         self.actions: list[Action] = []
 
@@ -37,7 +39,7 @@ class Host:
             conn.close()
         for conn in self.connections['verified'].values():
             conn.close()
-        raise ClosedError(reason)
+        raise SocketClosedMessage(reason)
 
     def wait(self):
         while True:

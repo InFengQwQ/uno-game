@@ -7,6 +7,6 @@ from .host import Host
 
 __all__ = [
     'RUN_INTERVAL', 'ROOM_UPDATE_INTERVAL', 'ROOM_RECEIVE_INTERVAL',
-    'Info', 'Action', 'ClosedError',
+    'Info', 'Action', 'SocketClosedMessage',
     'Room', 'Client', 'Host'
 ]
