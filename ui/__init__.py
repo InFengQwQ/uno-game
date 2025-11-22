@@ -6,7 +6,6 @@ from .message import Message
 from .screen import *
 
 __all__ = [
-    'SCREEN_WIDTH', 'W', 'SCREEN_HEIGHT', 'H', 'FPS',
     'Column', 'Input', 'Button', 'Message'
 ]
 

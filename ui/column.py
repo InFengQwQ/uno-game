@@ -2,7 +2,8 @@ from typing import Any
 
 import pygame
 
-from .constants import H, TEXT_COLOR
+from config import H
+from .constants import TEXT_COLOR
 from .utils import slice_scale
 
 

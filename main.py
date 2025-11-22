@@ -1,185 +1,66 @@
-from os.path import abspath, dirname, join
-import sys
-
-def getpath(path: str):
-    return join(
-        getattr(sys, '_MEIPASS', dirname(abspath(__file__))),
-        path
-    )
-
 import pygame
 
 import ui
-from ui import *
-from multi import *
-from uno import *
+from ui import Column, Input, Button, Message
+from multi import (
+    SocketClosedMessage, GameStartedMessage, GameEndedMessage,
+    Room, Client, Host
+)
+from config import ROOM_CAPACITY
+from uno import Player
+from config import (
+    W, H, FPS, RUN_INTERVAL, ROOM_UPDATE_INTERVAL, ROOM_RECEIVE_INTERVAL
+)
+from resources import ResourceManager
+
 # 所有游戏内核在主机完成，所以大多数实例对象仅存在于主机
 # 对于客户端的玩家的数据，主机仍留有备份，客户端拥有手牌的卡牌类（主机发送json标明卡牌属性），仅此而已
 # 当然，客户端需要知道弃牌堆顶的牌，并通过rule判断自己可以打出什么，主机也应该脱离内核实现同样的架构
 # 而且对于摸牌和质疑等操作还需要单独发送数据到交互对象而非全局
 # 而对于其他操作应该不发送给操作者
 
-BUTTON_SHAPES = ['square', 'round']
-BUTTON_STYLES = ['basic', 'line', 'color']
-ARROW_DIRECTIONS = ['left', 'right', 'up', 'down']
+# Initialize resource manager
+resources = ResourceManager()
 
-LARGE_TEXTS = ['tag']
-DEFAULT_TEXTS = ['hint', 'text']
-SMALL_TEXTS = ['message']
-NARROW_TEXTS = ['content']
-
-images: dict[str, dict[str, pygame.Surface]] = {
-    'info': {
-        'cards_text': pygame.image.load(
-            getpath('assets/images/info/cards_text.svg')
-        ).convert_alpha(),
-        'players_2_10': pygame.image.load(
-            getpath('assets/images/info/players_2_10.svg')
-        ).convert_alpha(),
-    },
-    'column': {
-        'back': pygame.image.load(
-            getpath('assets/images/column/back.svg')
-        ).convert_alpha(),
-        'front': pygame.image.load(
-            getpath('assets/images/column/front.svg')
-        ).convert_alpha(),
-        'divider': pygame.image.load(
-            getpath('assets/images/column/divider.svg')
-        ).convert_alpha(),
-    },
-    'input': {
-        'inactive': pygame.image.load(
-            getpath('assets/images/input/inactive.svg')
-        ).convert_alpha(),
-        'active': pygame.image.load(
-            getpath('assets/images/input/active.svg')
-        ).convert_alpha(),
-    },
-    'button': {
-        **{
-            f'{shape}_{style}': pygame.image.load(
-                getpath(f'assets/images/button/default/{shape}_{style}.svg')
-            ).convert_alpha()
-            for shape in BUTTON_SHAPES
-            for style in BUTTON_STYLES
-        },
-        **{
-            f'arrow_{direction}': pygame.image.load(
-                getpath(f'assets/images/button/arrow/{direction}.svg')
-            ).convert_alpha()
-            for direction in ARROW_DIRECTIONS
-        },
-    },
-    'message': {
-        'box': pygame.image.load(
-            getpath('assets/images/message/box.svg')
-        ).convert_alpha(),
-    },
-    'cards': {
-        'back': pygame.image.load(
-            getpath('assets/images/cards/back.png')
-        ).convert_alpha(),
-        **{
-            f'{color}_empty': pygame.image.load(
-                getpath(f'assets/images/cards/{color}_empty.png')
-            ).convert_alpha()
-            for color in COLORS
-        },
-        **{
-            f'{color}_{value}': pygame.image.load(
-                getpath(f'assets/images/cards/numbers/{color}_{value}.png')
-            ).convert_alpha()
-            for color in COLORS
-            for value in NUMBERS
-        },
-        **{
-            f'{color}_{action}': pygame.image.load(
-                getpath(f'assets/images/cards/actions/{color}_{action}.png')
-            ).convert_alpha()
-            for color in COLORS
-            for action in ACTIONS
-        },
-        **{
-            f'{BLACK_COLOR}_{wild}': pygame.image.load(
-                getpath(f'assets/images/cards/wilds/{BLACK_COLOR}_{wild}.png')
-            ).convert_alpha()
-            for wild in WILDS
-        }
-    }
-}
-fonts: dict[str, pygame.font.Font] = {
-    **{
-        large: pygame.font.Font(
-            getpath('assets/fonts/Kenney Future.ttf'), 24
-        )
-        for large in LARGE_TEXTS
-    },
-    **{
-        default: pygame.font.Font(
-            getpath('assets/fonts/Kenney Future.ttf'), 16
-        )
-        for default in DEFAULT_TEXTS
-    },
-    **{
-        small: pygame.font.Font(
-            getpath('assets/fonts/Kenney Future.ttf'), 8
-        )
-        for small in SMALL_TEXTS
-    },
-    **{
-        narrow: pygame.font.Font(
-            getpath('assets/fonts/Kenney Future Narrow.ttf'), 16
-        )
-        for narrow in NARROW_TEXTS
-    },
-}
-sounds: dict[str, pygame.mixer.Sound] = {
-    'click': pygame.mixer.Sound(
-        getpath('assets/sounds/click.ogg')
-    ),
-    'tap': pygame.mixer.Sound(
-        getpath('assets/sounds/tap.ogg')
-    ),
-}
-# pygame.mixer.music.load(f'assets/audio/music.ogg') 背景音乐加载，.play()播放
-
+# Initialize UI components
 Column.init(
-    back_image = images['column']['back'],
-    front_image = images['column']['front'],
-    divider_image = images['column']['divider'],
-    tag_font = fonts['tag'],
-    content_font = fonts['content']
+    back_image=resources.images['column']['back'],
+    front_image=resources.images['column']['front'],
+    divider_image=resources.images['column']['divider'],
+    tag_font=resources.fonts['tag'],
+    content_font=resources.fonts['content']
 )
 Input.init(
-    inactive_image = images['input']['inactive'],
-    active_image = images['input']['active'],
-    hint_font = fonts['hint'],
-    tap_sound = sounds['tap']
+    inactive_image=resources.images['input']['inactive'],
+    active_image=resources.images['input']['active'],
+    hint_font=resources.fonts['hint'],
+    tap_sound=resources.sounds['tap']
 )
 Button.init(
-    text_font = fonts['text'],
-    click_sound = sounds['click']
+    text_font=resources.fonts['text'],
+    click_sound=resources.sounds['click']
 )
 Message.init(
-    message_image = images['message']['box'],
-    message_font = fonts['message']
+    message_image=resources.images['message']['box'],
+    message_font=resources.fonts['message']
 )
 
 
 class UnoGame:
+    """Main game class managing the UNO game flow."""
 
-    role: Host | Client
+    role: Host | Client | None = None
 
     @classmethod
     def menu(cls):
+        """Display the main menu screen."""
         ui.clear()
 
         ui.scene.blit(pygame.transform.scale(
-            images['info']['cards_text'], (64, 64)), (10, 10)
+            resources.images['info']['cards_text'], (64, 64)), (10, 10)
         )
         ui.scene.blit(pygame.transform.scale(
-            images['info']['players_2_10'], (64, 64)), (84, 10)
+            resources.images['info']['players_2_10'], (64, 64)), (84, 10)
         )
 
         Column.elements.extend([
@@ -191,17 +72,17 @@ class UnoGame:
 
         Button.elements.extend([
             Button(
-                images['button']['square_color'],
+                resources.images['button']['square_color'],
                 pygame.Rect(W * 13/32, H * 3/8, W * 3/16, H * 1/12),
                 cls.create, slice=True, text="Create"
             ),
             Button(
-                images['button']['square_basic'],
+                resources.images['button']['square_basic'],
                 pygame.Rect(W * 13/32, H * 1/2, W * 3/16, H * 1/12),
                 cls.join, slice=True, text="Join"
             ),
             Button(
-                images['button']['square_basic'],
+                resources.images['button']['square_basic'],
                 pygame.Rect(W * 13/32, H * 5/8, W * 3/16, H * 1/12),
                 lambda: None, slice=True, text="Options"
             )
@@ -209,6 +90,12 @@ class UnoGame:
 
     @classmethod
     def join(cls, page: int = 1):
+        """
+        Display the room join screen.
+
+        Args:
+            page: Page number for room listing (default: 1)
+        """
         if Room.rooms:
             page = min(page, len(Room.rooms))
             info = sorted(Room.rooms.values())[page - 1]
@@ -248,17 +135,17 @@ class UnoGame:
                 cls.room()
             Button.elements.extend([
                 Button(
-                    images['button']['square_color'],
+                    resources.images['button']['square_color'],
                     pygame.Rect(W * 11/32, H * 9/16, W * 1/8, H * 1/12),
                     access, slice=True, text="OK"
                 ),
                 Button(
-                    images['button']['square_line'],
+                    resources.images['button']['square_line'],
                     pygame.Rect(W * 11/32, H * 11/16, W * 1/8, H * 1/12),
                     cls.menu, slice=True, text="Back"
                 ),
                 Button(
-                    images['button']['square_basic'],
+                    resources.images['button']['square_basic'],
                     pygame.Rect(W * 1/2, H * 11/16, W * 5/32, H * 1/12),
                     cls.join, slice=True, text="Refresh"
                 )
@@ -268,7 +155,7 @@ class UnoGame:
                     cls.join(page + 1)
                 Button.elements.extend([
                     Button(
-                        images['button']['arrow_right'],
+                        resources.images['button']['arrow_right'],
                         pygame.Rect(W * 19/32, H * 29/48 - 16, 32, 32),
                         next
                     )
@@ -278,7 +165,7 @@ class UnoGame:
                     cls.join(page - 1)
                 Button.elements.extend([
                     Button(
-                        images['button']['arrow_left'],
+                        resources.images['button']['arrow_left'],
                         pygame.Rect(W * 9/16 - 32, H * 29/48 - 16, 32, 32),
                         prev
                     )
@@ -298,12 +185,12 @@ class UnoGame:
 
             Button.elements.extend([
                 Button(
-                    images['button']['square_line'],
+                    resources.images['button']['square_line'],
                     pygame.Rect(W * 11/32, H * 11/16, W * 1/8, H * 1/12),
                     cls.menu, slice=True, text="Back"
                 ),
                 Button(
-                    images['button']['square_basic'],
+                    resources.images['button']['square_basic'],
                     pygame.Rect(W * 1/2, H * 11/16, W * 5/32, H * 1/12),
                     cls.join, slice=True, text="Refresh"
                 )
@@ -311,13 +198,14 @@ class UnoGame:
 
     @classmethod
     def create(cls):
+        """Display the room creation screen."""
         ui.clear()
 
         Column.elements.extend([
             Column(
                 pygame.Rect(W * 5/16, H * 1/4, W * 3/8, H * 1/2),
                 tag="Create",
-                contents = [
+                contents=[
                     "Create a room with name",
                     "and your player name.",
                     ''
@@ -348,12 +236,12 @@ class UnoGame:
             cls.room()
         Button.elements.extend([
             Button(
-                images['button']['square_line'],
+                resources.images['button']['square_line'],
                 pygame.Rect(W * 11/32, H * 1/2, W * 3/32, H * 1/12),
                 cls.menu, slice=True, text='Back'
             ),
             Button(
-                images['button']['square_color'],
+                resources.images['button']['square_color'],
                 pygame.Rect(W * 17/32, H * 5/8, W * 1/8, H * 1/12),
                 host, slice=True, text="OK"
             )
@@ -361,37 +249,44 @@ class UnoGame:
 
     @classmethod
     def room(cls):
+        """Display the room waiting screen."""
+        if cls.role is None:
+            return
+        role = cls.role
+        if role.room is None:
+            return
+
         ui.clear()
 
         Column.elements.extend([
             Column(
                 pygame.Rect(W * 5/16, H * 1/8, W * 3/8, H * 3/4),
-                tag=cls.role.room.name,
-                contents=cls.role.room.players
+                tag=role.room.name,
+                contents=role.room.players
             )
         ])
 
         def back():
             try:
-                cls.role.close()
+                role.close()
             except SocketClosedMessage:
-                del cls.role
+                cls.role = None
                 cls.menu()
         Button.elements.extend([
             Button(
-                images['button']['square_line'],
+                resources.images['button']['square_line'],
                 pygame.Rect(W * 11/32, H * 3/4, W * 1/8, H * 1/12),
                 back, slice=True, text="Back"
             )
         ])
 
-        if isinstance(cls.role, Host):
+        if isinstance(role, Host):
             def start():
-                cls.role.room.status = 1
+                role.room.status = 1
                 cls.game()
             Button.elements.extend([
                 Button(
-                    images['button']['square_color'],
+                    resources.images['button']['square_color'],
                     pygame.Rect(W * 17/32, H * 3/4, W * 1/8, H * 1/12),
                     start, slice=True, text="Start"
                 )
@@ -399,12 +294,20 @@ class UnoGame:
 
     @classmethod
     def game(cls):
-        ui.clear()
+        """
+        Initialize and display the game screen.
 
+        TODO: Initialize game logic here
+        """
+        if cls.role is None or cls.role.room is None:
+            return
+        _players = [Player(name) for name in cls.role.room.players]  # Will be used when game logic is implemented
+
+        ui.clear()
 
     @classmethod
     def run(cls):
-        """运行游戏。"""
+        """Run the game main loop."""
 
         cls.menu()
         counter = ui.update()
@@ -414,10 +317,12 @@ class UnoGame:
 
         @Message.catch
         def network():
+            if cls.role is None:
+                return
             try:
                 cls.role.run()
             except SocketClosedMessage as e:
-                del cls.role
+                cls.role = None
                 cls.menu()
                 raise e
             except GameStartedMessage:
@@ -427,7 +332,7 @@ class UnoGame:
 
         while counter := ui.update(counter):
             if check_interval(RUN_INTERVAL):
-                if hasattr(cls, 'role'):
+                if cls.role is not None:
                     network()
             if check_interval(ROOM_UPDATE_INTERVAL):
                 Room.update()

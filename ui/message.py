@@ -4,8 +4,21 @@ import logging
 
 import pygame
 
-from .constants import MESSAGE_RECT, FPS, TEXT_COLOR
+from config import (
+    W, FPS,
+    MESSAGE_BOX_WIDTH, MESSAGE_BOX_HEIGHT, MESSAGE_BOX_TOP_MARGIN,
+    MESSAGE_TEXT_LEFT_MARGIN, MESSAGE_DISPLAY_TIME
+)
+from .constants import TEXT_COLOR
 from .utils import slice_scale
+
+# MESSAGE_RECT is calculated based on screen width
+MESSAGE_RECT = pygame.Rect(
+    (W - MESSAGE_BOX_WIDTH) / 2,
+    MESSAGE_BOX_TOP_MARGIN,
+    MESSAGE_BOX_WIDTH,
+    MESSAGE_BOX_HEIGHT
+)
 
 logging.basicConfig(
     level=logging.ERROR,
@@ -35,7 +48,7 @@ class Message(pygame.Surface):
         self,
         message: Exception,
         rect: pygame.Rect = MESSAGE_RECT,
-        time: int = 5
+        time: int = MESSAGE_DISPLAY_TIME
     ):
         super().__init__(rect.size, pygame.SRCALPHA)
 
@@ -45,7 +58,7 @@ class Message(pygame.Surface):
                 str(message), True, TEXT_COLOR
             )
             message_rect = message_surface.get_rect(
-                midleft=(16, rect.h / 2)
+                midleft=(MESSAGE_TEXT_LEFT_MARGIN, rect.h / 2)
             )
             self.blit(message_surface, message_rect)
 

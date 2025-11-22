@@ -1,8 +1,8 @@
 import socket
 
+from config import HOST_PORT_RANGE, BUFFER_SIZE, ROOM_CAPACITY
 from .constants import (
-    HOST_PORT_RANGE, BUFFER_SIZE,
-    ROOM_WAITING, ROOM_ONGOING, ROOM_CAPACITY
+    ROOM_WAITING, ROOM_ONGOING
 )
 from .utils import (
     to_bytes, from_stream,

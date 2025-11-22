@@ -1,8 +1,7 @@
 import socket
 
+from config import MULTICAST_GROUP, MULTICAST_PORT, BUFFER_SIZE
 from .constants import (
-    MULTICAST_GROUP, MULTICAST_PORT,
-    BUFFER_SIZE,
     ROOM_WAITING
 )
 from .utils import (

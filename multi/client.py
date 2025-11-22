@@ -1,7 +1,7 @@
 import socket
 
+from config import BUFFER_SIZE, SOCKET_TIMEOUT
 from .constants import (
-    BUFFER_SIZE, SOCKET_TIMEOUT,
     ROOM_ONGOING, ROOM_WAITING
 )
 from .utils import (
@@ -23,7 +23,7 @@ class Client:
         self.name = name
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.room: Room
+        self.room: Room | None = None
 
     def close(self, reason: Exception | str = ''):
         self.sock.close()
@@ -84,6 +84,8 @@ class Client:
                     "Failed to connect to the host"
                 )
 
+            if self.room is None:
+                return
             if info := Room.rooms.get(self.room.addr):
                 self.room.players[:] = info.players
                 if (
@@ -99,7 +101,7 @@ class Client:
                     self.room.status = ROOM_WAITING
                     raise GameEndedMessage
 
-        if hasattr(self, 'room'):
+        if self.room is not None:
             if self.room.status is ROOM_ONGOING:
                 go()
             sync()

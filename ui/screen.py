@@ -1,6 +1,7 @@
 import pygame
 
-from .constants import W, H, FPS, BACKGROUND_COLOR
+from config import W, H, FPS, WINDOW_TITLE, WINDOW_ICON_SIZE, KEY_REPEAT_DELAY, KEY_REPEAT_INTERVAL
+from .constants import BACKGROUND_COLOR
 from .column import Column
 from .input import Input
 from .button import Button
@@ -9,7 +10,7 @@ from .message import Message
 pygame.init()
 
 def _draw_icon():
-    icon = pygame.Surface((32, 32), pygame.SRCALPHA)
+    icon = pygame.Surface(WINDOW_ICON_SIZE, pygame.SRCALPHA)
     colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0)]  # 红绿蓝黄
     for i, color in enumerate(colors):
         rect = pygame.Rect(i % 2 * 16, i // 2 * 16, 16, 16)
@@ -17,8 +18,8 @@ def _draw_icon():
     return icon
 
 pygame.display.set_icon(_draw_icon())
-pygame.display.set_caption('Game')
-pygame.key.set_repeat(500, 50)
+pygame.display.set_caption(WINDOW_TITLE)
+pygame.key.set_repeat(KEY_REPEAT_DELAY, KEY_REPEAT_INTERVAL)
 _screen = pygame.display.set_mode((W, H), flags=0)
 _clock = pygame.time.Clock()
 

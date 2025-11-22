@@ -17,7 +17,12 @@ class Input(pygame.Surface):
         active_image: pygame.Surface,
         hint_font: pygame.font.Font,
         tap_sound: pygame.mixer.Sound
-    ):          # TODO: 本地存储一些默认资源吧?
+    ):
+        """
+        Initialize the Input class with required resources.
+
+        TODO: 本地存储一些默认资源吧?
+        """
         cls._inactive_image = inactive_image
         cls._active_image = active_image
         cls._hint_font = hint_font
@@ -36,8 +41,11 @@ class Input(pygame.Surface):
 
         self._rect_topleft = rect.topleft
         self._hint = hint
+        
+        from config import UI_ELEMENT_PADDING
         self._text_area = self.subsurface(
-            (8, 8), (rect.w - 16, rect.h - 16)
+            (UI_ELEMENT_PADDING, UI_ELEMENT_PADDING),
+            (rect.w - UI_ELEMENT_PADDING * 2, rect.h - UI_ELEMENT_PADDING * 2)
         )
         self._mask = pygame.mask.from_surface(self.inactive_surface)
 
