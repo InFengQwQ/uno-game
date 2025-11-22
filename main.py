@@ -1,8 +1,12 @@
+from typing import Optional
+
 import pygame
 
 import ui
 from ui import Column, Input, Button, Message
 from multi import (
+    # ROOM_WAITING,
+    ROOM_ONGOING,
     SocketClosedMessage, GameStartedMessage, GameEndedMessage,
     Room, Client, Host
 )
@@ -49,11 +53,12 @@ Message.init(
 class UnoGame:
     """Main game class managing the UNO game flow."""
 
-    role: Host | Client | None = None
+    role: Optional[Host | Client] = None
 
     @classmethod
     def menu(cls):
         """Display the main menu screen."""
+
         ui.clear()
 
         ui.scene.blit(pygame.transform.scale(
@@ -96,6 +101,7 @@ class UnoGame:
         Args:
             page: Page number for room listing (default: 1)
         """
+
         if Room.rooms:
             page = min(page, len(Room.rooms))
             info = sorted(Room.rooms.values())[page - 1]
@@ -199,6 +205,7 @@ class UnoGame:
     @classmethod
     def create(cls):
         """Display the room creation screen."""
+
         ui.clear()
 
         Column.elements.extend([
@@ -250,25 +257,24 @@ class UnoGame:
     @classmethod
     def room(cls):
         """Display the room waiting screen."""
-        if cls.role is None:
-            return
-        role = cls.role
-        if role.room is None:
-            return
+
+        assert cls.role and cls.role.room
 
         ui.clear()
 
         Column.elements.extend([
             Column(
                 pygame.Rect(W * 5/16, H * 1/8, W * 3/8, H * 3/4),
-                tag=role.room.name,
-                contents=role.room.players
+                tag=cls.role.room.name,
+                contents=cls.role.room.players
             )
         ])
 
         def back():
+            assert cls.role
+
             try:
-                role.close()
+                cls.role.close()
             except SocketClosedMessage:
                 cls.role = None
                 cls.menu()
@@ -280,9 +286,11 @@ class UnoGame:
             )
         ])
 
-        if isinstance(role, Host):
+        if isinstance(cls.role, Host):
             def start():
-                role.room.status = 1
+                assert cls.role and cls.role.room
+
+                cls.role.room.status = ROOM_ONGOING
                 cls.game()
             Button.elements.extend([
                 Button(
@@ -299,8 +307,9 @@ class UnoGame:
 
         TODO: Initialize game logic here
         """
-        if cls.role is None or cls.role.room is None:
-            return
+
+        assert cls.role and cls.role.room
+
         _players = [Player(name) for name in cls.role.room.players]  # Will be used when game logic is implemented
 
         ui.clear()
@@ -317,8 +326,8 @@ class UnoGame:
 
         @Message.catch
         def network():
-            if cls.role is None:
-                return
+            assert cls.role
+
             try:
                 cls.role.run()
             except SocketClosedMessage as e:
@@ -332,7 +341,7 @@ class UnoGame:
 
         while counter := ui.update(counter):
             if check_interval(RUN_INTERVAL):
-                if cls.role is not None:
+                if cls.role:
                     network()
             if check_interval(ROOM_UPDATE_INTERVAL):
                 Room.update()

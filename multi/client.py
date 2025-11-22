@@ -1,4 +1,5 @@
 import socket
+from typing import Optional
 
 from config import BUFFER_SIZE, SOCKET_TIMEOUT
 from .constants import (
@@ -14,6 +15,8 @@ from .room import Room
 
 class Client:
 
+    room: Optional[Room] = None
+
     def __init__(self, name: str):
         if not (0 < len(name) < BUFFER_SIZE / 32):
             raise ValueError(
@@ -23,12 +26,10 @@ class Client:
         self.name = name
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.room: Room | None = None
 
     def close(self, reason: Exception | str = ''):
         self.sock.close()
-        if hasattr(self, 'room'):
-            del self.room
+        self.room = None
         raise SocketClosedMessage(reason)
 
     def join(self, info: Info, password: int):
@@ -67,41 +68,50 @@ class Client:
                         else:
                             self.close(response.message)
 
-    def run(self):
-        def go():
-            pass
+    def sync(self):
+        """"""
 
-        def sync():
-            try:
-                if not self.sock.recv(1, socket.MSG_PEEK):
-                    self.close(
-                        "Host has closed the connection"
-                    )
-            except BlockingIOError:
-                pass
-            except ConnectionError:
+        assert self.room
+
+        try:
+            if not self.sock.recv(1, socket.MSG_PEEK):
                 self.close(
-                    "Failed to connect to the host"
+                    "Host has closed the connection"
                 )
+        except BlockingIOError:
+            pass
+        except ConnectionError:
+            self.close(
+                "Failed to connect to the host"
+            )
 
-            if self.room is None:
-                return
-            if info := Room.rooms.get(self.room.addr):
-                self.room.players[:] = info.players
-                if (
-                    info.status is ROOM_ONGOING and
-                    self.room.status is ROOM_WAITING
-                ):
-                    self.room.status = ROOM_ONGOING
-                    raise GameStartedMessage
-                elif (
-                    info.status is ROOM_WAITING and
-                    self.room.status is ROOM_ONGOING
-                ):
-                    self.room.status = ROOM_WAITING
-                    raise GameEndedMessage
+        if info := Room.rooms.get(self.room.addr):
+            self.room.players[:] = info.players
+            if (
+                info.status is ROOM_ONGOING and
+                self.room.status is ROOM_WAITING
+            ):
+                self.room.status = ROOM_ONGOING
+                raise GameStartedMessage
+            elif (
+                info.status is ROOM_WAITING and
+                self.room.status is ROOM_ONGOING
+            ):
+                self.room.status = ROOM_WAITING
+                raise GameEndedMessage
 
-        if self.room is not None:
-            if self.room.status is ROOM_ONGOING:
-                go()
-            sync()
+    def go(self):
+        """"""
+
+        assert self.room
+
+        pass
+
+    def run(self):
+        """"""
+
+        assert self.room
+
+        self.sync()
+        if self.room.status is ROOM_ONGOING:
+            self.go()
