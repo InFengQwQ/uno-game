@@ -15,4 +15,3 @@ SOCKET_TIMEOUT = 5.0
 
 # Capacity of players in a room
 ROOM_CAPACITY = 10
-

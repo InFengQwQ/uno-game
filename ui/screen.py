@@ -1,6 +1,10 @@
 import pygame
 
-from config import W, H, FPS, WINDOW_TITLE, WINDOW_ICON_SIZE, KEY_REPEAT_DELAY, KEY_REPEAT_INTERVAL
+from config import (
+    W, H, FPS,
+    WINDOW_TITLE, WINDOW_ICON_SIZE,
+    KEY_REPEAT_DELAY, KEY_REPEAT_INTERVAL
+)
 from .constants import BACKGROUND_COLOR
 from .column import Column
 from .input import Input

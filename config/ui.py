@@ -17,4 +17,3 @@ MESSAGE_DISPLAY_TIME = 5  # seconds
 
 # UI element padding (for input fields, etc.)
 UI_ELEMENT_PADDING = 8
-

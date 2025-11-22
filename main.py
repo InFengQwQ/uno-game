@@ -333,7 +333,7 @@ class UnoGame:
             except SocketClosedMessage as e:
                 cls.role = None
                 cls.menu()
-                raise e
+                Message.elements.append(Message(e))
             except GameStartedMessage:
                 cls.game()
             except GameEndedMessage:

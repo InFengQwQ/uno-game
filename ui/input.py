@@ -2,6 +2,7 @@ from typing import Any, overload
 
 import pygame
 
+from config import UI_ELEMENT_PADDING
 from .constants import TEXT_COLOR, HINT_COLOR
 from .utils import slice_scale
 
@@ -41,8 +42,7 @@ class Input(pygame.Surface):
 
         self._rect_topleft = rect.topleft
         self._hint = hint
-        
-        from config import UI_ELEMENT_PADDING
+
         self._text_area = self.subsurface(
             (UI_ELEMENT_PADDING, UI_ELEMENT_PADDING),
             (rect.w - UI_ELEMENT_PADDING * 2, rect.h - UI_ELEMENT_PADDING * 2)

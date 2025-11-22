@@ -12,14 +12,6 @@ from config import (
 from .constants import TEXT_COLOR
 from .utils import slice_scale
 
-# MESSAGE_RECT is calculated based on screen width
-MESSAGE_RECT = pygame.Rect(
-    (W - MESSAGE_BOX_WIDTH) / 2,
-    MESSAGE_BOX_TOP_MARGIN,
-    MESSAGE_BOX_WIDTH,
-    MESSAGE_BOX_HEIGHT
-)
-
 logging.basicConfig(
     level=logging.ERROR,
     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -47,7 +39,12 @@ class Message(pygame.Surface):
     def __init__(
         self,
         message: Exception,
-        rect: pygame.Rect = MESSAGE_RECT,
+        rect: pygame.Rect = pygame.Rect(
+            (W - MESSAGE_BOX_WIDTH) / 2,
+            MESSAGE_BOX_TOP_MARGIN,
+            MESSAGE_BOX_WIDTH,
+            MESSAGE_BOX_HEIGHT
+        ),
         time: int = MESSAGE_DISPLAY_TIME
     ):
         super().__init__(rect.size, pygame.SRCALPHA)
