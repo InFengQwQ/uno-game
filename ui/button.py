@@ -1,4 +1,4 @@
-from typing import Any, Callable
+from typing import Any, Callable, overload
 
 import pygame
 
@@ -76,12 +76,19 @@ class Button(pygame.Surface):
             bool(self._mask.get_at(rel_pos))
         )
 
-    def update(
-        self,
-        event: pygame.event.Event = pygame.event.Event(pygame.USEREVENT)
-    ):
-        self.blit(self.surface, (0, 0))
+    @overload
+    def update(self) -> None: ...
+    @overload
+    def update(self, event: pygame.event.Event) -> None: ...
+    def update(self, *args: Any, **kwargs: Any):
+        if len(args) > 1 or kwargs:
+            raise TypeError
+        elif args:
+            event: pygame.event.Event = args[0]
+        else:
+            event = pygame.event.Event(pygame.USEREVENT)
 
+        self.blit(self.surface, (0, 0))
         if self.is_hovered:
             self.blit(self._highlight, (0, 0))
 
@@ -92,8 +99,8 @@ class Button(pygame.Surface):
     @classmethod
     def update_all(cls, events: list[pygame.event.Event]):
         if events:
-            for button in cls.elements:
-                for event in events:
+            for event in events:
+                for button in cls.elements:
                     button.update(event)
         else:
             for button in cls.elements:

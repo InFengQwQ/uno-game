@@ -66,10 +66,7 @@ class Column(pygame.Surface):
             - self.front_surface.get_height()
         )
 
-    def update(
-        self,
-        event: pygame.event.Event = pygame.event.Event(pygame.USEREVENT)
-    ):
+    def update(self,):
         self.blit(self.back_surface, (0, 0))
 
         if self.tag:
@@ -103,10 +100,5 @@ class Column(pygame.Surface):
 
     @classmethod
     def update_all(cls, events: list[pygame.event.Event]):
-        if events:
-            for column in cls.elements:
-                for event in events:
-                    column.update(event)
-        else:
-            for column in cls.elements:
-                column.update()
+        for column in cls.elements:
+            column.update()

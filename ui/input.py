@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, overload
 
 import pygame
 
@@ -75,10 +75,18 @@ class Input(pygame.Surface):
             bool(self._mask.get_at(rel_pos))
         )
 
-    def update(
-        self,
-        event: pygame.event.Event = pygame.event.Event(pygame.USEREVENT)
-    ):
+    @overload
+    def update(self) -> None: ...
+    @overload
+    def update(self, event: pygame.event.Event) -> None: ...
+    def update(self, *args: Any, **kwargs: Any):
+        if len(args) > 1 or kwargs:
+            raise TypeError
+        elif args:
+            event: pygame.event.Event = args[0]
+        else:
+            event = pygame.event.Event(pygame.USEREVENT)
+
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.is_hovered:
                 self.is_activated = True
@@ -100,7 +108,9 @@ class Input(pygame.Surface):
             self.blit(self.inactive_surface, (0, 0))
 
         if self.text:
-            font = pygame.font.SysFont(None, self._text_area.get_height() - 4)          # TODO: 初始化可带此字体
+            font = pygame.font.SysFont(
+                None, self._text_area.get_height() - 4
+            )          # TODO: 初始化可带此字体
 
             text_surface = font.render(
                 self.text, True, TEXT_COLOR

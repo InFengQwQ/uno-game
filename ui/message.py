@@ -78,10 +78,7 @@ class Message(pygame.Surface):
             **kwargs
         )
 
-    def update(
-        self,
-        event: pygame.event.Event = pygame.event.Event(pygame.USEREVENT)
-    ):
+    def update(self,):
         self._alpha = int(self._alpha - 255 * 1/(self._time * FPS))
         if self._alpha < 0:
             self.elements.remove(self)
@@ -90,13 +87,8 @@ class Message(pygame.Surface):
 
     @classmethod
     def update_all(cls, events: list[pygame.event.Event]):
-        if events:
-            for message in cls.elements:
-                for event in events:
-                    message.update(event)
-        else:
-            for message in cls.elements:
-                message.update()
+        for message in cls.elements:
+            message.update()
 
     @classmethod
     def catch(cls, func: Callable[..., None]) -> Callable[..., None]:
