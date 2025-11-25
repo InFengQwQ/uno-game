@@ -1,3 +1,5 @@
+"""Multi-player module for UNO game."""
+
 from .constants import *
 from .utils import *
 from .room import Room

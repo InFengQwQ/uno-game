@@ -1,3 +1,5 @@
+"""UI package initialization."""
+
 from .constants import *
 from .column import Column
 from .input import Input
@@ -8,5 +10,3 @@ from .screen import *
 __all__ = [
     'Column', 'Input', 'Button', 'Message'
 ]
-
-__author__ = 'InFeng'

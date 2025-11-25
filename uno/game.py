@@ -1,7 +1,12 @@
-from . import Card, Deck, Player, Rules
+"""UNO game management module."""
+
 import random
 
 from config import INITIAL_HAND_SIZE
+from .card import Card
+from .deck import Deck
+from .player import Player
+from .rules import Rules
 
 
 class Game:
@@ -14,6 +19,7 @@ class Game:
         Args:
             players: List of players participating in the game
         """
+
         self.deck = Deck()
         self.players = players   # player number no more than 10
         self.turn = -1   # counterclockwise is positively increasing, and default clockwise
@@ -40,6 +46,7 @@ class Game:
         Returns:
             True if the card was successfully played, False otherwise
         """
+
         if is_valid := Rules.is_valid_play(card, self):
             Rules.apply_special_effects(card, self)
             player.discard(self.deck, card)

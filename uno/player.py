@@ -1,4 +1,7 @@
-from . import Card, Deck
+"""Module representing a player in the UNO game."""
+
+from .card import Card
+from .deck import Deck
 
 
 class Player:
@@ -11,6 +14,7 @@ class Player:
         Args:
             name: Player's name
         """
+
         self.name = name
         self.hand: list[Card] = []
         self.score = 0  # Other players' hand cards when losing can be added here with a certain weight.
@@ -23,6 +27,7 @@ class Player:
             deck: The game deck
             num: Number of cards to draw (default: 1)
         """
+
         self.hand.extend(deck.draw(num))
 
     def discard(self, deck: Deck, card: Card):
@@ -33,5 +38,6 @@ class Player:
             deck: The game deck
             card: The card to discard
         """
+
         self.hand.remove(card)
         deck.discard(card)

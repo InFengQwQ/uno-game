@@ -1,21 +1,21 @@
+"""Main module for the UNO game application."""
+
 from typing import Optional
 
 import pygame
 
-import ui
-from ui import Column, Input, Button, Message
-from multi import (
-    # ROOM_WAITING,
-    ROOM_ONGOING,
-    SocketClosedMessage, GameStartedMessage, GameEndedMessage,
-    Room, Client, Host
-)
-from config import ROOM_CAPACITY
-from uno import Player
 from config import (
-    W, H, FPS, RUN_INTERVAL, ROOM_UPDATE_INTERVAL, ROOM_RECEIVE_INTERVAL
+    W, H, FPS,
+    RUN_INTERVAL, ROOM_UPDATE_INTERVAL, ROOM_RECEIVE_INTERVAL,
+    ROOM_CAPACITY,
 )
 from resources import ResourceManager
+import ui
+from ui import *
+import multi
+from multi import *
+import uno
+from uno import *
 
 # 所有游戏内核在主机完成，所以大多数实例对象仅存在于主机
 # 对于客户端的玩家的数据，主机仍留有备份，客户端拥有手牌的卡牌类（主机发送json标明卡牌属性），仅此而已
@@ -54,6 +54,7 @@ class UnoGame:
     """Main game class managing the UNO game flow."""
 
     role: Optional[Host | Client] = None
+    uno_game: Optional[Game] = None
 
     @classmethod
     def menu(cls):
@@ -310,7 +311,8 @@ class UnoGame:
 
         assert cls.role and cls.role.room
 
-        _players = [Player(name) for name in cls.role.room.players]  # Will be used when game logic is implemented
+        cls.uno_game = Game([Player(name) for name in cls.role.room.players])
+        # 看一下下面的实现，搞清楚每一回合该如何处理交互
 
         ui.clear()
 

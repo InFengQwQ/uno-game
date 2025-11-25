@@ -1,8 +1,18 @@
-from . import COLORS, BLACK_COLOR, NUMBER, NUMBERS, NONZERO_NUMBERS, ACTIONS, WILDS, Card
+"""UNO Deck Module"""
+
 import random
+
+from .constants import (
+    COLORS, BLACK_COLOR,
+    NUMBER, NUMBERS, NONZERO_NUMBERS,
+    ACTIONS, WILDS
+)
+from .card import Card
 
 
 class Deck:
+    """UNO Deck Class"""
+
     def __init__(self):
         self.draw_pile: list[Card] = []
         self.discard_pile: list[Card] = []
@@ -23,7 +33,9 @@ class Deck:
         self.draw_pile, self.discard_pile = self.discard_pile[:-1], self.discard_pile[-1:]
         random.shuffle(self.draw_pile)
 
-    def draw(self, num: int = 1):    # draw_pile to player.hand
+    def draw(self, num: int = 1):
+        """Draw Cards from Draw Pile"""
+
         cards: list[Card] = []
         for _ in range(num):
             try:
@@ -35,5 +47,7 @@ class Deck:
                 cards.append(self.draw_pile.pop())
         return cards
 
-    def discard(self, card: Card):  # player.hand to discard_pile
+    def discard(self, card: Card):
+        """Discard Card to Discard Pile"""
+
         self.discard_pile.append(card)

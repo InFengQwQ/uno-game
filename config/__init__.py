@@ -1,3 +1,5 @@
+"""Configuration package for the game application."""
+
 from .settings import *
 from .ui import *
 from .network import *
@@ -20,4 +22,3 @@ __all__ = [
     # Game rules
     'INITIAL_HAND_SIZE', 'MIN_PLAYERS', 'MAX_PLAYERS',
 ]
-

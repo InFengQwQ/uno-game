@@ -2,6 +2,7 @@
 
 from os.path import abspath, dirname, join
 import sys
+
 import pygame
 
 from uno.constants import COLORS, BLACK_COLOR, NUMBERS, ACTIONS, WILDS
@@ -18,30 +19,32 @@ def getpath(path: str) -> str:
 
 class ResourceManager:
     """Manages loading and access to game resources."""
-    
+
     # Button configuration
     BUTTON_SHAPES = ['square', 'round']
     BUTTON_STYLES = ['basic', 'line', 'color']
     ARROW_DIRECTIONS = ['left', 'right', 'up', 'down']
-    
+
     # Font configuration
     LARGE_TEXTS = ['tag']
     DEFAULT_TEXTS = ['hint', 'text']
     SMALL_TEXTS = ['message']
     NARROW_TEXTS = ['content']
-    
+
     def __init__(self):
         """Initialize and load all resources."""
+
         self.images: dict[str, dict[str, pygame.Surface]] = {}
         self.fonts: dict[str, pygame.font.Font] = {}
         self.sounds: dict[str, pygame.mixer.Sound] = {}
-        
+
         self._load_images()
         self._load_fonts()
         self._load_sounds()
-    
+
     def _load_images(self):
         """Load all image resources."""
+
         # Info images
         self.images['info'] = {
             'cards_text': pygame.image.load(
@@ -51,7 +54,7 @@ class ResourceManager:
                 getpath('assets/images/info/players_2_10.svg')
             ).convert_alpha(),
         }
-        
+
         # Column images
         self.images['column'] = {
             'back': pygame.image.load(
@@ -64,7 +67,7 @@ class ResourceManager:
                 getpath('assets/images/column/divider.svg')
             ).convert_alpha(),
         }
-        
+
         # Input images
         self.images['input'] = {
             'inactive': pygame.image.load(
@@ -74,7 +77,7 @@ class ResourceManager:
                 getpath('assets/images/input/active.svg')
             ).convert_alpha(),
         }
-        
+
         # Button images
         self.images['button'] = {
             **{
@@ -91,14 +94,14 @@ class ResourceManager:
                 for direction in self.ARROW_DIRECTIONS
             },
         }
-        
+
         # Message images
         self.images['message'] = {
             'box': pygame.image.load(
                 getpath('assets/images/message/box.svg')
             ).convert_alpha(),
         }
-        
+
         # Card images
         self.images['cards'] = {
             'back': pygame.image.load(
@@ -131,9 +134,10 @@ class ResourceManager:
                 for wild in WILDS
             }
         }
-    
+
     def _load_fonts(self):
         """Load all font resources."""
+
         self.fonts = {
             **{
                 large: pygame.font.Font(
@@ -160,9 +164,10 @@ class ResourceManager:
                 for narrow in self.NARROW_TEXTS
             },
         }
-    
+
     def _load_sounds(self):
         """Load all sound resources."""
+
         self.sounds = {
             'click': pygame.mixer.Sound(
                 getpath('assets/sounds/click.ogg')
@@ -171,4 +176,3 @@ class ResourceManager:
                 getpath('assets/sounds/tap.ogg')
             ),
         }
-

@@ -1,3 +1,5 @@
+"""Host management module."""
+
 import socket
 
 from config import HOST_PORT_RANGE, BUFFER_SIZE, ROOM_CAPACITY
@@ -13,13 +15,14 @@ from .room import Room
 
 
 class Host:
+    """Manages the host side of a multiplayer UNO game."""
 
     def __init__(self, name: str, room_name: str, password: int):
-        if not (0 < len(name) < BUFFER_SIZE / 32):
+        if not 0 < len(name) < BUFFER_SIZE / 32:
             raise ValueError("Name is empty or too long")
-        if not (0 < len(room_name) < BUFFER_SIZE / 32):
+        if not 0 < len(room_name) < BUFFER_SIZE / 32:
             raise ValueError("Room name is empty or too long")
-        if not (0 <= password < 10 ** (BUFFER_SIZE / 32)):
+        if not 0 <= password < 10 ** (BUFFER_SIZE / 32):
             raise ValueError("Password is out of range")
 
         self.name = name
@@ -35,7 +38,7 @@ class Host:
                 self.sock.setblocking(False)
                 break
         else:
-            raise Exception("Can not find a free port")
+            raise RuntimeError("Can not find a free port")
         self.room = Room(room_name, password, ('127.0.0.1', port))
         self.room.players.append(self.name)
         self.connections: dict[str, dict[str, socket.socket]] = {
@@ -45,6 +48,11 @@ class Host:
         self.actions: list[Action] = []
 
     def close(self, reason: Exception | str = ''):
+        """
+        Close all connections and the main socket,
+        then raise a SocketClosedMessage.
+        """
+
         self.sock.close()
         for conn in self.connections['unverified'].values():
             conn.close()
@@ -88,15 +96,14 @@ class Host:
                 for obj in from_stream(data):
                     request = Request.from_dict(obj)
                     if len(self.room.players) < ROOM_CAPACITY:
-                        match request.name, request.password:
-                            case name, _ if name in self.room.players:
-                                response = Response(False, "Name is already taken")
-                            case _, password if password != self.room.password:
-                                response = Response(False, "Password is incorrect")
-                            case _:
-                                response = Response(True, '')
-                                self.room.players.append(request.name)
-                                self.connections['verified'][request.name] = conn
+                        if request.name in self.room.players:
+                            response = Response(False, "Name is already taken")
+                        elif request.password != self.room.password:
+                            response = Response(False, "Password is incorrect")
+                        else:
+                            response = Response(True, '')
+                            self.room.players.append(request.name)
+                            self.connections['verified'][request.name] = conn
                     else:
                         response = Response(False, "Room is full")
                     try:
