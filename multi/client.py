@@ -1,3 +1,5 @@
+"""Manages the client side of a multiplayer UNO game."""
+
 import socket
 from typing import Optional
 
@@ -14,11 +16,12 @@ from .room import Room
 
 
 class Client:
+    """Manages the client side of a multiplayer UNO game."""
 
     room: Optional[Room] = None
 
     def __init__(self, name: str):
-        if not (0 < len(name) < BUFFER_SIZE / 32):
+        if not 0 < len(name) < BUFFER_SIZE / 32:
             raise ValueError(
                 "Name is empty or too long"
             )
@@ -28,24 +31,29 @@ class Client:
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def close(self, reason: Exception | str = ''):
+        """
+        Close the client connection and raise a SocketClosedMessage.
+
+        Args:
+            reason: The reason for closing the connection.
+        """
         self.sock.close()
         self.room = None
         raise SocketClosedMessage(reason)
 
     def join(self, info: Info, password: int):
         """Join a room."""
-
         self.sock.settimeout(SOCKET_TIMEOUT)
         try:
             self.sock.connect(info.addr)
-        except TimeoutError:
+        except TimeoutError as e:
             raise TimeoutError(
                 "Timeout or game is ongoing"
-            )
-        except ConnectionRefusedError:
+            ) from e
+        except ConnectionRefusedError as e:
             raise ConnectionRefusedError(
                 "Host is busy or room does not exist"
-            )
+            ) from e
         else:
             request = Request(self.name, password)
             try:
@@ -69,8 +77,9 @@ class Client:
                             self.close(response.message)
 
     def sync(self):
-        """"""
-
+        """
+        Synchronize the client state with the host.
+        """
         assert self.room
 
         try:
@@ -101,15 +110,13 @@ class Client:
                 raise GameEndedMessage
 
     def go(self):
-        """"""
-
+        """Start playing the game."""
         assert self.room
 
         pass
 
     def run(self):
-        """"""
-
+        """Run the client to synchronize and start the game if ongoing."""
         assert self.room
 
         self.sync()

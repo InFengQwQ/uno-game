@@ -11,11 +11,17 @@ from config import (
 )
 from resources import ResourceManager
 import ui
-from ui import *
+from ui import (
+    Column, Input, Button, Message
+)
 import multi
-from multi import *
-import uno
-from uno import *
+from multi import (
+    Host, Client, Room,
+    SocketClosedMessage, GameStartedMessage, GameEndedMessage
+)
+from uno import (
+    Player, Game
+)
 
 # 所有游戏内核在主机完成，所以大多数实例对象仅存在于主机
 # 对于客户端的玩家的数据，主机仍留有备份，客户端拥有手牌的卡牌类（主机发送json标明卡牌属性），仅此而已
@@ -52,14 +58,12 @@ Message.init(
 
 class UnoGame:
     """Main game class managing the UNO game flow."""
-
     role: Optional[Host | Client] = None
-    uno_game: Optional[Game] = None
+    game: Optional[Game] = None
 
     @classmethod
-    def menu(cls):
+    def display_menu(cls):
         """Display the main menu screen."""
-
         ui.clear()
 
         ui.scene.blit(pygame.transform.scale(
@@ -80,12 +84,12 @@ class UnoGame:
             Button(
                 resources.images['button']['square_color'],
                 pygame.Rect(W * 13/32, H * 3/8, W * 3/16, H * 1/12),
-                cls.create, slice=True, text="Create"
+                cls.display_create, slice=True, text="Create"
             ),
             Button(
                 resources.images['button']['square_basic'],
                 pygame.Rect(W * 13/32, H * 1/2, W * 3/16, H * 1/12),
-                cls.join, slice=True, text="Join"
+                cls.display_join, slice=True, text="Join"
             ),
             Button(
                 resources.images['button']['square_basic'],
@@ -95,14 +99,13 @@ class UnoGame:
         ])
 
     @classmethod
-    def join(cls, page: int = 1):
+    def display_join(cls, page: int = 1):
         """
         Display the room join screen.
 
         Args:
             page: Page number for room listing (default: 1)
         """
-
         if Room.rooms:
             page = min(page, len(Room.rooms))
             info = sorted(Room.rooms.values())[page - 1]
@@ -133,48 +136,48 @@ class UnoGame:
             ])
 
             @Message.catch
-            def access():
+            def _access():
                 if not password.text.isdigit():
                     raise ValueError("Password should be a number")
                 client = Client(name.text)
                 client.join(info, int(password.text))
                 cls.role = client
-                cls.room()
+                cls.display_room()
             Button.elements.extend([
                 Button(
                     resources.images['button']['square_color'],
                     pygame.Rect(W * 11/32, H * 9/16, W * 1/8, H * 1/12),
-                    access, slice=True, text="OK"
+                    _access, slice=True, text="OK"
                 ),
                 Button(
                     resources.images['button']['square_line'],
                     pygame.Rect(W * 11/32, H * 11/16, W * 1/8, H * 1/12),
-                    cls.menu, slice=True, text="Back"
+                    cls.display_menu, slice=True, text="Back"
                 ),
                 Button(
                     resources.images['button']['square_basic'],
                     pygame.Rect(W * 1/2, H * 11/16, W * 5/32, H * 1/12),
-                    cls.join, slice=True, text="Refresh"
+                    cls.display_join, slice=True, text="Refresh"
                 )
             ])
             if page < len(Room.rooms):
-                def next():
-                    cls.join(page + 1)
+                def _next():
+                    cls.display_join(page + 1)
                 Button.elements.extend([
                     Button(
                         resources.images['button']['arrow_right'],
                         pygame.Rect(W * 19/32, H * 29/48 - 16, 32, 32),
-                        next
+                        _next
                     )
                 ])
             if page > 1:
-                def prev():
-                    cls.join(page - 1)
+                def _prev():
+                    cls.display_join(page - 1)
                 Button.elements.extend([
                     Button(
                         resources.images['button']['arrow_left'],
                         pygame.Rect(W * 9/16 - 32, H * 29/48 - 16, 32, 32),
-                        prev
+                        _prev
                     )
                 ])
         else:
@@ -194,19 +197,18 @@ class UnoGame:
                 Button(
                     resources.images['button']['square_line'],
                     pygame.Rect(W * 11/32, H * 11/16, W * 1/8, H * 1/12),
-                    cls.menu, slice=True, text="Back"
+                    cls.display_menu, slice=True, text="Back"
                 ),
                 Button(
                     resources.images['button']['square_basic'],
                     pygame.Rect(W * 1/2, H * 11/16, W * 5/32, H * 1/12),
-                    cls.join, slice=True, text="Refresh"
+                    cls.display_join, slice=True, text="Refresh"
                 )
             ])
 
     @classmethod
-    def create(cls):
+    def display_create(cls):
         """Display the room creation screen."""
-
         ui.clear()
 
         Column.elements.extend([
@@ -237,28 +239,27 @@ class UnoGame:
         ])
 
         @Message.catch
-        def host():
+        def _host():
             if not password.text.isdigit():
                 raise ValueError("Password should be a number")
             cls.role = Host(name.text, room_name.text, int(password.text))
-            cls.room()
+            cls.display_room()
         Button.elements.extend([
             Button(
                 resources.images['button']['square_line'],
                 pygame.Rect(W * 11/32, H * 1/2, W * 3/32, H * 1/12),
-                cls.menu, slice=True, text='Back'
+                cls.display_menu, slice=True, text='Back'
             ),
             Button(
                 resources.images['button']['square_color'],
                 pygame.Rect(W * 17/32, H * 5/8, W * 1/8, H * 1/12),
-                host, slice=True, text="OK"
+                _host, slice=True, text="OK"
             )
         ])
 
     @classmethod
-    def room(cls):
+    def display_room(cls):
         """Display the room waiting screen."""
-
         assert cls.role and cls.role.room
 
         ui.clear()
@@ -271,47 +272,43 @@ class UnoGame:
             )
         ])
 
-        def back():
+        def _back():
             assert cls.role
 
             try:
                 cls.role.close()
             except SocketClosedMessage:
                 cls.role = None
-                cls.menu()
+                cls.display_menu()
         Button.elements.extend([
             Button(
                 resources.images['button']['square_line'],
                 pygame.Rect(W * 11/32, H * 3/4, W * 1/8, H * 1/12),
-                back, slice=True, text="Back"
+                _back, slice=True, text="Back"
             )
         ])
 
         if isinstance(cls.role, Host):
-            def start():
+            def _start():
                 assert cls.role and cls.role.room
 
-                cls.role.room.status = ROOM_ONGOING
-                cls.game()
+                cls.role.room.status = multi.ROOM_ONGOING
+                players = [Player(name) for name in cls.role.room.players]
+                cls.game = Game(players)
+                cls.display_game()
             Button.elements.extend([
                 Button(
                     resources.images['button']['square_color'],
                     pygame.Rect(W * 17/32, H * 3/4, W * 1/8, H * 1/12),
-                    start, slice=True, text="Start"
+                    _start, slice=True, text="Start"
                 )
             ])
 
     @classmethod
-    def game(cls):
-        """
-        Initialize and display the game screen.
-
-        TODO: Initialize game logic here
-        """
-
+    def display_game(cls):
+        """Initialize and display the game screen."""
         assert cls.role and cls.role.room
 
-        cls.uno_game = Game([Player(name) for name in cls.role.room.players])
         # 看一下下面的实现，搞清楚每一回合该如何处理交互
 
         ui.clear()
@@ -319,8 +316,7 @@ class UnoGame:
     @classmethod
     def run(cls):
         """Run the game main loop."""
-
-        cls.menu()
+        cls.display_menu()
         counter = ui.update()
 
         def check_interval(i: float) -> bool:
@@ -334,12 +330,12 @@ class UnoGame:
                 cls.role.run()
             except SocketClosedMessage as e:
                 cls.role = None
-                cls.menu()
+                cls.display_menu()
                 Message.elements.append(Message(e))
             except GameStartedMessage:
-                cls.game()
+                cls.display_game()
             except GameEndedMessage:
-                cls.room()
+                cls.display_room()
 
         while counter := ui.update(counter):
             if check_interval(RUN_INTERVAL):
@@ -357,11 +353,9 @@ class UnoGame:
 #     # 到时候尽量多把代码封装到类方法里
 #     while True:
 #         game = Game(players)
-#         game.turn += game.reverse
-#         player = game.players[game.turn]   # the first player
 #         while True:
 #             try:
-#                 if game.deck.discard_pile[-1].type == 'Wild Draw Four' and game.draw:
+#                 if game.deck.discard_pile[-1].type == 'draw_four' and game.draw:
 #                     # +4 challenge
 #                     pass
 #                     if True:
@@ -381,7 +375,7 @@ class UnoGame:
 #                     if game.play_card(player, card):
 #                         # play card
 #                         pass
-#                 elif (game.deck.draw_pile + game.deck.discard_pile):   # draw one and select whether to discard or reserve(or yes -> invalid -> reserve) 
+#                 elif (game.deck.draw_pile + game.deck.discard_pile):   # draw one and select whether to discard or reserve(or yes -> invalid -> reserve)
 #                     player.draw(game.deck)
 #                     # draw
 #                     pass

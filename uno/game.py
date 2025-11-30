@@ -11,17 +11,9 @@ from .rules import Rules
 
 class Game:
     """Manages the UNO game state and logic."""
-
     def __init__(self, players: list[Player]):
-        """
-        Initialize a new UNO game.
-
-        Args:
-            players: List of players participating in the game
-        """
-
         self.deck = Deck()
-        self.players = players   # player number no more than 10
+        self.players = players
         self.turn = -1   # counterclockwise is positively increasing, and default clockwise
         self.reverse = False
         self.draw = 0
@@ -29,11 +21,16 @@ class Game:
         for player in self.players:
             player.draw(self.deck, INITIAL_HAND_SIZE)
 
-        while (top := self.deck.draw_pile.pop()).type == 'wild_draw_four':
-            self.deck.draw_pile.insert(random.choice(range(len(self.deck.draw_pile))), top)
+        while (top := self.deck.draw_pile.pop()).sort == 'draw_four':
+            self.deck.draw_pile.insert(
+                random.choice(range(len(self.deck.draw_pile))),
+                top
+            )
 
         Rules.apply_special_effects(top, self)
         self.deck.discard_pile.append(top)
+        self.turn += self.reverse
+        self.player = self.players[self.turn]   # the first player
 
     def play_card(self, player: Player, card: Card) -> bool:
         """
@@ -46,7 +43,6 @@ class Game:
         Returns:
             True if the card was successfully played, False otherwise
         """
-
         if is_valid := Rules.is_valid_play(card, self):
             Rules.apply_special_effects(card, self)
             player.discard(self.deck, card)

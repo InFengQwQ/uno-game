@@ -1,3 +1,5 @@
+"""A module to manage multiplayer game rooms using multicast networking."""
+
 import socket
 
 from config import MULTICAST_GROUP, MULTICAST_PORT, BUFFER_SIZE
@@ -18,7 +20,10 @@ class Room:
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, socket.inet_aton(MULTICAST_GROUP) + socket.inet_aton('0.0.0.0'))
+    sock.setsockopt(
+        socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
+        socket.inet_aton(MULTICAST_GROUP) + socket.inet_aton('0.0.0.0')
+    )
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, BUFFER_SIZE)
     sock.bind(('0.0.0.0', MULTICAST_PORT))
     sock.setblocking(False)
@@ -36,7 +41,12 @@ class Room:
 
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
             sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 1)
-            sock.sendto(to_bytes(Info(self.name, self.addr, self.players, self.status).to_dict()), (MULTICAST_GROUP, MULTICAST_PORT))
+            sock.sendto(
+                to_bytes(Info(
+                    self.name, self.addr, self.players, self.status
+                ).to_dict()),
+                (MULTICAST_GROUP, MULTICAST_PORT)
+            )
 
     @classmethod
     def receive(cls):

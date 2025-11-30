@@ -16,7 +16,6 @@ from .room import Room
 
 class Host:
     """Manages the host side of a multiplayer UNO game."""
-
     def __init__(self, name: str, room_name: str, password: int):
         if not 0 < len(name) < BUFFER_SIZE / 32:
             raise ValueError("Name is empty or too long")
@@ -52,7 +51,6 @@ class Host:
         Close all connections and the main socket,
         then raise a SocketClosedMessage.
         """
-
         self.sock.close()
         for conn in self.connections['unverified'].values():
             conn.close()
@@ -61,8 +59,7 @@ class Host:
         raise SocketClosedMessage(reason)
 
     def sync(self):
-        """"""
-
+        """Synchronize the room state and remove disconnected players."""
         for name, conn in self.connections['verified'].copy().items():
             try:
                 if not conn.recv(1, socket.MSG_PEEK):
@@ -73,8 +70,7 @@ class Host:
         self.room.broadcast()
 
     def wait(self):
-        """"""
-
+        """Wait for new connections and handle join requests."""
         while True:
             try:
                 conn, addr = self.sock.accept()
@@ -112,8 +108,7 @@ class Host:
                         pass
 
     def go(self):
-        """"""
-
+        """Handle game actions from verified players and broadcast them."""
         def action():
             for name, conn in self.connections['verified'].items():
                 try:
@@ -135,8 +130,7 @@ class Host:
         action()
 
     def run(self):
-        """"""
-
+        """Run the main loop to synchronize, wait for connections, or handle game actions."""
         self.sync()
         if self.room.status is ROOM_WAITING:
             self.wait()
