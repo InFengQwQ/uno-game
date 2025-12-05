@@ -6,7 +6,7 @@ import pygame
 
 from config import (
     W, H, FPS,
-    RUN_INTERVAL, ROOM_UPDATE_INTERVAL, ROOM_RECEIVE_INTERVAL,
+    RUN_INTERVAL, ROOM_RECV_INTERVAL,
     ROOM_CAPACITY,
 )
 from resources import ResourceManager
@@ -100,15 +100,15 @@ class UnoGame:
 
     @classmethod
     def display_join(cls, page: int = 1):
-        """
-        Display the room join screen.
+        """Display the room join screen.
 
         Args:
             page: Page number for room listing (default: 1)
         """
         if Room.rooms:
             page = min(page, len(Room.rooms))
-            info = sorted(Room.rooms.values())[page - 1]
+            ip, port = addr = sorted(Room.rooms)[page - 1]
+            info = Room.rooms[addr]
 
             ui.clear()
 
@@ -118,7 +118,7 @@ class UnoGame:
                     tag=f"Search({page}/{len(Room.rooms)})",
                     contents=[
                         f"{info.name}({len(info.players)}/{ROOM_CAPACITY})",
-                        f"{info.ip}:{info.port}",
+                        f"{ip}:{port}",
                         ''
                     ]
                 )
@@ -140,7 +140,7 @@ class UnoGame:
                 if not password.text.isdigit():
                     raise ValueError("Password should be a number")
                 client = Client(name.text)
-                client.join(info, int(password.text))
+                client.join(addr, int(password.text))
                 cls.role = client
                 cls.display_room()
             Button.elements.extend([
@@ -341,10 +341,8 @@ class UnoGame:
             if check_interval(RUN_INTERVAL):
                 if cls.role:
                     network()
-            if check_interval(ROOM_UPDATE_INTERVAL):
-                Room.update()
-            if check_interval(ROOM_RECEIVE_INTERVAL):
-                Room.receive()
+            if check_interval(ROOM_RECV_INTERVAL):
+                Room.recv()
 
 
 # def main():

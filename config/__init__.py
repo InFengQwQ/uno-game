@@ -9,7 +9,7 @@ __all__ = [
     # Screen settings
     'SCREEN_WIDTH', 'SCREEN_HEIGHT', 'W', 'H', 'FPS',
     # Main loop intervals
-    'RUN_INTERVAL', 'ROOM_UPDATE_INTERVAL', 'ROOM_RECEIVE_INTERVAL',
+    'RUN_INTERVAL', 'ROOM_RECV_INTERVAL',
     # UI settings
     'WINDOW_TITLE', 'WINDOW_ICON_SIZE',
     'KEY_REPEAT_DELAY', 'KEY_REPEAT_INTERVAL',

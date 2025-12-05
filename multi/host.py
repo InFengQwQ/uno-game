@@ -1,21 +1,21 @@
-"""Host management module."""
+"""The host side of a multiplayer UNO game."""
 
 import socket
 
 from config import HOST_PORT_RANGE, BUFFER_SIZE, ROOM_CAPACITY
 from .constants import (
-    ROOM_WAITING, ROOM_ONGOING
+    ROOM_WAITING, ROOM_ONGOING,
+    InfoDict, JsonMessage
 )
 from .utils import (
     to_bytes, from_stream,
-    Request, Response, Action,
     SocketClosedMessage
 )
 from .room import Room
 
 
 class Host:
-    """Manages the host side of a multiplayer UNO game."""
+    """The host side of a multiplayer UNO game."""
     def __init__(self, name: str, room_name: str, password: int):
         if not 0 < len(name) < BUFFER_SIZE / 32:
             raise ValueError("Name is empty or too long")
@@ -37,19 +37,22 @@ class Host:
                 self.sock.setblocking(False)
                 break
         else:
-            raise RuntimeError("Can not find a free port")
-        self.room = Room(room_name, password, ('127.0.0.1', port))
+            raise OSError("Can not find a free port")
+        self.messages: JsonMessage = {}
+        self.room = Room(room_name, password, port)
         self.room.players.append(self.name)
         self.connections: dict[str, dict[str, socket.socket]] = {
             'unverified': {}, 'verified': {}
-        }
+        }               # 考虑分成两个字典，因为毕竟一个是addr: dict socket一个是name: dict socket
 
-        self.actions: list[Action] = []
+        self.actions: list[InfoDict] = []
 
-    def close(self, reason: Exception | str = ''):
-        """
-        Close all connections and the main socket,
-        then raise a SocketClosedMessage.
+    def close(self, reason: Exception = Exception()):
+        """Close the Host and all connections,
+        and raise a SocketClosedMessage.
+
+        Args:
+            reason: The reason for closing the connections.
         """
         self.sock.close()
         for conn in self.connections['unverified'].values():
@@ -58,19 +61,45 @@ class Host:
             conn.close()
         raise SocketClosedMessage(reason)
 
-    def sync(self):
-        """Synchronize the room state and remove disconnected players."""
-        for name, conn in self.connections['verified'].copy().items():
+    def send(self, conn: socket.socket, msg: JsonMessage):
+        """Send a message."""
+        try:
+            conn.send(to_bytes(msg))
+        except OSError:
+            pass        # 暂时没考虑出这种情况
+
+    def recv(self):
+        """Receive data and update the messages dictionary."""
+        for addr, conn in self.connections['unverified'].copy().items():
             try:
-                if not conn.recv(1, socket.MSG_PEEK):
-                    self.room.players.remove(name)
-                    self.connections['verified'].pop(name)
+                data = conn.recv(BUFFER_SIZE)
+            except ConnectionError:
+                self.connections['unverified'].pop(addr)
             except BlockingIOError:
                 pass
-        self.room.broadcast()
+            else:
+                self.messages.update(from_stream(data))
 
-    def wait(self):
-        """Wait for new connections and handle join requests."""
+        for name, conn in self.connections['verified'].copy().items():
+            try:
+                if not (data := conn.recv(BUFFER_SIZE)):
+                    raise ConnectionError
+            except ConnectionError:
+                self.connections['verified'].pop(name)
+                if self.room.status is ROOM_WAITING:
+                    self.room.players.remove(name)
+            except BlockingIOError:
+                pass
+            else:
+                self.messages.update(from_stream(data))
+
+    def extract(self, key: str):
+        """Extract data from the messages dictionary."""
+        self.messages.setdefault(key, {})
+        return self.messages.pop(key)
+
+    def accept(self):
+        """Accept new connection and update connections dictionary."""
         while True:
             try:
                 conn, addr = self.sock.accept()
@@ -80,57 +109,65 @@ class Host:
                 conn.setblocking(False)
                 self.connections['unverified'][addr] = conn
 
+    def verify(self):
+        """Verify the connections and update connections dictionary."""
         for addr, conn in self.connections['unverified'].copy().items():
-            try:
-                data = conn.recv(BUFFER_SIZE)
-            except BlockingIOError:
-                continue
-            except ConnectionError:
+            if request := self.extract('request'):
                 self.connections['unverified'].pop(addr)
-            else:
-                self.connections['unverified'].pop(addr)
-                for obj in from_stream(data):
-                    request = Request.from_dict(obj)
-                    if len(self.room.players) < ROOM_CAPACITY:
-                        if request.name in self.room.players:
-                            response = Response(False, "Name is already taken")
-                        elif request.password != self.room.password:
-                            response = Response(False, "Password is incorrect")
-                        else:
-                            response = Response(True, '')
-                            self.room.players.append(request.name)
-                            self.connections['verified'][request.name] = conn
-                    else:
-                        response = Response(False, "Room is full")
-                    try:
-                        conn.send(to_bytes(response.to_dict()))
-                    except ConnectionError:
-                        pass
+                if len(self.room.players) == ROOM_CAPACITY:
+                    msg: JsonMessage = {'response': {
+                        'status': False,
+                        'message': "Room is full"
+                    }}
+                elif request['name'] in self.room.players:
+                    msg: JsonMessage = {'response': {
+                        'status': False,
+                        'message': "Name is already taken"
+                    }}
+                elif request['password'] != self.room.password:
+                    msg: JsonMessage = {'response': {
+                        'status': False,
+                        'message': "Password is incorrect"
+                    }}
+                else:
+                    msg: JsonMessage = {'response': {
+                        'status': True,
+                        'room': {
+                            'name': self.room.name,
+                            'password': self.room.password,
+                            'port': self.room.port
+                        }
+                    }}
+                    self.room.players.append(request['name'])
+                    self.connections['verified'][request['name']] = conn
+                self.send(conn, msg)
+
+    def sync(self):
+        """Synchronize the host with clients,
+        and remove disconnected players.
+        """
+        self.recv()
+
+        msg: JsonMessage = {'room':{
+            'players': self.room.players,
+            'status': self.room.status
+        }}
+        for conn in self.connections['verified'].copy().values():
+            self.send(conn, msg)
+
+    def wait(self):
+        """Handle room messages."""
+        self.room.broadcast()
+
+        self.accept()
+        self.verify()
 
     def go(self):
-        """Handle game actions from verified players and broadcast them."""
-        def action():
-            for name, conn in self.connections['verified'].items():
-                try:
-                    data = conn.recv(BUFFER_SIZE)
-                except BlockingIOError:
-                    pass
-                except ConnectionError:
-                    self.connections['verified'].pop(name)
-                else:
-                    for obj in from_stream(data):
-                        action = Action.from_dict(obj)
-                        self.actions.append(action)
-
-            for action in self.actions:
-                for name, conn in self.connections['verified'].items():
-                    if name != action.name:
-                        conn.send(to_bytes(action.to_dict()))
-
-        action()
+        """Handle game messages."""
+        # action()
 
     def run(self):
-        """Run the main loop to synchronize, wait for connections, or handle game actions."""
+        """Run the host."""
         self.sync()
         if self.room.status is ROOM_WAITING:
             self.wait()

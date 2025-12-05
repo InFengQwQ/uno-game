@@ -1,166 +1,68 @@
+"""Utility functions for handling messages."""
+
 import json
 
-from .constants import (
-    InfoDict, RequestDict, ResponseDict,
-    ActionDict,
-    JsonSerializable
-)
+from .constants import InfoDict, JsonMessage
 
-def to_bytes(obj: object):
+def to_bytes(obj: object) -> bytes:
+    """Convert a json serializable object to a byte string."""
     try:
         return json.dumps(obj).encode()
     except json.JSONDecodeError:
         return b''
 
-def from_packet(packet: bytes):
-    result = None
-    try:
-        result = json.loads(packet.decode())
-    except json.JSONDecodeError:
-        pass
-    return result
-
-def from_stream(stream: bytes):
+def from_stream(b: bytes) -> JsonMessage:
+    """Convert stream to a json message."""
     data = ''
-    result: list[JsonSerializable] = []
-    for c in stream.decode():
+    result: JsonMessage = {}
+    for c in b.decode():
         data += c
         try:
-            result.append(json.loads(data))
+            result.update(json.loads(data))
         except json.JSONDecodeError:
             pass
         else:
             data = ''
     return result
 
+def from_package(b: bytes):
+    """Convert a package to a json serializable object."""
+    try:
+        return json.loads(b.decode())
+    except json.JSONDecodeError:
+        return None
 
-class Info():
-
+class RoomInfo():
+    """RoomInfo class."""
     def __init__(
         self,
         name: str,
-        addr: tuple[str, int],
+        port: int,
         players: list[str],
         status: int
     ):
         self.name = name
-        self.addr = self.ip, self.port = addr
+        self.port = port
         self.players = players
         self.status = status
 
-    def __lt__(self, other: object):
-        if isinstance(other, Info):
-            return self.name < other.name
-        else:
-            return NotImplemented
-
     def to_dict(self) -> InfoDict:
-        return {
-            'name': self.name,
-            'port': self.port,
-            'players': self.players,
-            'status': self.status
-        }
-
-    @classmethod
-    def from_dict(cls, obj: JsonSerializable, ip: str):
-        if (
-            obj.keys() == {'name', 'port', 'players', 'status'} and
-            isinstance(name := obj['name'], str) and
-            isinstance(port := obj['port'], int) and
-            isinstance(players := obj['players'], list) and
-            isinstance(status := obj['status'], int)
-        ):
-            return cls(name, (ip, port), players, status)
-        else:
-            raise TypeError
-
-
-class Request():
-
-    def __init__(
-        self,
-        name: str,
-        password: int
-    ):
-        self.name = name
-        self.password = password
-
-    def to_dict(self) -> RequestDict:
+        """Convert to a info dictionary."""
         return self.__dict__
 
     @classmethod
-    def from_dict(cls, obj: JsonSerializable):
-        if (
-            obj.keys() == {'name', 'password'} and
-            isinstance(name := obj['name'], str) and
-            isinstance(password := obj['password'], int)
-        ):
-            return cls(name, password)
-        else:
-            raise TypeError
-
-
-class Response():
-
-    def __init__(
-        self,
-        status: bool,
-        message: str
-    ):
-        self.status = status
-        self.message = message
-
-    def to_dict(self) -> ResponseDict:
-        return self.__dict__
-
-    @classmethod
-    def from_dict(cls, obj: JsonSerializable):
-        if (
-            obj.keys() == {'status', 'message'} and
-            isinstance(status := obj['status'], bool) and
-            isinstance(message := obj['message'], str)
-        ):
-            return cls(status, message)
-        else:
-            raise TypeError
-
-
-class Action():
-
-    def __init__(
-        self,
-        name: str,
-        action: str,
-        value: int
-    ):
-        self.name = name
-        self.action = action
-        self.value = value
-
-    def to_dict(self) -> ActionDict:
-        return self.__dict__
-
-    @classmethod
-    def from_dict(cls, obj: JsonSerializable):
-        if (
-            obj.keys() == {'name', 'action', 'value'} and
-            isinstance(name := obj['name'], str) and
-            isinstance(action := obj['action'], str) and
-            isinstance(value := obj['value'], int)
-        ):
-            return cls(name, action, value)
-        else:
-            raise TypeError
+    def from_dict(cls, value: InfoDict) -> 'RoomInfo':
+        """Convert from a info dictionary."""
+        return cls(**value)
 
 
 class SocketClosedMessage(Exception):
-    pass
+    """Stack trace of the exception."""
 
 
 class GameStartedMessage(Exception):
-    pass
+    """Stack trace of the exception."""
 
 
 class GameEndedMessage(Exception):
-    pass
+    """Stack trace of the exception."""
