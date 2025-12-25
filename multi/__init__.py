@@ -9,5 +9,6 @@ from .host import Host
 __all__ = [
     'RoomInfo', 'Action',
     'SocketClosedMessage', 'GameStartedMessage', 'GameEndedMessage',
-    'Room', 'Client', 'Host'
+    'Room', 'Client', 'Host',
+    'ROOM_WAITING', 'ROOM_ONGOING'
 ]

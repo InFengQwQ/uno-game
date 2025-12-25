@@ -1,22 +1,36 @@
 """The host side of a multiplayer UNO game."""
 
 import socket
+from typing import Optional
 
 from config import HOST_PORT_RANGE, BUFFER_SIZE, ROOM_CAPACITY
 from .constants import (
     ROOM_WAITING, ROOM_ONGOING,
-    InfoDict, JsonMessage
+    InfoDict, JsonMessage, Action
 )
 from .utils import (
     to_bytes, from_stream,
-    SocketClosedMessage
+    SocketClosedMessage,
+    create_action_message, create_error_message
 )
 from .room import Room
 
 
 class Host:
     """The host side of a multiplayer UNO game."""
+    
     def __init__(self, name: str, room_name: str, password: int):
+        """Initialize the host.
+        
+        Args:
+            name: Host player name
+            room_name: Name of the room
+            password: Room password
+            
+        Raises:
+            ValueError: If parameters are invalid
+            OSError: If no free port is available
+        """
         if not 0 < len(name) < BUFFER_SIZE / 32:
             raise ValueError("Name is empty or too long")
         if not 0 < len(room_name) < BUFFER_SIZE / 32:
@@ -43,11 +57,11 @@ class Host:
         self.room.players.append(self.name)
         self.connections: dict[str, dict[str, socket.socket]] = {
             'unverified': {}, 'verified': {}
-        }               # 考虑分成两个字典，因为毕竟一个是addr: dict socket一个是name: dict socket
+        }
 
         self.actions: list[InfoDict] = []
 
-    def close(self, reason: Exception = Exception()):
+    def close(self, reason: Exception = Exception()) -> None:
         """Close the Host and all connections,
         and raise a SocketClosedMessage.
 
@@ -61,14 +75,30 @@ class Host:
             conn.close()
         raise SocketClosedMessage(reason)
 
-    def send(self, conn: socket.socket, msg: JsonMessage):
-        """Send a message."""
+    def send(self, conn: socket.socket, msg: JsonMessage) -> None:
+        """Send a message to a connection.
+        
+        Args:
+            conn: The socket connection
+            msg: The message to send
+        """
         try:
             conn.send(to_bytes(msg))
         except OSError:
-            pass        # 暂时没考虑出这种情况
+            pass
 
-    def recv(self):
+    def broadcast(self, msg: JsonMessage, exclude: Optional[str] = None) -> None:
+        """Broadcast a message to all verified connections.
+        
+        Args:
+            msg: The message to broadcast
+            exclude: Optional player name to exclude from broadcast
+        """
+        for name, conn in self.connections['verified'].items():
+            if name != exclude:
+                self.send(conn, msg)
+
+    def recv(self) -> None:
         """Receive data and update the messages dictionary."""
         for addr, conn in self.connections['unverified'].copy().items():
             try:
@@ -93,12 +123,19 @@ class Host:
             else:
                 self.messages.update(from_stream(data))
 
-    def extract(self, key: str):
-        """Extract data from the messages dictionary."""
+    def extract(self, key: str) -> InfoDict:
+        """Extract data from the messages dictionary.
+        
+        Args:
+            key: The message key to extract
+            
+        Returns:
+            The extracted message data
+        """
         self.messages.setdefault(key, {})
         return self.messages.pop(key)
 
-    def accept(self):
+    def accept(self) -> None:
         """Accept new connection and update connections dictionary."""
         while True:
             try:
@@ -109,7 +146,7 @@ class Host:
                 conn.setblocking(False)
                 self.connections['unverified'][addr] = conn
 
-    def verify(self):
+    def verify(self) -> None:
         """Verify the connections and update connections dictionary."""
         for addr, conn in self.connections['unverified'].copy().items():
             if request := self.extract('request'):
@@ -142,7 +179,7 @@ class Host:
                     self.connections['verified'][request['name']] = conn
                 self.send(conn, msg)
 
-    def sync(self):
+    def sync(self) -> None:
         """Synchronize the host with clients,
         and remove disconnected players.
         """
@@ -155,18 +192,28 @@ class Host:
         for conn in self.connections['verified'].copy().values():
             self.send(conn, msg)
 
-    def wait(self):
+    def wait(self) -> None:
         """Handle room messages."""
         self.room.broadcast()
 
         self.accept()
         self.verify()
 
-    def go(self):
-        """Handle game messages."""
-        # action()
+    def process_action(self, action: InfoDict) -> None:
+        """Process a game action from a client.
+        
+        Args:
+            action: The action data to process
+        """
+        self.actions.append(action)
 
-    def run(self):
+    def go(self) -> None:
+        """Handle game messages."""
+        # Process actions from clients
+        if action_data := self.extract('action'):
+            self.process_action(action_data)
+
+    def run(self) -> None:
         """Run the host."""
         self.sync()
         if self.room.status is ROOM_WAITING:
