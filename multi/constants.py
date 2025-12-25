@@ -19,24 +19,24 @@ JsonMessage = dict[str, InfoDict]
 class Action(Enum):
     """Game action types for multiplayer communication."""
     # Room management actions
-    JOIN_ROOM = "join_room"
-    LEAVE_ROOM = "leave_room"
-    START_GAME = "start_game"
-    END_GAME = "end_game"
+    JOIN_ROOM = "join_room"  # Request to join a room
+    LEAVE_ROOM = "leave_room"  # Request to leave a room
+    START_GAME = "start_game"  # Host starts the game
+    END_GAME = "end_game"  # Game has ended
     
     # Game actions
-    PLAY_CARD = "play_card"
-    DRAW_CARD = "draw_card"
-    CHALLENGE_DRAW_FOUR = "challenge_draw_four"
-    CHOOSE_COLOR = "choose_color"
-    SAY_UNO = "say_uno"
+    PLAY_CARD = "play_card"  # Player plays a card
+    DRAW_CARD = "draw_card"  # Player draws a card
+    CHALLENGE_DRAW_FOUR = "challenge_draw_four"  # Challenge a draw four card
+    CHOOSE_COLOR = "choose_color"  # Choose color for wild card
+    SAY_UNO = "say_uno"  # Player declares UNO
     
     # State sync actions
-    SYNC_GAME_STATE = "sync_game_state"
-    SYNC_HAND = "sync_hand"
-    SYNC_TOP_CARD = "sync_top_card"
-    SYNC_TURN = "sync_turn"
+    SYNC_GAME_STATE = "sync_game_state"  # Synchronize complete game state
+    SYNC_HAND = "sync_hand"  # Synchronize player's hand
+    SYNC_TOP_CARD = "sync_top_card"  # Synchronize top discard card
+    SYNC_TURN = "sync_turn"  # Synchronize current turn
     
     # Error actions
-    INVALID_ACTION = "invalid_action"
-    ERROR = "error"
+    INVALID_ACTION = "invalid_action"  # Invalid action received
+    ERROR = "error"  # General error
