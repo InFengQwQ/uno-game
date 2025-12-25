@@ -125,9 +125,9 @@ If you need early feedback or discussion:
 ### 对于未来提交 / For future commits
 
 1. **遵循贡献指南 / Follow contributing guidelines**
-   - 阅读 [CONTRIBUTING.md](CONTRIBUTING.md)
+   - 阅读 [CONTRIBUTING.md](../CONTRIBUTING.md)
    - 只提交完成并测试过的代码
-   - Read [CONTRIBUTING.md](CONTRIBUTING.md)
+   - Read [CONTRIBUTING.md](../CONTRIBUTING.md)
    - Only submit complete and tested code
 
 2. **使用清晰的提交信息 / Use clear commit messages**
@@ -163,12 +163,12 @@ Reasons:
 **建议：**
 - 继续完成开发和测试
 - 或使用草稿 PR 进行讨论
-- 遵循 [CONTRIBUTING.md](CONTRIBUTING.md) 中的指南
+- 遵循 [CONTRIBUTING.md](../CONTRIBUTING.md) 中的指南
 
 **Recommendation:**
 - Continue development and testing
 - Or use draft PR for discussion
-- Follow guidelines in [CONTRIBUTING.md](CONTRIBUTING.md)
+- Follow guidelines in [CONTRIBUTING.md](../CONTRIBUTING.md)
 
 ---
 
