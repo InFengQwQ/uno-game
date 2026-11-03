@@ -1,0 +1,10 @@
+[project]
+name = "uno-game"
+version = "0.1.0"
+description = "Multiplayer UNO"
+readme = "README.md"
+requires-python = "==3.12.*"
+dependencies = [
+    "pygame>=2.5.2",
+    "psutil>=6.0.0",
+]
