@@ -1,7 +1,6 @@
 # UNO Game
 
 ## Requirements
-
 - [uv](https://docs.astral.sh/uv/)
 - Python 3.12
 
@@ -23,3 +22,7 @@ uv run main.py
 build-nuitka.bat
 build-pyinstaller.bat
 ```
+
+## Credits
+
+- Game assets by [Kenney](https://kenney.nl/) ([CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/))
