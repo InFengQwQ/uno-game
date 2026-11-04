@@ -23,7 +23,7 @@ class Client:
         mirror: Game info mirror.
     """
     def __init__(self, name: str):
-        if not 0 < len(name) < BUFFER_SIZE / 32:
+        if not 0 < len(name) <= 7:
             raise ValueError("Name is empty or too long")
 
         self.name = name
@@ -40,7 +40,7 @@ class Client:
         self.room = None
         raise SocketClosedMessage(reason) from reason
 
-    def join(self, addr: tuple[str, int], password: int):
+    def join(self, addr: tuple[str, int], password: str):
         """Connect and send a request to a room."""
         try:
             self._sock.connect(addr)

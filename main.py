@@ -136,14 +136,8 @@ class UnoGame:
 
             @Message.catch
             def join():
-                if not password.text.isdigit():
-                    Message.elements.append(Message(
-                        ValueError("Password should be a number")
-                        # TODO
-                    ))
-                    return
                 client = Client(name.text)
-                client.join(addr, int(password.text))
+                client.join(addr, password.text)
                 cls.role = client
                 cls.display_room()
             Button.elements.extend([
@@ -239,13 +233,7 @@ class UnoGame:
 
         @Message.catch
         def create():
-            if not password.text.isdigit():
-                Message.elements.append(Message(
-                    ValueError("Password should be a number")
-                    # TODO
-                ))
-                return
-            cls.role = Host(name.text, room_name.text, int(password.text))
+            cls.role = Host(name.text, room_name.text, password.text)
             cls.display_room()
         Button.elements.extend([
             Button(

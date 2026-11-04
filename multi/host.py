@@ -30,13 +30,13 @@ class Host:
 
         mirror: Game info mirror.
     """
-    def __init__(self, name: str, room_name: str, password: int):
-        if not 0 < len(name) < BUFFER_SIZE / 32:
+    def __init__(self, name: str, room_name: str, password: str):
+        if not 0 < len(name) <= 7:
             raise ValueError("Name is empty or too long")
-        if not 0 < len(room_name) < BUFFER_SIZE / 32:
+        if not 0 < len(room_name) <= 7:
             raise ValueError("Room name is empty or too long")
-        if not 0 <= password < 10 ** (BUFFER_SIZE / 32):
-            raise ValueError("Password is out of range")
+        if not (0 < len(password) <= 7 and password.isdecimal()):
+            raise ValueError("Password is empty, too long or invalid")
 
         self.name = name
 
@@ -58,7 +58,7 @@ class Host:
 
         self.game: Optional[Game] = None
 
-        self.room = Room(port, room_name, password)
+        self.room = Room(port, room_name, int(password))
         self.room.players.append(self.name)
 
         self.mirror: Optional[Mirror] = None
@@ -103,9 +103,10 @@ class Host:
                 messages, _ = from_stream(data)
                 request = messages[0].get('request') if messages else None
                 if not (
-                    isinstance(request, dict)
-                    and isinstance(request.get('name'), str)
-                    and isinstance(request.get('password'), int)
+                    isinstance(request, dict) and
+                    isinstance(request.get('name'), str) and
+                    isinstance(request.get('password'), str) and
+                    request['password'].isdecimal()
                 ):
                     continue
                 del self._connections['unverified'][addr]
@@ -125,7 +126,7 @@ class Host:
                         }
                     })
                     conn.close()
-                elif request['password'] != self.room.password:
+                elif int(request['password']) != self.room.password:
                     self.send(conn, msg={
                         'response': {# response
                             'status': False,
