@@ -16,8 +16,8 @@ from .element import (
 )
 
 __all__ = [
-    'scene',
-    'update', 'clear'
+    'scene', 'clock',
+    'update', 'clear',
 ]
 
 
@@ -32,14 +32,12 @@ pygame.display.set_icon(_icon)
 pygame.display.set_caption(WINDOW_TITLE)
 pygame.key.set_repeat(KEY_REPEAT_DELAY, KEY_REPEAT_INTERVAL)
 _screen = pygame.display.set_mode((W, H), flags=0)
-_clock = pygame.time.Clock()
 scene = pygame.Surface((W, H), pygame.SRCALPHA)
 
 
-def update(counter: int = 0):
+clock = pygame.time.Clock()
+def update(elapsed: int = 0):
     """Update all UI elements."""
-    _clock.tick(FPS)
-
     events = pygame.event.get((
         pygame.QUIT,
         pygame.MOUSEBUTTONDOWN, pygame.TEXTINPUT, pygame.KEYDOWN,
@@ -67,7 +65,7 @@ def update(counter: int = 0):
     else:
         pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
-    return counter + 1
+    return elapsed + clock.tick(FPS)
 
 def clear():
     scene.__init__((W, H), flags=pygame.SRCALPHA)
