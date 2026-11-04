@@ -24,15 +24,15 @@ def from_package(b: bytes) -> Any:
     except (UnicodeDecodeError, json.JSONDecodeError):
         return None
 
-def from_stream(b: bytes) -> tuple[JsonMessage, int]:
+def from_stream(b: bytes) -> tuple[list[JsonMessage], int]:
     """Convert stream to a json message."""
-    msgs: JsonMessage = {}
     data = b''
+    msgs = list[JsonMessage]()
     span = 0
     for byte in b:
         data += bytes((byte,))
         try:
-            msgs.update(json.loads(data))
+            msgs.append(json.loads(data))
         except (UnicodeDecodeError, json.JSONDecodeError): ...
         else:
             span += len(data)

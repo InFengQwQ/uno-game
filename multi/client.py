@@ -56,7 +56,7 @@ class Client:
             self.close(e)
         else:
             self.send({
-                'request': { # request
+                'request': {# request
                     'name': self.name,
                     'password': password
                 }
@@ -94,7 +94,8 @@ class Client:
         except OSError as e:
             self.close(e)
         else:
-            self._messages.update(messages)
+            for jm in messages:
+                self._messages.update(jm)
 
     def sync(self):
         """Synchronize message with the host."""
@@ -123,7 +124,7 @@ class Client:
         elif type == ActionType.PLAY:
             assert 'card' in kwargs and 'uno' in kwargs
         self.send({
-            'action': { # action
+            'action': {# action
                 'type': type.value,
                 **kwargs
             }

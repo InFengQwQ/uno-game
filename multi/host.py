@@ -64,9 +64,13 @@ class Host:
         self.mirror: Optional[Mirror] = None
 
     def close(self, reason: Exception = Exception()):
-        self._sock.close()
-        for conn in (self._connections['unverified'] | self._connections['verified']).values():
+        for conn in (
+            self._connections['unverified'] |
+            self._connections['verified']
+        ).values():
             conn.close()
+
+        self._sock.close()
         raise SocketClosedMessage(reason)
 
     def accept(self):
@@ -96,14 +100,18 @@ class Host:
                 del self._connections['unverified'][addr]
                 conn.close()
             else:
-                # TODO: handle invalid data
-                assert (
-                    request := from_stream(data)[0].get('request')
-                ) # request
+                messages, _ = from_stream(data)
+                request = messages[0].get('request') if messages else None
+                if not (
+                    isinstance(request, dict)
+                    and isinstance(request.get('name'), str)
+                    and isinstance(request.get('password'), int)
+                ):
+                    continue
                 del self._connections['unverified'][addr]
                 if len(self.room.players) == ROOM_CAPACITY:
                     self.send(conn, msg={
-                        'response': { # response
+                        'response': {# response
                             'status': False,
                             'message': "Room is full"
                         }
@@ -111,7 +119,7 @@ class Host:
                     conn.close()
                 elif request['name'] in self.room.players:
                     self.send(conn, msg={
-                        'response': { # response
+                        'response': {# response
                             'status': False,
                             'message': "Name is already taken"
                         }
@@ -119,7 +127,7 @@ class Host:
                     conn.close()
                 elif request['password'] != self.room.password:
                     self.send(conn, msg={
-                        'response': { # response
+                        'response': {# response
                             'status': False,
                             'message': "Password is incorrect"
                         }
@@ -127,7 +135,7 @@ class Host:
                     conn.close()
                 else:
                     self.send(conn, msg={
-                        'response': { # response
+                        'response': {# response
                             'status': True,
                             'room': {
                                 'name': self.room.name,
@@ -140,6 +148,7 @@ class Host:
                     self._connections['verified'][request['name']] = conn
 
     def send(self, conn: socket.socket, msg: JsonMessage):
+        """Send data to connections."""
         try:
             conn.sendall(to_bytes(msg))
         except BlockingIOError: ...
@@ -147,6 +156,7 @@ class Host:
             conn.close()
 
     def recv(self):
+        """Receive data from connections and refine them."""
         def drop(name: str):
             connections = self._connections['verified']
             room = self.room
@@ -167,7 +177,8 @@ class Host:
             except OSError:
                 drop(name)
             else:
-                self._messages[name] = messages
+                for jm in messages:
+                    self._messages[name] = (jm)
 
     def sync(self):
         """Synchronize the host with clients."""
@@ -277,8 +288,8 @@ class Host:
                     }
                 if conn := self._connections['verified'].get(name):
                     self.send(conn, msg={
-                        'reply': reply # reply
-                    })
+                        'reply': reply
+                    }) # reply
 
     def run(self):
         """Run the host role."""
