@@ -51,7 +51,7 @@ class Host:
                 self._sock.setblocking(False)
                 break
         else:
-            raise OSError("No available port was found")
+            raise OSError("No available port in range")
         self._connections: dict[str, dict[str, socket.socket]] = {
             'unverified': {}, 'verified': {}
         }
@@ -90,7 +90,12 @@ class Host:
                     1
                 )
                 conn.setblocking(False)
-                self._connections['unverified'][addr] = conn
+
+                unverified = self._connections['unverified']
+                if len(unverified) == ROOM_CAPACITY:
+                    initial = next(iter(unverified))
+                    unverified.pop(initial).close()
+                unverified[addr] = conn
 
     def verify(self):
         """Receive data from connections and verify them."""
@@ -114,6 +119,7 @@ class Host:
                     )
                 ):
                     continue
+
                 del self._connections['unverified'][addr]
                 if len(self.room.players) == ROOM_CAPACITY:
                     self.send(conn, msg={
@@ -185,6 +191,7 @@ class Host:
                     )
                 ):
                     continue
+
                 del self._connections['unverified'][addr]
                 self._connections['verified'][request['name']] = conn
                 self.send(conn, msg={
