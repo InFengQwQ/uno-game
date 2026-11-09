@@ -1,3 +1,4 @@
+import secrets
 import socket
 from typing import Any, Optional
 
@@ -63,6 +64,8 @@ class Host:
 
         self.mirror: Optional[Mirror] = None
 
+        self._tokens: dict[str, str] = {}
+
     def close(self, reason: Exception = Exception()):
         for conn in (
             self._connections['unverified'] |
@@ -93,8 +96,7 @@ class Host:
         """Receive data from connections and verify them."""
         for addr, conn in self._connections['unverified'].copy().items():
             try:
-                if not (data := conn.recv(BUFFER_SIZE)):
-                    raise OSError
+                if not (data := conn.recv(BUFFER_SIZE)): raise OSError
             except BlockingIOError: ...
             except OSError:
                 del self._connections['unverified'][addr]
@@ -103,10 +105,13 @@ class Host:
                 messages, _ = from_stream(data)
                 request = messages[0].get('request') if messages else None
                 if not (
-                    isinstance(request, dict) and
-                    isinstance(request.get('name'), str) and
-                    isinstance(request.get('password'), str) and
-                    request['password'].isdecimal()
+                    (
+                        isinstance(request, dict) and
+                        isinstance(request.get('name'), str) and
+                        isinstance(request.get('password'), str)
+                    ) and (
+                        request['password'].isdecimal()
+                    )
                 ):
                     continue
                 del self._connections['unverified'][addr]
@@ -135,6 +140,8 @@ class Host:
                     })
                     conn.close()
                 else:
+                    token = secrets.token_hex(16)
+                    self._tokens[request['name']] = token
                     self.send(conn, msg={
                         'response': {# response
                             'status': True,
@@ -142,17 +149,61 @@ class Host:
                                 'name': self.room.name,
                                 'password': self.room.password,
                                 'port': self.room.port
-                            }
+                            },
+                            'token': token
                         }
                     })
                     self.room.players.append(request['name'])
                     self._connections['verified'][request['name']] = conn
 
+    def resume(self):
+        """Resume game.
+
+        Handle reconnection requests with verified tokens.
+        """
+        for addr, conn in self._connections['unverified'].copy().items():
+            try:
+                if not (data := conn.recv(BUFFER_SIZE)): raise OSError
+            except BlockingIOError: ...
+            except OSError:
+                del self._connections['unverified'][addr]
+                conn.close()
+            else:
+                messages, _ = from_stream(data)
+                request = messages[0].get('request') if messages else None
+                if not (
+                    (
+                        isinstance(request, dict) and
+                        isinstance(request.get('name'), str) and
+                        isinstance(request.get('token'), str)
+                    ) and (
+                        request['name'] not in self._connections['verified'] and
+                        request['name'] in self.room.players and
+                        (token := self._tokens.get(request['name']))
+                    ) and secrets.compare_digest(
+                        request['token'], token
+                    )
+                ):
+                    continue
+                del self._connections['unverified'][addr]
+                self._connections['verified'][request['name']] = conn
+                self.send(conn, msg={
+                    'response': {# response
+                        'status': True,
+                        'room': {
+                            'name': self.room.name,
+                            'password': self.room.password,
+                            'port': self.room.port
+                        },
+                        'token': token
+                    }
+                })
+
     def send(self, conn: socket.socket, msg: JsonMessage):
         """Send data to connections."""
         try:
-            conn.sendall(to_bytes(msg))
-        except BlockingIOError: ...
+            if conn.send(data := to_bytes(msg)) != len(data):
+                raise OSError
         except OSError:
             conn.close()
 
@@ -164,6 +215,7 @@ class Host:
             connections.pop(name).close()
             if room.status == RoomStatus.WAITING:
                 room.players.remove(name)
+                self._tokens.pop(name, None)
 
         for name, conn in self._connections['verified'].copy().items():
             try:
@@ -296,11 +348,12 @@ class Host:
         """Run the host role."""
         self.recv()
 
+        self.accept()
         if self.room.status == RoomStatus.WAITING:
             self.room.broadcast()
-            self.accept()
             self.verify()
-        elif self.room.status == RoomStatus.ONGOING:
+        if self.room.status == RoomStatus.ONGOING:
+            self.resume()
             self.handle()
             self.result()
 
