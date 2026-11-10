@@ -45,7 +45,16 @@ class Client:
         raise SocketClosedMessage(reason) from reason
 
     def join(self, addr: tuple[str, int], password: str):
-        """Connect and send a request to a room."""
+        """Try to join a room.
+
+        Args:
+            addr: Address of target.
+            password: Password of target.
+
+        Raises:
+            TimeoutError: Socket timeout.
+            ConnectionRefusedError: Host rejection.
+        """
         try:
             self._target = (addr, password)
             self._sock.connect(addr)
@@ -81,7 +90,7 @@ class Client:
 
     def reconnect(self):
         """Reconnect to the room."""
-        assert self.room
+        if not self.room: raise OSError("Room is not set")
 
         self._sock.close()
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -133,13 +142,11 @@ class Client:
                 self.reconnect()
             except OSError:
                 self.close(e)
-            return
         else:
             for jm in messages:
                 self._messages.update(jm)
 
     def sync(self):
-        """Synchronize message with the host."""
         assert self.room
 
         if game := self._messages.pop('game', None): # game
@@ -159,7 +166,12 @@ class Client:
             self.room.status = room['status']
 
     def action(self, type: ActionType, **kwargs: Any):
-        """Perform action."""
+        """Perform action.
+
+        Args:
+            type: One of the action types.
+            kwargs: Other arguments.
+        """
         if type in (ActionType.DRAW, ActionType.CHALLENGE, ActionType.CATCH):
             assert not kwargs
         elif type == ActionType.PLAY:
@@ -172,7 +184,11 @@ class Client:
         })
 
     def result(self):
-        """Archive action."""
+        """Archive action.
+
+        Raises:
+            OSError: If the action is invalid.
+        """
         if reply := self._messages.pop('reply', None): # reply
             if reply['status']:
                 if reply.get('hand'):
@@ -183,7 +199,6 @@ class Client:
                 )
 
     def run(self):
-        """Run the client role."""
         assert self.room
         self.recv()
 

@@ -51,7 +51,7 @@ class Host:
                 self._sock.setblocking(False)
                 break
         else:
-            raise OSError("No available port in range")
+            raise Exception("No available port for host")
         self._connections: dict[str, dict[str, socket.socket]] = {
             'unverified': {}, 'verified': {}
         }
@@ -207,15 +207,12 @@ class Host:
                 })
 
     def send(self, conn: socket.socket, msg: JsonMessage):
-        """Send data to connections."""
         try:
-            if conn.send(data := to_bytes(msg)) != len(data):
-                raise OSError
+            if conn.send(data := to_bytes(msg)) != len(data): raise OSError
         except OSError:
             conn.close()
 
     def recv(self):
-        """Receive data from connections and refine them."""
         def drop(name: str):
             connections = self._connections['verified']
             room = self.room
@@ -241,7 +238,6 @@ class Host:
                     self._messages[name] = (jm)
 
     def sync(self):
-        """Synchronize the host with clients."""
         if game := self.game:
             snapshot = Mirror.of(game, self.name)
             if mirror := self.mirror:
@@ -267,11 +263,17 @@ class Host:
                 })
 
     def start(self):
+        """Start game."""
         self.game = Game(self.room.players)
         self.room.status = RoomStatus.ONGOING
 
     def action(self, type: ActionType, **kwargs: Any):
-        """Perform action."""
+        """Perform action.
+
+        Args:
+            type: One of the action types.
+            kwargs: Other arguments.
+        """
         if type in (ActionType.DRAW, ActionType.CHALLENGE, ActionType.CATCH):
             assert not kwargs
         if type in (ActionType.PLAY):
@@ -285,16 +287,20 @@ class Host:
         }
 
     def result(self):
-        """Archive action."""
+        """Archive action.
+
+        Raises:
+            OSError: If the action is invalid.
+        """
         if not self._messages.get(self.name): return
         if reply := self._messages[self.name].get('reply'): # reply
             if reply['status']:
                 if reply.get('hand'):
-                    pass
-
-                    # TODO: 得到被质疑者手牌
+                    pass    # TODO: 得到被质疑者手牌
             else:
-                raise Exception(reply['message'])
+                raise OSError(
+                    reply['message']
+                )
 
     def handle(self):
         """Handle turn actions."""
@@ -352,7 +358,6 @@ class Host:
                     }) # reply
 
     def run(self):
-        """Run the host role."""
         self.recv()
 
         self.accept()
