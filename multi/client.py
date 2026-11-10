@@ -120,10 +120,9 @@ class Client:
         try:
             if self._sock.send(data := to_bytes(msg)) != len(data): raise OSError
         except OSError as e:
-            try:
-                self.reconnect()
-            except OSError:
-                self.close(e)
+            self.close(Exception(str(e) or
+                "Failed to send data to the host"
+            ))
 
     def recv(self):
         try:
