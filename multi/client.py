@@ -70,27 +70,40 @@ class Client:
             self.close(e)
         else:
             self.send({
-                'request': {# request
+                'request': {
                     'name': self.name,
                     'password': password
                 }
             })
-            self.recv()
 
-            if response := self._messages.pop('response', None): # response
-                if response['status']:
-                    self.room = Room(**response['room'])
-                    self._sock.setblocking(False)
+            data = b''
+            while 'response' not in self._messages:
+                if not (chunk := self._sock.recv(BUFFER_SIZE)):
+                    raise OSError(
+                        "Connection is closed by the host"
+                    )
 
-                    self._token = response['token']
-                else:
-                    self.close(OSError(
-                        response['message']
-                    ))
+                data += chunk
+                messages, end = from_stream(data)
+                data = data[end:]
+
+                for jm in messages:
+                    self._messages.update(jm)
+
+            response = self._messages.pop('response')
+            if response['status']:
+                self.room = Room(**response['room'])
+
+                self._sock.setblocking(False)
+                self._token = response['token']
+            else:
+                self.close(OSError(
+                    response['message']
+                ))
 
     def reconnect(self):
         """Reconnect to the room."""
-        if not self.room: raise OSError("Room is not set")
+        assert self.room
 
         self._sock.close()
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -100,21 +113,31 @@ class Client:
         addr, password = self._target
         self._sock.connect(addr)
         self._sock.sendall(to_bytes({
-            'request': {# request
+            'request': {
                 'name': self.name,
                 'password': password,
                 'token': self._token
             }
         }))
-        messages, end = from_stream(
-            self._sock.recv(BUFFER_SIZE, socket.MSG_PEEK)
-        )
-        response = messages[0].get('response') if messages else None
-        if not (end and response and response['status']): raise OSError
-        self._sock.recv(end)
-        self._sock.setblocking(False)
 
-        self._token = response['token']
+        data = b''
+        while 'response' not in self._messages:
+            if not (chunk := self._sock.recv(BUFFER_SIZE)):
+                raise OSError
+
+            data += chunk
+            messages, end = from_stream(data)
+            data = data[end:]
+
+            for jm in messages:
+                self._messages.update(jm)
+
+        response = self._messages.pop('response')
+        if response['status']:
+            self._sock.setblocking(False)
+            self._token = response['token']
+        else:
+            raise OSError
 
     def send(self, msg: JsonMessage):
         try:
@@ -148,7 +171,7 @@ class Client:
     def sync(self):
         assert self.room
 
-        if game := self._messages.pop('game', None): # game
+        if game := self._messages.pop('game', None):
             snapshot = Mirror.from_dict(game)
             if mirror := self.mirror:
                 mirror.update(snapshot)
@@ -156,7 +179,7 @@ class Client:
                 self.mirror = snapshot
                 self.room.status = RoomStatus.ONGOING
                 raise GameBeginMessage
-        if room := self._messages.pop('room', None): # room
+        if room := self._messages.pop('room', None):
             self.room.players[:] = room['players']
             if self.room.status == RoomStatus.ONGOING:
                 self.mirror = None
@@ -176,7 +199,7 @@ class Client:
         elif type == ActionType.PLAY:
             assert 'card' in kwargs and 'uno' in kwargs
         self.send({
-            'action': {# action
+            'action': {
                 'type': type.value,
                 **kwargs
             }
@@ -188,7 +211,7 @@ class Client:
         Raises:
             OSError: If the action is invalid.
         """
-        if reply := self._messages.pop('reply', None): # reply
+        if reply := self._messages.pop('reply', None):  # reply
             if reply['status']:
                 if reply.get('hand'):
                     pass    # TODO: 得到被质疑者手牌

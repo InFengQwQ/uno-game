@@ -123,7 +123,7 @@ class Host:
                 del self._connections['unverified'][addr]
                 if len(self.room.players) == ROOM_CAPACITY:
                     self.send(conn, msg={
-                        'response': {# response
+                        'response': {
                             'status': False,
                             'message': "Room is full"
                         }
@@ -131,7 +131,7 @@ class Host:
                     conn.close()
                 elif request['name'] in self.room.players:
                     self.send(conn, msg={
-                        'response': {# response
+                        'response': {
                             'status': False,
                             'message': "Name is already taken"
                         }
@@ -139,7 +139,7 @@ class Host:
                     conn.close()
                 elif int(request['password']) != self.room.password:
                     self.send(conn, msg={
-                        'response': {# response
+                        'response': {
                             'status': False,
                             'message': "Password is incorrect"
                         }
@@ -149,7 +149,7 @@ class Host:
                     token = secrets.token_hex(16)
                     self._tokens[request['name']] = token
                     self.send(conn, msg={
-                        'response': {# response
+                        'response': {
                             'status': True,
                             'room': {
                                 'name': self.room.name,
@@ -195,7 +195,7 @@ class Host:
                 del self._connections['unverified'][addr]
                 self._connections['verified'][request['name']] = conn
                 self.send(conn, msg={
-                    'response': {# response
+                    'response': {
                         'status': True,
                         'room': {
                             'name': self.room.name,
@@ -247,7 +247,7 @@ class Host:
 
             for name, conn in self._connections['verified'].items():
                 self.send(conn, msg={
-                    'game': Mirror.of(game, name).to_dict() # game
+                    'game': Mirror.of(game, name).to_dict()
                 })
         else:
             room = self.room
@@ -259,7 +259,7 @@ class Host:
             }
             for conn in self._connections['verified'].values():
                 self.send(conn, msg={
-                    'room': info # room
+                    'room': info
                 })
 
     def start(self):
@@ -293,7 +293,7 @@ class Host:
             OSError: If the action is invalid.
         """
         if not self._messages.get(self.name): return
-        if reply := self._messages[self.name].get('reply'): # reply
+        if reply := self._messages[self.name].get('reply'):  # reply
             if reply['status']:
                 if reply.get('hand'):
                     pass    # TODO: 得到被质疑者手牌
@@ -308,7 +308,7 @@ class Host:
 
         messages, self._messages = self._messages, {}
         for name, msg in messages.items():
-            if action := msg.get('action'): # action
+            if action := msg.get('action'):  # action
                 reply: InfoDict = {
                     'status': False
                 }
@@ -355,7 +355,7 @@ class Host:
                 if conn := self._connections['verified'].get(name):
                     self.send(conn, msg={
                         'reply': reply
-                    }) # reply
+                    })
 
     def run(self):
         self.recv()
