@@ -122,7 +122,10 @@ class Room:
             except BlockingIOError:
                 break
             else:
-                assert (info := from_package(data))
-                rooms[(ip, info['port'])] = RoomInfo.from_dict(info)
+                info: InfoDict = from_package(data)
+                try:
+                    rooms[(ip, info['port'])] = RoomInfo.from_dict(info)
+                except (KeyError, TypeError, ValueError):
+                    continue
 
         cls.rooms = rooms
