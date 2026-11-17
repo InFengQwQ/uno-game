@@ -180,11 +180,13 @@ class Input(Element):
 
     @classmethod
     def init(cls,
+        ink_font: pygame.font.Font,
         hint_font: pygame.font.Font,
         active_image: pygame.Surface,
         normal_image: pygame.Surface,
         tap_sound: pygame.mixer.Sound
     ):
+        cls._ink_font = ink_font
         cls._hint_font = hint_font
         cls._active_image = active_image
         cls._normal_image = normal_image
@@ -205,13 +207,18 @@ class Input(Element):
 
         self._is_activated = False
 
-        self._txtarea = self.subsurface(
+        self._inkarea = self.subsurface(
             (UI_ELEMENT_PADDING, UI_ELEMENT_PADDING),
             (
                 rect.w - UI_ELEMENT_PADDING * 2,
                 rect.h - UI_ELEMENT_PADDING * 2
             )
         )
+        # try:
+        #     self._ink_font = pygame.font.SysFont(
+        #         None, 24
+        #     )
+        # except TypeError: ...
         self.text = ''
 
         self.hint = hint
@@ -259,25 +266,21 @@ class Input(Element):
             self.blit(self._normal_surface, (0, 0))
 
         if self.text:
-            font = pygame.font.SysFont(
-                None, self._txtarea.get_height() - 4
-            )
-
-            txt_surface = font.render(
+            ink_surface = self._ink_font.render(
                 self.text, True, TEXT_COLOR
             )
-            txt_rect = txt_surface.get_rect(
-                midright=self._txtarea.get_rect().midright
+            ink_rect = ink_surface.get_rect(
+                midright=self._inkarea.get_rect().midright
             )
-            self._txtarea.blit(txt_surface, txt_rect)
+            self._inkarea.blit(ink_surface, ink_rect)
         else:
             hint_surface = self._hint_font.render(
                 self.hint, True, HINT_COLOR
             )
             hint_rect = hint_surface.get_rect(
-                center=self._txtarea.get_rect().center
+                center=self._inkarea.get_rect().center
             )
-            self._txtarea.blit(hint_surface, hint_rect)
+            self._inkarea.blit(hint_surface, hint_rect)
 
     @classmethod
     def handle_all(cls, events: list[pygame.event.Event]):

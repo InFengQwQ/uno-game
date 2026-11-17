@@ -45,7 +45,7 @@ class ResourceManager:
             10: ['message']
         },
         'Kenney Future Narrow.ttf': {
-            16: ['content', 'name']
+            16: ['content', 'ink', 'name']
         },
     }
 

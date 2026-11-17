@@ -35,6 +35,7 @@ Column.init(
     divider_image=resources.images['column']['divider']
 )
 Input.init(
+    ink_font=resources.fonts['ink'],
     hint_font=resources.fonts['hint'],
     active_image=resources.images['input']['active'],
     normal_image=resources.images['input']['normal'],
