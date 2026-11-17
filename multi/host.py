@@ -47,7 +47,7 @@ class Host:
                 self._sock.bind(('0.0.0.0', port))
             except OSError: ...
             else:
-                self._sock.listen(1)
+                self._sock.listen(ROOM_CAPACITY)
                 self._sock.setblocking(False)
                 break
         else:
