@@ -24,20 +24,22 @@ def from_package(b: bytes) -> Any:
     except (UnicodeDecodeError, json.JSONDecodeError):
         return None
 
-def from_stream(b: bytes) -> tuple[JsonMessage, int]:
-    """Convert stream to a json message."""
-    msgs: JsonMessage = {}
-    data = b''
+def from_stream(b: bytes) -> tuple[list[JsonMessage], int]:
+    """Convert a newline-delimited stream to json messages."""
+    messages = list[JsonMessage]()
     span = 0
-    for byte in b:
-        data += bytes((byte,))
+
+    while (sep := b.find(b'\n', span)) != -1:
         try:
-            msgs.update(json.loads(data))
-        except (UnicodeDecodeError, json.JSONDecodeError): ...
+            _message: JsonMessage = json.loads(b[span:sep].decode())
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            continue
         else:
-            span += len(data)
-            data = b''
-    return msgs, span
+            messages.append(_message)
+        finally:
+            span = sep + 1
+
+    return messages, span
 
 class SocketClosedMessage(Exception):
     """Stack trace of the exception."""

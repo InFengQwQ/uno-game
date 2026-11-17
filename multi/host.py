@@ -1,3 +1,4 @@
+import secrets
 import socket
 from typing import Any, Optional
 
@@ -30,13 +31,13 @@ class Host:
 
         mirror: Game info mirror.
     """
-    def __init__(self, name: str, room_name: str, password: int):
-        if not 0 < len(name) < BUFFER_SIZE / 32:
+    def __init__(self, name: str, room_name: str, password: str):
+        if not 0 < len(name) <= 7:
             raise ValueError("Name is empty or too long")
-        if not 0 < len(room_name) < BUFFER_SIZE / 32:
+        if not 0 < len(room_name) <= 7:
             raise ValueError("Room name is empty or too long")
-        if not 0 <= password < 10 ** (BUFFER_SIZE / 32):
-            raise ValueError("Password is out of range")
+        if not (0 < len(password) <= 7 and password.isdecimal()):
+            raise ValueError("Password is empty, too long or invalid")
 
         self.name = name
 
@@ -46,11 +47,11 @@ class Host:
                 self._sock.bind(('0.0.0.0', port))
             except OSError: ...
             else:
-                self._sock.listen(1)
+                self._sock.listen(ROOM_CAPACITY)
                 self._sock.setblocking(False)
                 break
         else:
-            raise OSError("No available port was found")
+            raise Exception("No available port for host")
         self._connections: dict[str, dict[str, socket.socket]] = {
             'unverified': {}, 'verified': {}
         }
@@ -58,15 +59,21 @@ class Host:
 
         self.game: Optional[Game] = None
 
-        self.room = Room(port, room_name, password)
+        self.room = Room(port, room_name, int(password))
         self.room.players.append(self.name)
 
         self.mirror: Optional[Mirror] = None
 
+        self._tokens: dict[str, str] = {}
+
     def close(self, reason: Exception = Exception()):
-        self._sock.close()
-        for conn in (self._connections['unverified'] | self._connections['verified']).values():
+        for conn in (
+            self._connections['unverified'] |
+            self._connections['verified']
+        ).values():
             conn.close()
+
+        self._sock.close()
         raise SocketClosedMessage(reason)
 
     def accept(self):
@@ -83,27 +90,42 @@ class Host:
                     1
                 )
                 conn.setblocking(False)
-                self._connections['unverified'][addr] = conn
+
+                unverified = self._connections['unverified']
+                if len(unverified) == ROOM_CAPACITY:
+                    initial = next(iter(unverified))
+                    unverified.pop(initial).close()
+                unverified[addr] = conn
 
     def verify(self):
         """Receive data from connections and verify them."""
         for addr, conn in self._connections['unverified'].copy().items():
             try:
-                if not (data := conn.recv(BUFFER_SIZE)):
-                    raise OSError
+                if not (peeked := conn.recv(BUFFER_SIZE, socket.MSG_PEEK)): raise OSError
             except BlockingIOError: ...
             except OSError:
                 del self._connections['unverified'][addr]
                 conn.close()
             else:
-                # TODO: handle invalid data
-                assert (
-                    request := from_stream(data)[0].get('request')
-                ) # request
+                messages, end = from_stream(peeked)
+                if not end: continue
+                conn.recv(end)
+                request = messages[0].get('request') if messages else None
+                if not (
+                    (
+                        isinstance(request, dict) and
+                        isinstance(request.get('name'), str) and
+                        isinstance(request.get('password'), str)
+                    ) and (
+                        request['password'].isdecimal()
+                    )
+                ):
+                    continue
+
                 del self._connections['unverified'][addr]
                 if len(self.room.players) == ROOM_CAPACITY:
                     self.send(conn, msg={
-                        'response': { # response
+                        'response': {
                             'status': False,
                             'message': "Room is full"
                         }
@@ -111,38 +133,86 @@ class Host:
                     conn.close()
                 elif request['name'] in self.room.players:
                     self.send(conn, msg={
-                        'response': { # response
+                        'response': {
                             'status': False,
                             'message': "Name is already taken"
                         }
                     })
                     conn.close()
-                elif request['password'] != self.room.password:
+                elif int(request['password']) != self.room.password:
                     self.send(conn, msg={
-                        'response': { # response
+                        'response': {
                             'status': False,
                             'message': "Password is incorrect"
                         }
                     })
                     conn.close()
                 else:
+                    token = secrets.token_hex(16)
+                    self._tokens[request['name']] = token
                     self.send(conn, msg={
-                        'response': { # response
+                        'response': {
                             'status': True,
                             'room': {
                                 'name': self.room.name,
                                 'password': self.room.password,
                                 'port': self.room.port
-                            }
+                            },
+                            'token': token
                         }
                     })
                     self.room.players.append(request['name'])
                     self._connections['verified'][request['name']] = conn
 
+    def resume(self):
+        """Resume game.
+
+        Handle reconnection requests with verified tokens.
+        """
+        for addr, conn in self._connections['unverified'].copy().items():
+            try:
+                if not (peeked := conn.recv(BUFFER_SIZE, socket.MSG_PEEK)): raise OSError
+            except BlockingIOError: ...
+            except OSError:
+                del self._connections['unverified'][addr]
+                conn.close()
+            else:
+                messages, end = from_stream(peeked)
+                if not end: continue
+                conn.recv(end)
+                request = messages[0].get('request') if messages else None
+                if not (
+                    (
+                        isinstance(request, dict) and
+                        isinstance(request.get('name'), str) and
+                        isinstance(request.get('token'), str)
+                    ) and (
+                        request['name'] not in self._connections['verified'] and
+                        request['name'] in self.room.players and
+                        (token := self._tokens.get(request['name']))
+                    ) and secrets.compare_digest(
+                        request['token'], token
+                    )
+                ):
+                    continue
+
+                del self._connections['unverified'][addr]
+                self._connections['verified'][request['name']] = conn
+                self.send(conn, msg={
+                    'response': {
+                        'status': True,
+                        'room': {
+                            'name': self.room.name,
+                            'password': self.room.password,
+                            'port': self.room.port
+                        },
+                        'token': token
+                    }
+                })
+
     def send(self, conn: socket.socket, msg: JsonMessage):
         try:
-            conn.sendall(to_bytes(msg))
-        except BlockingIOError: ...
+            if conn.send(data := to_bytes(msg)) != len(data): raise OSError
         except OSError:
             conn.close()
 
@@ -153,24 +223,22 @@ class Host:
             connections.pop(name).close()
             if room.status == RoomStatus.WAITING:
                 room.players.remove(name)
+                self._tokens.pop(name, None)
 
         for name, conn in self._connections['verified'].copy().items():
             try:
-                peeked = conn.recv(BUFFER_SIZE, socket.MSG_PEEK)
-                if not peeked:
-                    drop(name)
-                    continue
-                messages, end = from_stream(peeked)
-                if not end: continue
-                conn.recv(end)
+                if not (peeked := conn.recv(BUFFER_SIZE, socket.MSG_PEEK)): raise OSError
             except BlockingIOError: ...
             except OSError:
                 drop(name)
             else:
-                self._messages[name] = messages
+                messages, end = from_stream(peeked)
+                if not end: continue
+                conn.recv(end)
+                for jm in messages:
+                    self._messages[name] = (jm)
 
     def sync(self):
-        """Synchronize the host with clients."""
         if game := self.game:
             snapshot = Mirror.of(game, self.name)
             if mirror := self.mirror:
@@ -180,7 +248,7 @@ class Host:
 
             for name, conn in self._connections['verified'].items():
                 self.send(conn, msg={
-                    'game': Mirror.of(game, name).to_dict() # game
+                    'game': Mirror.of(game, name).to_dict()
                 })
         else:
             room = self.room
@@ -192,15 +260,21 @@ class Host:
             }
             for conn in self._connections['verified'].values():
                 self.send(conn, msg={
-                    'room': info # room
+                    'room': info
                 })
 
     def start(self):
+        """Start game."""
         self.game = Game(self.room.players)
         self.room.status = RoomStatus.ONGOING
 
     def action(self, type: ActionType, **kwargs: Any):
-        """Perform action."""
+        """Perform action.
+
+        Args:
+            type: One of the action types.
+            kwargs: Other arguments.
+        """
         if type in (ActionType.DRAW, ActionType.CHALLENGE, ActionType.CATCH):
             assert not kwargs
         if type in (ActionType.PLAY):
@@ -214,16 +288,20 @@ class Host:
         }
 
     def result(self):
-        """Archive action."""
+        """Archive action.
+
+        Raises:
+            OSError: If the action is invalid.
+        """
         if not self._messages.get(self.name): return
-        if reply := self._messages[self.name].get('reply'): # reply
+        if reply := self._messages[self.name].get('reply'):  # reply
             if reply['status']:
                 if reply.get('hand'):
-                    pass
-
-                    # TODO: 得到被质疑者手牌
+                    pass    # TODO: 得到被质疑者手牌
             else:
-                raise Exception(reply['message'])
+                raise OSError(
+                    reply['message']
+                )
 
     def handle(self):
         """Handle turn actions."""
@@ -231,7 +309,7 @@ class Host:
 
         messages, self._messages = self._messages, {}
         for name, msg in messages.items():
-            if action := msg.get('action'): # action
+            if action := msg.get('action'):  # action
                 reply: InfoDict = {
                     'status': False
                 }
@@ -277,18 +355,18 @@ class Host:
                     }
                 if conn := self._connections['verified'].get(name):
                     self.send(conn, msg={
-                        'reply': reply # reply
+                        'reply': reply
                     })
 
     def run(self):
-        """Run the host role."""
         self.recv()
 
+        self.accept()
         if self.room.status == RoomStatus.WAITING:
             self.room.broadcast()
-            self.accept()
             self.verify()
-        elif self.room.status == RoomStatus.ONGOING:
+        if self.room.status == RoomStatus.ONGOING:
+            self.resume()
             self.handle()
             self.result()
 

@@ -7,10 +7,9 @@ import pygame
 
 from config import (
     W, H,
-    FPS,
     MESSAGE_BOX_WIDTH, MESSAGE_BOX_HEIGHT,
     MESSAGE_BOX_TOP_MARGIN, MESSAGE_TEXT_LEFT_MARGIN,
-    MESSAGE_DISPLAY_TIME,
+    MESSAGE_DISPLAY_TICK,
     UI_ELEMENT_PADDING
 )
 
@@ -411,7 +410,7 @@ class Message(Element):
             MESSAGE_BOX_WIDTH,
             MESSAGE_BOX_HEIGHT
         ),
-        time: float = MESSAGE_DISPLAY_TIME
+        time: float = MESSAGE_DISPLAY_TICK
     ):
         super().__init__(rect=rect)
 
@@ -429,7 +428,7 @@ class Message(Element):
 
     def draw(self):
         """Render the message element."""
-        self.alpha = self.alpha - 255 * 1/(self.time * FPS)
+        self.alpha -= 255 * 1/(self.time)
         if self.alpha < 0:
             self.elements.remove(self)
         else:

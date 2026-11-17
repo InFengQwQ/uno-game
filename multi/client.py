@@ -2,6 +2,7 @@ import socket
 from typing import Any, Optional
 
 from config import BUFFER_SIZE, SOCKET_TIMEOUT
+
 from .constants import *
 from .utils import (
     to_bytes, from_stream,
@@ -23,7 +24,7 @@ class Client:
         mirror: Game info mirror.
     """
     def __init__(self, name: str):
-        if not 0 < len(name) < BUFFER_SIZE / 32:
+        if not 0 < len(name) <= 7:
             raise ValueError("Name is empty or too long")
 
         self.name = name
@@ -35,14 +36,27 @@ class Client:
         self.room: Optional[Room] = None
         self.mirror: Optional[Mirror] = None
 
+        self._token: str
+        self._target: tuple[tuple[str, int], str]
+
     def close(self, reason: Exception = Exception()):
-        self._sock.close()
         self.room = None
+        self._sock.close()
         raise SocketClosedMessage(reason) from reason
 
-    def join(self, addr: tuple[str, int], password: int):
-        """Connect and send a request to a room."""
+    def join(self, addr: tuple[str, int], password: str):
+        """Try to join a room.
+
+        Args:
+            addr: Address of target.
+            password: Password of target.
+
+        Raises:
+            TimeoutError: Socket timeout.
+            ConnectionRefusedError: Host rejection.
+        """
         try:
+            self._target = (addr, password)
             self._sock.connect(addr)
         except TimeoutError as e:
             raise TimeoutError(
@@ -56,51 +70,108 @@ class Client:
             self.close(e)
         else:
             self.send({
-                'request': { # request
+                'request': {
                     'name': self.name,
                     'password': password
                 }
             })
-            self.recv()
 
-            if response := self._messages.pop('response', None): # response
-                if response['status']:
-                    self._sock.setblocking(False)
-                    self.room = Room(**response['room'])
-                else:
-                    self.close(
-                        OSError(response['message'])
+            data = b''
+            while 'response' not in self._messages:
+                if not (chunk := self._sock.recv(BUFFER_SIZE)):
+                    raise OSError(
+                        "Connection is closed by the host"
                     )
+
+                data += chunk
+                messages, end = from_stream(data)
+                data = data[end:]
+
+                for jm in messages:
+                    self._messages.update(jm)
+
+            response = self._messages.pop('response')
+            if response['status']:
+                self.room = Room(**response['room'])
+
+                self._sock.setblocking(False)
+                self._token = response['token']
+            else:
+                self.close(OSError(
+                    response['message']
+                ))
+
+    def reconnect(self):
+        """Reconnect to the room."""
+        assert self.room
+
+        self._sock.close()
+        self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self._sock.settimeout(SOCKET_TIMEOUT)
+        self._messages.clear()
+
+        addr, password = self._target
+        self._sock.connect(addr)
+        self._sock.sendall(to_bytes({
+            'request': {
+                'name': self.name,
+                'password': password,
+                'token': self._token
+            }
+        }))
+
+        data = b''
+        while 'response' not in self._messages:
+            if not (chunk := self._sock.recv(BUFFER_SIZE)):
+                raise OSError
+
+            data += chunk
+            messages, end = from_stream(data)
+            data = data[end:]
+
+            for jm in messages:
+                self._messages.update(jm)
+
+        response = self._messages.pop('response')
+        if response['status']:
+            self._sock.setblocking(False)
+            self._token = response['token']
+        else:
+            raise OSError
 
     def send(self, msg: JsonMessage):
         try:
-            self._sock.sendall(to_bytes(msg))
-        except BlockingIOError: ...
+            if self._sock.send(data := to_bytes(msg)) != len(data): raise OSError
         except OSError as e:
-            self.close(e)
+            self.close(Exception(str(e) or
+                "Failed to send data to the host"
+            ))
 
     def recv(self):
         try:
             peeked = self._sock.recv(BUFFER_SIZE, socket.MSG_PEEK)
             if not peeked:
-                self.close(
-                    OSError("Connection is closed by the host")
-                )
+                self.close(OSError(
+                    "Connection is closed by the host"
+                ))
             messages, end = from_stream(peeked)
             if not end:
                 return
             self._sock.recv(end)
         except BlockingIOError: ...
         except OSError as e:
-            self.close(e)
+            try:
+                self.reconnect()
+            except OSError:
+                self.close(e)
         else:
-            self._messages.update(messages)
+            for jm in messages:
+                self._messages.update(jm)
 
     def sync(self):
-        """Synchronize message with the host."""
         assert self.room
 
-        if game := self._messages.pop('game', None): # game
+        if game := self._messages.pop('game', None):
             snapshot = Mirror.from_dict(game)
             if mirror := self.mirror:
                 mirror.update(snapshot)
@@ -108,7 +179,7 @@ class Client:
                 self.mirror = snapshot
                 self.room.status = RoomStatus.ONGOING
                 raise GameBeginMessage
-        if room := self._messages.pop('room', None): # room
+        if room := self._messages.pop('room', None):
             self.room.players[:] = room['players']
             if self.room.status == RoomStatus.ONGOING:
                 self.mirror = None
@@ -117,37 +188,43 @@ class Client:
             self.room.status = room['status']
 
     def action(self, type: ActionType, **kwargs: Any):
-        """Perform action."""
+        """Perform action.
+
+        Args:
+            type: One of the action types.
+            kwargs: Other arguments.
+        """
         if type in (ActionType.DRAW, ActionType.CHALLENGE, ActionType.CATCH):
             assert not kwargs
         elif type == ActionType.PLAY:
             assert 'card' in kwargs and 'uno' in kwargs
         self.send({
-            'action': { # action
+            'action': {
                 'type': type.value,
                 **kwargs
             }
         })
 
     def result(self):
-        """Archive action."""
-        if reply := self._messages.pop('reply', None): # reply
+        """Archive action.
+
+        Raises:
+            OSError: If the action is invalid.
+        """
+        if reply := self._messages.pop('reply', None):  # reply
             if reply['status']:
                 if reply.get('hand'):
-                    pass
-
-                    # TODO: 得到被质疑者手牌
+                    pass    # TODO: 得到被质疑者手牌
             else:
-                raise OSError(reply['message'])
+                raise OSError(
+                    reply['message']
+                )
 
     def run(self):
-        """Run the client role."""
         assert self.room
         self.recv()
 
-        if self.room.status == RoomStatus.WAITING:
-            pass
-        if self.room.status == RoomStatus.ONGOING:
-            self.result()
+        if self.room.status == RoomStatus.WAITING: ...
+        if self.room.status == RoomStatus.ONGOING: self.result()
 
         self.sync()

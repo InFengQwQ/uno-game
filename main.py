@@ -5,7 +5,6 @@ import pygame
 
 from config import (
     W, H,
-    FPS,
     RUN_INTERVAL, ROOM_RECV_INTERVAL,
     ROOM_CAPACITY
 )
@@ -138,14 +137,8 @@ class UnoGame:
 
             @Message.catch
             def join():
-                if not password.text.isdigit():
-                    Message.elements.append(Message(
-                        ValueError("Password should be a number")
-                        # TODO
-                    ))
-                    return
                 client = Client(name.text)
-                client.join(addr, int(password.text))
+                client.join(addr, password.text)
                 cls.role = client
                 cls.display_room()
             Button.elements.extend([
@@ -241,13 +234,7 @@ class UnoGame:
 
         @Message.catch
         def create():
-            if not password.text.isdigit():
-                Message.elements.append(Message(
-                    ValueError("Password should be a number")
-                    # TODO
-                ))
-                return
-            cls.role = Host(name.text, room_name.text, int(password.text))
+            cls.role = Host(name.text, room_name.text, password.text)
             cls.display_room()
         Button.elements.extend([
             Button(
@@ -399,9 +386,6 @@ class UnoGame:
         """Run the main loop."""
         cls.display_menu()
 
-        def check_interval(i: float) -> bool:
-            return not int(counter % (FPS * i))
-
         @Message.catch
         def network():
             assert (role := cls.role)
@@ -418,11 +402,14 @@ class UnoGame:
             except GameEndedMessage:
                 cls.display_room()
 
-        counter = 0
-        while counter := update(counter):
-            if check_interval(RUN_INTERVAL) and cls.role:
+        elapsed = 0
+        i = j = 0
+        while elapsed := update(elapsed):
+            if elapsed // RUN_INTERVAL > i and cls.role:
+                i += 1
                 network()
-            if check_interval(ROOM_RECV_INTERVAL):
+            if elapsed // ROOM_RECV_INTERVAL > j:
+                j += 1
                 Room.recv()
 
 
