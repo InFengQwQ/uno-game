@@ -101,13 +101,15 @@ class Host:
         """Receive data from connections and verify them."""
         for addr, conn in self._connections['unverified'].copy().items():
             try:
-                if not (data := conn.recv(BUFFER_SIZE)): raise OSError
+                if not (peeked := conn.recv(BUFFER_SIZE, socket.MSG_PEEK)): raise OSError
             except BlockingIOError: ...
             except OSError:
                 del self._connections['unverified'][addr]
                 conn.close()
             else:
-                messages, _ = from_stream(data)
+                messages, end = from_stream(peeked)
+                if not end: continue
+                conn.recv(end)
                 request = messages[0].get('request') if messages else None
                 if not (
                     (
@@ -169,13 +171,15 @@ class Host:
         """
         for addr, conn in self._connections['unverified'].copy().items():
             try:
-                if not (data := conn.recv(BUFFER_SIZE)): raise OSError
+                if not (peeked := conn.recv(BUFFER_SIZE, socket.MSG_PEEK)): raise OSError
             except BlockingIOError: ...
             except OSError:
                 del self._connections['unverified'][addr]
                 conn.close()
             else:
-                messages, _ = from_stream(data)
+                messages, end = from_stream(peeked)
+                if not end: continue
+                conn.recv(end)
                 request = messages[0].get('request') if messages else None
                 if not (
                     (
@@ -223,17 +227,14 @@ class Host:
 
         for name, conn in self._connections['verified'].copy().items():
             try:
-                peeked = conn.recv(BUFFER_SIZE, socket.MSG_PEEK)
-                if not peeked:
-                    drop(name)
-                    continue
-                messages, end = from_stream(peeked)
-                if not end: continue
-                conn.recv(end)
+                if not (peeked := conn.recv(BUFFER_SIZE, socket.MSG_PEEK)): raise OSError
             except BlockingIOError: ...
             except OSError:
                 drop(name)
             else:
+                messages, end = from_stream(peeked)
+                if not end: continue
+                conn.recv(end)
                 for jm in messages:
                     self._messages[name] = (jm)
 
