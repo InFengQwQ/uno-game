@@ -26,6 +26,8 @@ class Game:
         target_player: The last acting player.
 
         player: The current player.
+        is_able_to_challenge: If the current player can take challenge.
+        is_able_to_catch: If the current player can take catch.
         is_end: Whether the game has ended.
     """
     def __init__(self, players: list[str]):
@@ -55,6 +57,22 @@ class Game:
     @property
     def player(self) -> Player:
         return self.players[self.turn]
+
+    @property
+    def is_able_to_challenge(self) -> bool:
+        return (
+            self.target_player is not None and
+            self.deck.top.sort == CardSort.WILD_DRAW_4 and
+            (not self.is_end)
+        )
+
+    @property
+    def is_able_to_catch(self) -> bool:
+        return (
+            self.target_player is not None and
+            len(self.target_player.hand) == 1 and
+            not self.target_player.uno
+        )
 
     @property
     def is_end(self) -> bool:

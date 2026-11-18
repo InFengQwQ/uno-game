@@ -314,7 +314,7 @@ class Host:
                     'status': False
                 }
                 if action['type'] == ActionType.CATCH:
-                    if Rule.is_able_to_catch(game):
+                    if game.is_able_to_catch:
                         reply['status'] = True
                         game.catch(name)
                     else:
@@ -333,7 +333,7 @@ class Host:
                             reply['status'] = True
                             game.draw()
                         case ActionType.CHALLENGE:
-                            if Rule.is_able_to_challenge(game):
+                            if game.is_able_to_challenge:
                                 assert game.target_player
 
                                 reply['status'] = True

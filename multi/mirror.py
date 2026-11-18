@@ -1,4 +1,5 @@
 from collections import defaultdict, deque
+from dataclasses import dataclass
 from typing import cast
 
 from uno import (
@@ -37,7 +38,7 @@ class CardInfo(Card):
         )
 
 class PlayerInfo(Player):
-    """PlayerInfo class for messages.
+    """Player carried by messages.
 
     Attributes:
         uno: Whether this player called UNO.
@@ -72,26 +73,22 @@ class PlayerInfo(Player):
         return PlayerInfo(**value)
 
 
+@dataclass
 class Mirror:
     """Client-side mirror of visible game state.
 
     This object is UI-facing only. It does not run rules or own authoritative
     state. The host should send snapshots, and the client updates this mirror.
     """
-    def __init__(self,
-        players: list[PlayerInfo],
-        player: PlayerInfo,
-        hand: list[CardInfo],
-        top: CardInfo,
-        to_draw: int,
-        reverse: bool
-    ):
-        self.players = players
-        self.player = player
-        self.hand = hand
-        self.top = top
-        self.to_draw = to_draw
-        self.reverse = reverse
+    players: list[PlayerInfo]
+    player: PlayerInfo
+    hand: list[CardInfo]
+    top: CardInfo
+    to_draw: int    # TODO
+    reverse: bool   # TODO
+
+    is_able_to_challenge: bool
+    is_able_to_catch: bool
 
     def update(self, other: 'Mirror'):
         for key, value in vars(other).items():
@@ -134,7 +131,9 @@ class Mirror:
             ],
             'top': self.top.to_dict(),
             'to_draw': self.to_draw,
-            'reverse': self.reverse
+            'reverse': self.reverse,
+            'is_able_to_challenge': self.is_able_to_challenge,
+            'is_able_to_catch': self.is_able_to_catch
         }
 
     @classmethod
@@ -151,7 +150,9 @@ class Mirror:
             ],
             CardInfo.from_dict(value['top']),
             value['to_draw'],
-            value['reverse']
+            value['reverse'],
+            value['is_able_to_challenge'],
+            value['is_able_to_catch']
         )
 
     @classmethod
@@ -176,5 +177,7 @@ class Mirror:
             ],
             CardInfo.from_dict(game.deck.top.__dict__),
             game.to_draw,
-            game.reverse
+            game.reverse,
+            game.is_able_to_challenge,
+            game.is_able_to_catch
         )

@@ -1,5 +1,5 @@
 from .card import (
-    CardSort, WILDS,
+    WILDS,
     Card
 )
 from .player import *
@@ -35,24 +35,6 @@ class Rule:
                 card for card in game.player.hand
                 if Rule.is_valid_play(card, game.deck.top)
             ]
-
-    @staticmethod
-    def is_able_to_challenge(game: Game) -> bool:
-        """If the current player can take challenge."""
-        return (
-            game.target_player is not None and
-            game.deck.top.sort == CardSort.WILD_DRAW_4 and
-            (not game.is_end)
-        )
-
-    @staticmethod
-    def is_able_to_catch(game: Game) -> bool:
-        """If the current player can take catch."""
-        return (
-            game.target_player is not None and
-            len(game.target_player.hand) == 1 and
-            not game.target_player.uno
-        )
 
     @staticmethod
     def calculate_score(game: Game) -> dict[Player, int]:

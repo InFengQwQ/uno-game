@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import socket
 
 import psutil
@@ -29,8 +30,9 @@ def _iface_addrs():
     ]
 
 
+@dataclass
 class RoomInfo:
-    """RoomInfo class for messages.
+    """Information about a room in the network.
 
     Attributes:
         port: Port of the host.
@@ -38,16 +40,10 @@ class RoomInfo:
         players: List of player names.
         status: As waiting or ongoing.
     """
-    def __init__(self,
-        port: int,
-        name: str,
-        players: list[str],
-        status: RoomStatus, # int from json
-    ):
-        self.port = port
-        self.name = name
-        self.players = players
-        self.status = status
+    port: int
+    name: str
+    players: list[str]
+    status: RoomStatus
 
     def to_dict(self) -> InfoDict:
         """Convert to a info dictionary."""
@@ -56,7 +52,12 @@ class RoomInfo:
     @classmethod
     def from_dict(cls, value: InfoDict) -> 'RoomInfo':
         """Convert from a info dictionary."""
-        return cls(**value)
+        return RoomInfo(
+            value['port'],
+            value['name'],
+            value['players'],
+            RoomStatus(value['status'])
+        )
 
 
 class Room:
