@@ -56,7 +56,6 @@ Stage.init(
 
 
 class UnoGame:
-    """Main game class."""
     role: Optional[Host | Client] = None
 
     @classmethod
@@ -353,8 +352,10 @@ class UnoGame:
             Button(
                 pygame.Rect(W * 21/64, H * 7/8, W * 5/32, H * 1/12),
                 resources.images['button']['square_basic'],
-                draw, slice=True, text=(
-                    lambda: "Pass" if mirror.to_draw < 0 else "Draw"
+                draw, slice=True, text=lambda: (
+                    "Pass"
+                    if mirror.to_draw < 0 and mirror.player.name == role.name
+                    else "Draw"
                 )
             ),
             Button(
