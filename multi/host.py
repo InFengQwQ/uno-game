@@ -266,6 +266,7 @@ class Host:
     def start(self):
         """Start game."""
         self.game = Game(self.room.players)
+        self.mirror = Mirror.of(self.game, self.name)
         self.room.status = RoomStatus.ONGOING
 
     def action(self, type: ActionType, **kwargs: Any):

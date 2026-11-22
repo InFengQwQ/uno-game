@@ -281,7 +281,6 @@ class UnoGame:
         if isinstance(role, Host):
             def start():
                 role.start()
-                role.sync()
                 cls.display_game()
             Button.elements.extend([
                 Button(
