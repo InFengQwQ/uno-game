@@ -321,6 +321,8 @@ class UnoGame:
         @clamped_exec
         def draw():
             role.action(ActionType.DRAW)
+
+            cls.display_game(pick)
         @Message.catch
         @clamped_exec
         def play():
@@ -337,9 +339,9 @@ class UnoGame:
                     uno=False   # TODO
                 )
 
-                cls.display_game(pick)
+                cls.display_game(pick)  # Selector.action() re-builds UI, clearing itself
             if card.is_pending:
-                cls.display_game(pick)
+                cls.display_game(pick)  # clear Selectors (but one)
 
                 Stage.Selector(
                     pygame.Rect(W * 2/9, H * 3/8, W * 5/9, H * 1/4),
@@ -381,6 +383,18 @@ class UnoGame:
             prev_card
         ))
 
+        def challenge():
+            role.action(ActionType.CHALLENGE)
+        Button.elements.append(Button(
+            pygame.Rect(W * 1/32, H * 1/24, W * 3/16, H * 1/12),
+            resources.images['button']['square_line'],
+            challenge, slice=True, text=lambda: (
+                "Challenge"
+                if mirror.is_able_to_challenge and mirror.player.name == role.name
+                else ""
+            )
+        ))
+
     @classmethod
     def run(cls):
         """Run the main loop."""
@@ -405,10 +419,10 @@ class UnoGame:
         elapsed = 0
         i = j = 0
         while elapsed := update(elapsed):
-            if elapsed // RUN_INTERVAL > i and cls.role:
+            if elapsed / RUN_INTERVAL > i and cls.role:
                 i += 1
                 network()
-            if elapsed // ROOM_RECV_INTERVAL > j:
+            if elapsed / ROOM_RECV_INTERVAL > j:
                 j += 1
                 Room.recv()
 
