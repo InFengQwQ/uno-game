@@ -110,7 +110,10 @@ class Host:
                 messages, end = from_stream(peeked)
                 if not end: continue
                 conn.recv(end)
-                request = messages[0].get('request') if messages else None
+                try:
+                    request = messages[0].get('request') if messages else None
+                except AttributeError:
+                    request = None
                 if not (
                     (
                         isinstance(request, dict) and
@@ -180,7 +183,10 @@ class Host:
                 messages, end = from_stream(peeked)
                 if not end: continue
                 conn.recv(end)
-                request = messages[0].get('request') if messages else None
+                try:
+                    request = messages[0].get('request') if messages else None
+                except AttributeError:
+                    request = None
                 if not (
                     (
                         isinstance(request, dict) and
@@ -225,6 +231,7 @@ class Host:
                 room.players.remove(name)
                 self._tokens.pop(name, None)
 
+        self._messages.clear()
         for name, conn in self._connections['verified'].copy().items():
             try:
                 if not (peeked := conn.recv(BUFFER_SIZE, socket.MSG_PEEK)): raise OSError
@@ -235,6 +242,7 @@ class Host:
                 messages, end = from_stream(peeked)
                 if not end: continue
                 conn.recv(end)
+
                 for jm in messages:
                     self._messages[name] = (jm)
 
@@ -258,6 +266,7 @@ class Host:
                     'password'
                 )
             }
+
             for conn in self._connections['verified'].values():
                 self.send(conn, msg={
                     'room': info
@@ -297,8 +306,8 @@ class Host:
         if not self._messages.get(self.name): return
         if reply := self._messages[self.name].get('reply'):  # reply
             if reply['status']:
-                if reply.get('hand'):
-                    pass    # TODO: 得到被质疑者手牌
+                hand = reply.get('hand')
+                pass            # TODO: 得到被质疑者手牌
             else:
                 raise OSError(
                     reply['message']
@@ -308,56 +317,68 @@ class Host:
         """Handle turn actions."""
         assert (game := self.game)
 
-        messages, self._messages = self._messages, {}
+        messages = self._messages.copy()
         for name, msg in messages.items():
-            if action := msg.get('action'):  # action
-                reply: InfoDict = {
-                    'status': False
-                }
-                if action['type'] == ActionType.CATCH:
-                    if game.is_able_to_catch:
-                        reply['status'] = True
-                        game.catch(name)
-                    else:
-                        reply['message'] = "Cannot catch"
-                elif name == game.player.name:
-                    match action['type']:
-                        case ActionType.PLAY:
-                            card = CardInfo.from_dict(action['card'])
-                            if card in Rule.validplays(game):
-                                reply['status'] = True
-                                game.player.uno = action['uno']
-                                game.play(card)
-                            else:
-                                reply['message'] = "Invalid play"
-                        case ActionType.DRAW:
-                            reply['status'] = True
-                            game.draw()
-                        case ActionType.CHALLENGE:
-                            if game.is_able_to_challenge:
-                                assert game.target_player
+            reply: InfoDict = {
+                'status': False
+            }
+            try:
+                action: InfoDict = msg['action']
+                action_type = ActionType(action['type'])
+            except (KeyError, ValueError, TypeError):
+                continue
 
-                                reply['status'] = True
-                                reply['hand'] = [
-                                    vars(card)
-                                    for card in game.target_player.hand
-                                ]
-                                game.challenge()
-                            else:
-                                reply['message'] = "Cannot challenge"
-                        case _:
-                            continue
+            if action_type == ActionType.CATCH:
+                if game.is_able_to_catch:
+                    game.catch(name)
+                    reply['status'] = True
                 else:
-                    reply['message'] = "Not your turn"
+                    reply['message'] = "Cannot catch"
+            elif name == game.player.name:
+                match action_type:
+                    case ActionType.PLAY:
+                        try:
+                            card = CardInfo.from_dict(action['card'])
+                        except (KeyError, ValueError, TypeError): continue
 
-                if name == self.name:
-                    self._messages[self.name] = {
-                        'reply': reply
-                    }
-                if conn := self._connections['verified'].get(name):
-                    self.send(conn, msg={
-                        'reply': reply
-                    })
+                        if card in Rule.validplays(game):
+                            uno = action.get('uno')
+                            if not isinstance(uno, bool): continue
+                            game.player.uno = uno
+
+                            game.play(card)
+                            reply['status'] = True
+                        else:
+                            reply['message'] = "Invalid play"
+                    case ActionType.DRAW:
+                        game.draw()
+                        reply['status'] = True                        
+                    case ActionType.CHALLENGE:
+                        if game.is_able_to_challenge:
+                            assert game.target_player
+
+                            reply['hand'] = [
+                                vars(card)
+                                for card in game.target_player.hand
+                            ]
+
+                            game.challenge()
+                            reply['status'] = True
+                        else:
+                            reply['message'] = "Cannot challenge"
+                    case _:
+                        continue
+            else:
+                reply['message'] = "Not your turn"
+
+            if name == self.name:
+                self._messages[self.name] = {
+                    'reply': reply
+                }
+            if conn := self._connections['verified'].get(name):
+                self.send(conn, msg={
+                    'reply': reply
+                })
 
     def run(self):
         self.recv()

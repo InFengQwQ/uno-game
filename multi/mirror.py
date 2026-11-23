@@ -31,7 +31,11 @@ class CardInfo(Card):
 
     @classmethod
     def from_dict(cls, value: InfoDict) -> 'CardInfo':
-        """Convert from a info dictionary."""
+        """Convert from one.
+
+        Args:
+            value: Info dictionary.
+        """
         return CardInfo(
             CardColor(value['color']), CardSort(value['sort']),
             value['value']
@@ -55,7 +59,7 @@ class PlayerInfo(Player):
         self._size = size
 
     @property
-    def size(self) -> int:
+    def size(self) -> int:  # at Mirror.update
         return self._size
 
     def to_dict(self) -> InfoDict:
@@ -69,7 +73,11 @@ class PlayerInfo(Player):
 
     @classmethod
     def from_dict(cls, value: InfoDict) -> 'PlayerInfo':
-        """Convert from a info dictionary."""
+        """Convert from one.
+
+        Args:
+            value: Info dictionary.
+        """
         return PlayerInfo(**value)
 
 
@@ -84,8 +92,8 @@ class Mirror:
     player: PlayerInfo
     hand: list[CardInfo]
     top: CardInfo
-    to_draw: int    # TODO
-    reverse: bool   # TODO
+    to_draw: int    # TODO: shown in the left pile
+    reverse: bool   # TODO: shown in the roaster
 
     is_able_to_challenge: bool
     is_able_to_catch: bool

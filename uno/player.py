@@ -14,7 +14,7 @@ class Player:
         hand: The held card list.
     """
     def __init__(self, name: str):
-        self.uno = False
+        self.uno: bool = False
         self.name = name
         self.score = 0.0
         # TODO: Optionally incorporate other players' remaining cards at game over

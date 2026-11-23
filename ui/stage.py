@@ -52,7 +52,7 @@ class Stage(Element):
         hand: Sequence[Card],
         top: Card,
         slot: int,
-        rect: pygame.Rect = pygame.Rect( # MARGIN...
+        rect: pygame.Rect = pygame.Rect(  # MARGIN...
             0, H * 1/6, W, H * 2/3
         )
     ):
@@ -213,7 +213,7 @@ class Stage(Element):
                         card_rect
                     )
 
-
+    # mixture UI elements
     class Selector:
         """Color Selector."""
         def __init__(self,

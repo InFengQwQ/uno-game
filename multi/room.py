@@ -51,7 +51,11 @@ class RoomInfo:
 
     @classmethod
     def from_dict(cls, value: InfoDict) -> 'RoomInfo':
-        """Convert from a info dictionary."""
+        """Convert from one.
+
+        Args:
+            value: Info dictionary.
+        """
         return RoomInfo(
             value['port'],
             value['name'],
@@ -126,7 +130,7 @@ class Room:
                 info: InfoDict = from_package(data)
                 try:
                     rooms[(ip, info['port'])] = RoomInfo.from_dict(info)
-                except (KeyError, TypeError, ValueError):
+                except (KeyError, ValueError, TypeError):
                     continue
 
         cls.rooms = rooms
