@@ -213,7 +213,8 @@ class Stage(Element):
                         card_rect
                     )
 
-    # mixture UI elements
+
+    # UI elements mixture
     class Selector:
         """Color Selector."""
         def __init__(self,
@@ -221,7 +222,7 @@ class Stage(Element):
             action: Callable[[CardColor], None]
         ):
             Column.elements.append(column := Column(
-                rect, "Select from Choice"
+                rect, "Select from Colors"
             ))
 
             Button.elements.extend([
@@ -242,3 +243,51 @@ class Stage(Element):
                 )
                 for i, color in enumerate(COLORS)
             ])
+
+    class Revealer:
+        """Cards Revealer."""
+        def __init__(self,
+            rect: pygame.Rect,
+            image: pygame.Surface,
+            action: Callable[..., None],
+            hand: Sequence[Card],
+            slot: int
+        ):
+            Column.elements.append(column := Column(
+                rect, "Reveal Hand"
+            ))
+
+            Button.elements.append(Button(
+                pygame.Rect(
+                    rect.centerx - (
+                        W / INITIAL_HAND_SIZE - 32
+                    ) / 2,
+                    rect.y + (
+                        rect.h + column.get_head() +
+                        W / INITIAL_HAND_SIZE - 32
+                    ) / 2,
+                    W / INITIAL_HAND_SIZE - 32,
+                    H / 12
+                ),
+                image,
+                action, slice=True, text=lambda: "OK"
+            ))
+
+            stripe = Stage.Stripe(
+                hand_rect := pygame.Rect(
+                    rect.x + 16,
+                    rect.y + (
+                        rect.h + column.get_head() -
+                        W / INITIAL_HAND_SIZE + 32
+                    ) / 2 - H / 24,
+                    rect.w - 32,
+                    W / INITIAL_HAND_SIZE - 32
+                ),
+                hand, slot
+            )
+            stripe.draw()
+            Button.elements.append(Button(
+                hand_rect,
+                stripe,
+                lambda: None
+            ))

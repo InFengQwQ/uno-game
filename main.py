@@ -9,17 +9,8 @@ from config import (
     ROOM_CAPACITY
 )
 from resources import ResourceManager
-from ui import (
-    Column, Input, Button, Message,
-    Stage,
-    scene,
-    clear, update
-)
-from multi import (
-    ActionType,
-    SocketClosedMessage, GameBeginMessage, GameEndedMessage,
-    Room, Client, Host
-)
+from ui import *
+from multi import *
 
 
 # Initialize resource manager
@@ -291,7 +282,7 @@ class UnoGame:
             ])
 
     @classmethod
-    def display_game(cls, pick: int = 1):
+    def display_game(cls, pick: int = 1, reveal: list[CardInfo] = list[CardInfo]()):
         """Display the game screen."""
         assert (role := cls.role)
         # assert (room := cls.role.room)
@@ -304,15 +295,16 @@ class UnoGame:
             @wraps(func)
             def wrapper():
                 nonlocal pick
-                pick = max(min(pick, len(mirror.hand)), 1)
+                pick = max(min(pick, len(reveal or mirror.hand)), 1)
                 return func()
 
             return wrapper
 
+        hand = mirror.hand if not reveal else []
         Stage.elements.append(Stage(
             mirror.players,
             mirror.player,
-            mirror.hand,
+            hand,
             mirror.top,
             pick-1,
         ))
@@ -341,7 +333,7 @@ class UnoGame:
 
                 cls.display_game(pick)  # Selector.action() re-builds UI, clearing itself
             if card.is_pending:
-                cls.display_game(pick)  # clear Selectors (but one)
+                cls.display_game(pick)  # also clear remaining cards Selector
 
                 Stage.Selector(
                     pygame.Rect(W * 2/9, H * 3/8, W * 5/9, H * 1/4),
@@ -349,11 +341,12 @@ class UnoGame:
                 )
             else:
                 send_action()
+        def idle(): ...
         Button.elements.extend([
             Button(
                 pygame.Rect(W * 21/64, H * 7/8, W * 5/32, H * 1/12),
                 resources.images['button']['square_basic'],
-                draw, slice=True, text=lambda: (
+                draw if not reveal else idle, slice=True, text=lambda: (
                     "Pass"
                     if mirror.to_draw < 0 and mirror.player.name == role.name
                     else "Draw"
@@ -362,13 +355,13 @@ class UnoGame:
             Button(
                 pygame.Rect(W * 33/64, H * 7/8, W * 5/32, H * 1/12),
                 resources.images['button']['square_color'],
-                play, slice=True, text=lambda: "Play"
+                play if not reveal else idle, slice=True, text=lambda: "Play"
             )
         ])
 
         @clamped_exec
         def next_card():
-            cls.display_game(pick + 1)
+            cls.display_game(pick + 1, reveal)
         Button.elements.append(Button(
             pygame.Rect(W * 23/32, H * 11/12 - 16, 32, 32),
             resources.images['button']['arrow_right'],
@@ -376,7 +369,7 @@ class UnoGame:
         ))
         @clamped_exec
         def prev_card():
-            cls.display_game(pick - 1)
+            cls.display_game(pick - 1, reveal)
         Button.elements.append(Button(
             pygame.Rect(W * 9/32 - 32, H * 11/12 - 16, 32, 32),
             resources.images['button']['arrow_left'],
@@ -386,7 +379,7 @@ class UnoGame:
         def challenge():
             role.action(ActionType.CHALLENGE)
         Button.elements.append(Button(
-            pygame.Rect(W * 1/32, H * 1/24, W * 3/16, H * 1/12),
+            pygame.Rect(W * 1/24, H * 1/24, W * 2/9, H * 1/12),
             resources.images['button']['square_line'],
             challenge, slice=True, text=lambda: (
                 "Challenge"
@@ -394,6 +387,14 @@ class UnoGame:
                 else ""
             )
         ))
+        if reveal:
+            Stage.Revealer(
+                pygame.Rect(W * 1/24, H * 3/8, W * 11/12, H * 11/24),
+                resources.images['button']['square_color'],
+                lambda: cls.display_game(1, []),
+                reveal,
+                pick-1,
+            )
 
     @classmethod
     def run(cls):
@@ -415,6 +416,8 @@ class UnoGame:
                 cls.display_game()
             except GameEndedMessage:
                 cls.display_room()
+            except HandShownMessage as e:
+                cls.display_game(1, e.hand)
 
         elapsed = 0
         i = j = 0

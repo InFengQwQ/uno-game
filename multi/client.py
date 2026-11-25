@@ -6,10 +6,14 @@ from config import BUFFER_SIZE, SOCKET_TIMEOUT
 from .constants import *
 from .utils import (
     to_bytes, from_stream,
-    SocketClosedMessage, GameBeginMessage, GameEndedMessage
+    SocketClosedMessage, GameBeginMessage, GameEndedMessage,
+    HandShownMessage
 )
 from .room import Room
-from .mirror import Mirror
+from .mirror import (
+    CardInfo,
+    Mirror
+)
 
 __all__ = ['Client']
 
@@ -171,7 +175,7 @@ class Client:
     def sync(self):
         assert self.room
 
-        if game := self._messages.pop('game', None):
+        if game := self._messages.pop('game', InfoDict()):
             snapshot = Mirror.from_dict(game)
             if mirror := self.mirror:
                 mirror.update(snapshot)
@@ -179,7 +183,7 @@ class Client:
                 self.mirror = snapshot
                 self.room.status = RoomStatus.ONGOING
                 raise GameBeginMessage
-        if room := self._messages.pop('room', None):
+        if room := self._messages.pop('room', InfoDict()):
             self.room.players[:] = room['players']
             if self.room.status == RoomStatus.ONGOING:
                 self.mirror = None
@@ -211,10 +215,15 @@ class Client:
         Raises:
             OSError: If the action is invalid.
         """
-        if reply := self._messages.pop('reply', None):  # reply
-            if reply['status']:
-                if reply.get('hand'):
-                    pass    # TODO: 得到被质疑者手牌
+        def hint(reply: InfoDict):
+            hand = [
+                CardInfo.from_dict(card)
+                for card in reply['hand']
+            ]
+            raise HandShownMessage(hand)
+        if reply := self._messages.pop('reply', InfoDict()):
+            if reply['status']: 
+                hint(reply) if 'hand' in reply else None
             else:
                 raise OSError(
                     reply['message']

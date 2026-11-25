@@ -12,7 +12,8 @@ from uno import Game, Rule
 from .constants import *
 from .utils import (
     to_bytes, from_stream,
-    SocketClosedMessage
+    SocketClosedMessage,
+    HandShownMessage
 )
 from .room import Room
 from .mirror import *
@@ -55,7 +56,7 @@ class Host:
         self._connections: dict[str, dict[str, socket.socket]] = {
             'unverified': {}, 'verified': {}
         }
-        self._messages: JsonMessage = {}
+        self._messages: JsonMessage = {self.name: InfoDict()}
 
         self.game: Optional[Game] = None
 
@@ -231,7 +232,8 @@ class Host:
                 room.players.remove(name)
                 self._tokens.pop(name, None)
 
-        self._messages.clear()
+        for name in self._messages.copy():
+            self._messages.pop(name) if name != self.name else None
         for name, conn in self._connections['verified'].copy().items():
             try:
                 if not (peeked := conn.recv(BUFFER_SIZE, socket.MSG_PEEK)): raise OSError
@@ -292,8 +294,7 @@ class Host:
 
         self._messages[self.name] = {
             'action': {
-                'type': type.value,
-                **kwargs
+                'type': type.value, **kwargs
             }
         }
 
@@ -303,11 +304,15 @@ class Host:
         Raises:
             OSError: If the action is invalid.
         """
-        if not self._messages.get(self.name): return
-        if reply := self._messages[self.name].get('reply'):  # reply
+        def hint(reply: InfoDict):
+            hand = [
+                CardInfo.from_dict(card)
+                for card in reply['hand']
+            ]
+            raise HandShownMessage(hand)
+        if reply := self._messages[self.name].pop('reply', InfoDict()):
             if reply['status']:
-                hand = reply.get('hand')
-                pass            # TODO: 得到被质疑者手牌
+                hint(reply) if 'hand' in reply else None
             else:
                 raise OSError(
                     reply['message']
@@ -357,8 +362,7 @@ class Host:
                         if game.is_able_to_challenge:
                             assert game.target_player
 
-                            reply['hand'] = [
-                                vars(card)
+                            reply['hand'] = [vars(card)
                                 for card in game.target_player.hand
                             ]
 

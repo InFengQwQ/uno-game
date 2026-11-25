@@ -1,13 +1,16 @@
 import json
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from config import BUFFER_SIZE
 
 from .constants import JsonMessage
+if TYPE_CHECKING:
+    from .mirror import CardInfo
 
 __all__ = [
     'to_bytes', 'from_package', 'from_stream',
-    'SocketClosedMessage', 'GameBeginMessage', 'GameEndedMessage'
+    'SocketClosedMessage', 'GameBeginMessage', 'GameEndedMessage',
+    'HandShownMessage'
 ]
 
 
@@ -49,3 +52,15 @@ class GameBeginMessage(Exception):
 
 class GameEndedMessage(Exception):
     """Stack trace of the exception."""
+
+class HandShownMessage(Exception):
+    """Stack trace of the exception.
+
+    When a player's challenged the host will
+    send the hand of the player to the challenger.
+
+    Attributes:
+        hand: Hand of the player.
+    """
+    def __init__(self, hand: list['CardInfo']):
+        self.hand = hand
